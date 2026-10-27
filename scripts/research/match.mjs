@@ -14,12 +14,25 @@ const ADDABLE = 0.45;
 const NOISE = /兼职|招聘|工资|下载安装|破解|免费版|手机版|电话|客服|官网入口|股票|股份|公司排名|是什么意思啊|小说|游戏|彩票|贷款|代理加盟/;
 
 const { merged } = loadTopicMap();
+function normalize(s) {
+  return String(s).toLowerCase().replace(/[\s\p{P}\p{S}]/gu, '');
+}
 const rows = [];
 for (const f of ['plan/research/raw.json', 'plan/research/web-search.json', 'plan/research/supplement.json']) {
   if (existsSync(f)) rows.push(...JSON.parse(readFileSync(f, 'utf8')).rows);
 }
+// grokbot 的采集（import-grok.mjs）：它自己写的说法（grok_seed / grok_bank）只收核实通过的（verify-terms.mjs）
+const readJson = (f) => (existsSync(f) ? JSON.parse(readFileSync(f, 'utf8')) : null);
+const verify = readJson('plan/research/verify.json');
+const verifiedSet = new Set((verify?.verified ?? []).map((v) => normalize(v.q)));
+for (const r of readJson('plan/research/grok.json')?.rows ?? []) {
+  if (r.source === 'grok_seed' || r.source === 'grok_bank') {
+    if (verifiedSet.has(normalize(r.q))) rows.push({ ...r, source: 'grok_verified' });
+  } else rows.push(r);
+}
+rows.push(...(verify?.rows ?? []));
 
-const normalize = (s) => String(s).toLowerCase().replace(/[\s\p{P}\p{S}]/gu, '');
+
 function bigrams(s) {
   const set = new Set();
   for (let i = 0; i < s.length - 1; i++) set.add(s.slice(i, i + 2));
@@ -80,7 +93,8 @@ console.log(`去重后 ${out.length} 条：已覆盖 ${count('covered')}，可�
 
 // 需求分：只算搜索引擎联想词（反映有人在搜），和节点足够像（≥ 0.6）的才计入，
 // 每条联想词按出现在几个引擎里加权。不是搜索量，只用来比较节点之间需求的相对大小
-const ENGINES = new Set(['baidu', 'bing', 'so360', 'sogou']);
+// 搜索引擎联想词才算「有人在搜」；竞品标题、AI 写的说法都不算
+const ENGINES = new Set(['baidu', 'bing', 'so360', 'sogou', 'google', 'baidu_related', 'google_related']);
 const DEMAND_MIN = 0.6;
 const demand = Object.fromEntries(merged.map((n) => [n.id, { score: 0, top: [] }]));
 for (const x of out) {

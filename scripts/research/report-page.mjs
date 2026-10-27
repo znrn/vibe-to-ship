@@ -1,5 +1,5 @@
 // 把问法研究结果生成对照页（给自己看，不发布）
-// 数据：plan/research/matched.json（自动匹配）+ plan/research/proposals.yaml（人工整理的调整建议）
+// 数据：plan/research/matched.json（自动匹配）+ proposals*.yaml（每轮人工整理的最终建议）+ verify.json（说法核实）
 // 用法：node scripts/research/report-page.mjs [输出路径]
 //       默认写到 ~/launchpad/pages/aidev-topic-research.html
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -11,7 +11,12 @@ import { loadTopicMap } from '../lib/topic-map.mjs';
 
 const out = resolve(process.argv[2] ?? `${homedir()}/launchpad/pages/aidev-topic-research.html`);
 const matched = JSON.parse(readFileSync('plan/research/matched.json', 'utf8'));
-const proposals = existsSync('plan/research/proposals.yaml') ? parse(readFileSync('plan/research/proposals.yaml', 'utf8')) : {};
+// 每一轮整理的最终建议，按时间顺序
+const ROUNDS = [
+  { file: 'plan/research/proposals.yaml', title: '第一轮 · 联想词和技术社区' },
+  { file: 'plan/research/proposals-r2.yaml', title: '第二轮 · grokbot 采集和文章主词核验' },
+].filter((r) => existsSync(r.file)).map((r) => ({ ...r, p: parse(readFileSync(r.file, 'utf8')) }));
+const verify = existsSync('plan/research/verify.json') ? JSON.parse(readFileSync('plan/research/verify.json', 'utf8')) : null;
 const raw = JSON.parse(readFileSync('plan/research/raw.json', 'utf8'));
 const { merged } = loadTopicMap();
 const byId = new Map(merged.map((n) => [n.id, n]));
@@ -19,8 +24,8 @@ const byId = new Map(merged.map((n) => [n.id, n]));
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const stageName = (s) => ROADMAP.find((x) => x.slug === s)?.name ?? s;
 const platformNames = (ps) => (ps ?? []).map((p) => PLATFORMS.find((x) => x.slug === p)?.name ?? p).join(' / ');
-const SRC = { baidu: '百度', bing: 'Bing', so360: '360', sogou: '搜狗', csdn: 'CSDN', juejin: '掘金', v2ex: 'V2EX', zhihu: '知乎', wxcommunity: '微信开放社区' };
-const ENGINES = new Set(['baidu', 'bing', 'so360', 'sogou']);
+const SRC = { baidu: '百度', bing: 'Bing', so360: '360', sogou: '搜狗', google: 'Google', baidu_related: '百度相关搜索', baidu_index: '百度指数相关', google_related: 'Google 相关搜索', google_paa: 'Google PAA', google_trends: 'Google Trends', douyin: '抖音', xhs: '小红书', csdn: 'CSDN', juejin: '掘金', v2ex: 'V2EX', zhihu: '知乎', wxcommunity: '微信开放社区', competitor: '竞品标题', grok_verified: 'grok 说法（已核实）' };
+const ENGINES = new Set(['baidu', 'bing', 'so360', 'sogou', 'google', 'baidu_related', 'google_related']);
 const srcTags = (list) => list.map((s) => `<span class="src ${ENGINES.has(s) ? 'eng' : 'com'}">${SRC[s] ?? esc(s)}</span>`).join('');
 const nodeLabel = (id) => (byId.get(id) ? `${esc(byId.get(id).keyword)} <code>${esc(id)}</code>` : `<code>${esc(id)}</code>`);
 
@@ -34,7 +39,8 @@ for (const x of matched) if (x.node) perNode.get(x.node).push(x);
 const sec = (title, sub, body) => `<section><h2>${title}</h2>${sub ? `<p class="sub">${sub}</p>` : ''}${body}</section>`;
 const evidence = (list) => (list?.length ? `<ul class="ev">${list.map((q) => `<li>${esc(q)}</li>`).join('')}</ul>` : '');
 
-const newNodes = (proposals.new_nodes ?? []).map((n) => `
+function renderRound({ title, p }) {
+  const newNodes = (p.new_nodes ?? []).map((n) => `
   <div class="card add">
     <div class="top"><h3>${esc(n.keyword)}</h3><span class="badge pri-${esc(n.priority)}">${esc(n.priority)}</span></div>
     <p class="meta"><code>${esc(n.id)}</code> · 第 ${ROADMAP.find((s) => s.slug === n.stage)?.step ?? '?'} 步 ${esc(stageName(n.stage))} · ${esc(platformNames(n.platforms))}</p>
@@ -43,12 +49,36 @@ const newNodes = (proposals.new_nodes ?? []).map((n) => `
     ${n.why ? `<p class="why">${esc(n.why)}</p>` : ''}
     ${evidence(n.evidence)}
   </div>`).join('');
-
-const addCovers = (proposals.add_covers ?? []).map((a) => `
+  const addCovers = (p.add_covers ?? []).map((a) => `
   <tr><td>${nodeLabel(a.node)}</td><td><div class="chips">${a.terms.map((t) => `<span class="plus">${esc(t)}</span>`).join('')}</div>${a.why ? `<p class="why">${esc(a.why)}</p>` : ''}</td></tr>`).join('');
-
-const changes = (proposals.changes ?? []).map((c) => `
+  const changes = (p.changes ?? []).map((c) => `
   <tr><td>${nodeLabel(c.node)}</td><td><b>${esc(c.action)}</b>${c.to ? `：${esc(c.to)}` : ''}<p class="why">${esc(c.why)}</p>${evidence(c.evidence)}</td></tr>`).join('');
+  return `<div class="round"><h2 class="round-title">${esc(title)}</h2>
+    <p class="sub">新增 ${(p.new_nodes ?? []).length} 个节点 · 调整 ${(p.changes ?? []).length} 处 · 补长尾 ${(p.add_covers ?? []).length} 处</p>
+    ${p.summary ? `<div class="card">${p.summary.split('\n').filter(Boolean).map((l) => `<p>${esc(l)}</p>`).join('')}</div>` : ''}
+    ${newNodes ? `<h3 class="h3">新增的节点</h3><div class="cards">${newNodes}</div>` : ''}
+    ${changes ? `<h3 class="h3">调整的节点</h3><div class="table-wrap"><table>${changes}</table></div>` : ''}
+    ${addCovers ? `<h3 class="h3">补进长尾的问法</h3><div class="table-wrap"><table>${addCovers}</table></div>` : ''}
+  </div>`;
+}
+
+// 核实：AI 写的说法和地图文章主词，只输入前半截时能不能被联想出来
+const verifySection = verify
+  ? (() => {
+      const g = (list) => list.filter((t) => t.from === 'grok');
+      const m = (list) => list.filter((t) => t.from === 'map');
+      return sec(
+        '说法核实',
+        '只输入一个说法的前半截（40% / 60%），看百度、360 能不能把它联想出来。输入整句时联想接口常会原样补全，不能当证据，所以用前缀判断。',
+        `<div class="stats">
+          <div class="stat"><b>${g(verify.verified).length} / ${g(verify.verified).length + g(verify.unverified).length}</b><span>grokbot 自己写的说法通过</span></div>
+          <div class="stat"><b>${m(verify.verified).length} / ${m(verify.verified).length + m(verify.unverified).length}</b><span>文章主词通过（核验时）</span></div>
+        </div>
+        <details class="node"><summary><span class="k">通过的 grokbot 说法</span><span class="n">${g(verify.verified).length} 条，可当证据</span></summary><ul class="qs">${g(verify.verified).map((t) => `<li>${esc(t.q)}<span class="near">← 输入「${esc(t.hits[0].prefix)}」联想出「${esc(t.hits[0].suggestion)}」</span></li>`).join('')}</ul></details>
+        <details class="node"><summary><span class="k">没通过的文章主词（核验时）</span><span class="n">${m(verify.unverified).length} 个，第二轮已逐个判断要不要换说法</span></summary><ul class="qs">${m(verify.unverified).map((t) => `<li>${esc(t.q)} <code>${esc(t.node)}</code></li>`).join('')}</ul></details>`,
+      );
+    })()
+  : '';
 
 const nodeRows = merged.map((n) => {
   const list = perNode.get(n.id);
@@ -67,7 +97,7 @@ const html = `<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>冬瓜站问法对照</title>
-<meta name="description" content="用百度、Bing、360、搜狗联想词和 CSDN、掘金、V2EX、知乎、微信开放社区的真实问法，对照冬瓜站选题地图：哪些已覆盖、哪些该补进长尾、哪些该新增或调整节点。">
+<meta name="description" content="用百度、Bing、360、Google、抖音、小红书联想词和 CSDN、掘金、V2EX、知乎、微信开放社区的真实问法（含 grokbot 采集），对照冬瓜站选题地图：哪些已覆盖、哪些该补进长尾、哪些该新增或调整节点。">
 <meta name="launchpad-group" content="AI 开发培训">
 <style>
 :root{--bg:#f7f6f2;--surface:#fff;--ink:#1d1f1c;--muted:#6b6f68;--line:#e3e1da;--accent:#2f6f4f;--accent-soft:#e6f0ea;--warm:#b4622a;--warm-soft:#f8ebe0;--blue:#2d5f9a;--blue-soft:#e5eef8}
@@ -124,6 +154,9 @@ code{font:12px ui-monospace,Menlo,monospace;color:var(--muted)}
 .src.com{background:var(--warm-soft);color:var(--warm)}
 .near{font-size:11.5px;color:var(--muted)}
 .muted{color:var(--muted);font-size:13px;padding:0 14px 12px}
+.round{margin-top:8px}
+.round-title{font-size:22px;margin-top:44px;padding-top:16px;border-top:2px solid var(--line)}
+.h3{font-size:17px;margin:24px 0 10px}
 footer{margin-top:48px;font-size:12.5px;color:var(--muted)}
 @media (max-width:600px){.cards{grid-template-columns:1fr}}
 </style>
@@ -137,18 +170,16 @@ footer{margin-top:48px;font-size:12.5px;color:var(--muted)}
     <div class="stat"><b>${count('covered')}</b><span>已被地图覆盖</span></div>
     <div class="stat"><b>${count('addable')}</b><span>属于已有节点但没写进长尾</span></div>
     <div class="stat"><b>${count('unmatched')}</b><span>对不上任何节点</span></div>
-    <div class="stat"><b>${(proposals.new_nodes ?? []).length}</b><span>建议新增节点</span></div>
+    <div class="stat"><b>${ROUNDS.reduce((n, r) => n + (r.p.new_nodes ?? []).length, 0)}</b><span>累计建议新增节点</span></div>
   </div>
   <div class="srcs">来源：${Object.entries(bySource).sort((a, b) => b[1] - a[1]).map(([s, n]) => `${SRC[s] ?? esc(s)} ${n}`).join(' · ')}</div>
 
-  ${proposals.summary ? sec('结论', '', `<div class="card">${proposals.summary.split('\n').filter(Boolean).map((l) => `<p>${esc(l)}</p>`).join('')}</div>`) : ''}
-  ${newNodes ? sec('建议新增的节点', '地图里没有、但真实问法里反复出现的意图。', `<div class="cards">${newNodes}</div>`) : ''}
-  ${changes ? sec('建议调整的节点', '改文章主词、合并、拆分、调优先级。', `<div class="table-wrap"><table>${changes}</table></div>`) : ''}
-  ${addCovers ? sec('建议补进长尾的问法', '属于已有节点，写进 covers，并在文章的小节或常见问题里回答。', `<div class="table-wrap"><table>${addCovers}</table></div>`) : ''}
+  ${ROUNDS.slice().reverse().map(renderRound).join('')}
+  ${verifySection}
   ${sec('每个节点命中的问法', '自动匹配结果。橙色数字 = 没有任何搜索联想词命中，可能是说法不对或需求小。', nodeRows)}
   ${sec('未匹配的问法', '自动匹配对不上的原始问法，人工整理建议时参考。', unmatchedList)}
 
-  <footer>重新采集：node scripts/research/collect.mjs → node scripts/research/match.mjs → node scripts/research/report-page.mjs。建议写在 plan/research/proposals.yaml。</footer>
+  <footer>重新采集：collect.mjs（自采）/ import-grok.mjs（grokbot）→ verify-terms.mjs（核实 AI 写的说法）→ match.mjs → report-page.mjs，均在 scripts/research/。每轮最终建议写在 plan/research/proposals*.yaml。</footer>
 </div>
 </body>
 </html>

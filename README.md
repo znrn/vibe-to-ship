@@ -91,8 +91,11 @@ npm run plan:page                   # 生成选题地图浏览页（默认写到
 
 ```bash
 node scripts/research/collect.mjs           # 采集搜索联想词和社区帖子标题 → plan/research/raw.json
+node scripts/research/import-grok.mjs       # 导入 grokbot 的采集（~/launchpad/keyword-harvest-*/）→ plan/research/grok.json
+node scripts/research/verify-terms.mjs      # 核实 AI 写的说法和文章主词：只输入前半截，看能否被联想出来 → verify.json
 node scripts/research/match.mjs             # 匹配到地图节点，并算出需求分 → plan/research/demand.json
 node scripts/research/report-page.mjs       # 生成问法对照页（本机导航）
+node scripts/research/apply-proposals.mjs <建议.yaml>   # 把一轮整理的最终建议应用到选题地图
 node scripts/research/export-keywords.mjs   # 导出 P1 关键词查询表 → plan/research/keywords-p1.csv（--all 导出全部）
 node scripts/research/import-volume.mjs <文件.csv>   # 导入关键词工具查到的搜索量 → plan/research/volume.json
 ```
@@ -101,7 +104,7 @@ node scripts/research/import-volume.mjs <文件.csv>   # 导入关键词工具�
 
 查搜索量：把 `keywords-p1.csv` 第一列粘到百度营销关键词规划师或 5118 批量查询，导出结果（Excel 先另存为 CSV），再用 `import-volume.mjs` 导入。之后 `npm run plan:page` 重新生成地图页，卡片上会显示每个节点的需求分和搜索量，可以按两者排序。
 
-需求分只是联想词的命中次数，用来比较节点之间的相对需求；搜索量为 0 或「未收录」的长尾也不一定没人搜，两者结合看。人工整理建议的规则见 `plan/research/CURATION.md`，最终建议在 `plan/research/proposals.yaml`。
+需求分只是联想词的命中次数，用来比较节点之间的相对需求；搜索量为 0 或「未收录」的长尾也不一定没人搜，两者结合看。人工整理建议的规则（含收录范围）见 `plan/research/CURATION.md`，每轮最终建议在 `plan/research/proposals*.yaml`。AI 生成的说法（包括 grokbot 自己写的）必须先通过 `verify-terms.mjs` 核实才能当证据：联想接口拿到整句时常会原样补全，所以只用前缀判断。
 
 内容铁律：**对号入座 → 当场给用 → 点出系统缺口**。标题就是读者的问题，开头 150 字给答案，结尾点出下一步还会卡在哪。
 
