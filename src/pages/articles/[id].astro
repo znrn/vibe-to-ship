@@ -7,6 +7,9 @@ import RoadmapPosition from '../../components/article/RoadmapPosition.astro';
 import ArticleExit from '../../components/article/ArticleExit.astro';
 import ArticleFaq from '../../components/article/ArticleFaq.astro';
 import ArticleSources from '../../components/article/ArticleSources.astro';
+import ArticleWorkflow from '../../components/article/ArticleWorkflow.astro';
+import AiRunCard from '../../components/article/AiRunCard.astro';
+import RoleTag from '../../components/article/RoleTag.astro';
 import { SITE, platformOf, topicOf } from '../../data/site';
 import { getArticles, formatDate, stageOfArticle, type Article } from '../../lib/articles';
 
@@ -84,7 +87,9 @@ if (data.faq.length > 0) {
         {
           data.steps.length > 0 && (
             <ol class="answer-steps">
-              {data.steps.map((s) => <li>{s}</li>)}
+              {data.steps.map((s) =>
+                typeof s === 'string' ? <li>{s}</li> : <li><RoleTag who={s.who} /> {s.text}</li>,
+              )}
             </ol>
           )
         }
@@ -104,7 +109,17 @@ if (data.faq.length > 0) {
         <Content />
       </div>
 
+      <ArticleWorkflow
+        handoff={data.handoff}
+        humanOnly={data.humanOnly}
+        verify={data.verify}
+        troubleshoot={data.troubleshoot}
+        boundaries={data.boundaries}
+      />
+
       <ArticleFaq items={data.faq} />
+
+      {data.aiRun && <AiRunCard url={url} task={data.keyword} />}
 
       <ArticleSources sources={data.sources} reviewed={data.reviewed} />
 
@@ -116,6 +131,32 @@ if (data.faq.length > 0) {
     </div>
   </div>
 </BaseLayout>
+
+<script>
+  // 提示词卡、排障表、「交给 AI 执行」卡片的复制按钮
+  document.addEventListener('click', async (e) => {
+    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-copy]');
+    if (!btn) return;
+    const text = btn.dataset.copy ?? '';
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+    }
+    const old = btn.textContent;
+    btn.textContent = '已复制';
+    btn.classList.add('done');
+    setTimeout(() => {
+      btn.textContent = old;
+      btn.classList.remove('done');
+    }, 1500);
+  });
+</script>
 
 <style>
   .layout{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:40px;align-items:start;padding-top:36px;padding-bottom:64px}
@@ -152,7 +193,7 @@ if (data.faq.length > 0) {
   .prose :global(th){background:var(--soft)}
 
   @media (max-width:900px){
-    .layout{grid-template-columns:1fr;gap:20px;padding-top:20px}
+    .layout{grid-template-columns:minmax(0,1fr);gap:20px;padding-top:20px}
     .side{position:static;order:-1}
     .main{max-width:none}
   }

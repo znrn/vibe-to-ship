@@ -32,7 +32,30 @@ const articles = defineCollection({
     reviewed: z.coerce.date().optional(),
     // 首屏「结论 / 步骤」块：一句话结论 + 照做步骤
     answer: z.string(),
-    steps: z.array(z.string()).default([]),
+    // 照做步骤。可以只写一句话，也可以标明谁来做：me 你来做 / ai 交给 AI / check 你来验收
+    steps: z
+      .array(z.union([z.string(), z.object({ who: z.enum(['me', 'ai', 'check']), text: z.string() })]))
+      .default([]),
+
+    // ── 人和 AI 的分工（新结构，见 plan/WRITING.md）──
+    // 交给 AI：交接前要准备的信息 + 可以直接复制给 Claude / Codex 的提示词
+    handoff: z
+      .object({
+        prepare: z.array(z.string()).default([]),
+        prompts: z.array(z.object({ title: z.string(), text: z.string(), note: z.string().optional() })).default([]),
+      })
+      .optional(),
+    // 只有你能做的事：实名、付款、控制台操作、短信核验等，AI 替不了
+    humanOnly: z.array(z.object({ text: z.string(), note: z.string().optional() })).default([]),
+    // 你来验收：AI 说做完了，你要亲自检查的点
+    verify: z.array(z.string()).default([]),
+    // 卡住了怎么办：现象 → 通常的原因 → 怎么跟 AI 说
+    troubleshoot: z.array(z.object({ symptom: z.string(), cause: z.string(), say: z.string() })).default([]),
+    // 别让 AI 做的事：权限和风险的边界
+    boundaries: z.array(z.string()).default([]),
+    // 文末是否显示「交给 AI 执行」卡片（把本文链接发给 Claude / Codex 照着做）
+    aiRun: z.boolean().default(false),
+
     // 文末「这一步解决了，但接下来通常会卡在 XX」，不填就按下一步路线自动生成
     stuckNext: z.string().optional(),
     // 下一篇推荐（填文章文件名，不带 .md）

@@ -1,0 +1,161 @@
+---
+// 人和 AI 的分工：交给 AI（提示词卡）→ 只有你能做的 → 你来验收 → 卡住了怎么办 → 别让 AI 做的事
+// 内容来自文章 frontmatter；哪一块没写就不显示。复制按钮的脚本在文章页里统一处理（[data-copy]）。
+import RoleTag from './RoleTag.astro';
+
+interface Props {
+  handoff?: { prepare: string[]; prompts: { title: string; text: string; note?: string }[] };
+  humanOnly: { text: string; note?: string }[];
+  verify: string[];
+  troubleshoot: { symptom: string; cause: string; say: string }[];
+  boundaries: string[];
+}
+const { handoff, humanOnly, verify, troubleshoot, boundaries } = Astro.props;
+---
+
+{
+  handoff && (handoff.prepare.length > 0 || handoff.prompts.length > 0) && (
+    <section class="wf" id="handoff">
+      <h2><RoleTag who="ai" /> 这样交代给 AI</h2>
+      {handoff.prepare.length > 0 && (
+        <div class="prepare">
+          <p class="label">交接前准备好</p>
+          <ul>{handoff.prepare.map((p) => <li>{p}</li>)}</ul>
+        </div>
+      )}
+      {handoff.prompts.map((p, i) => (
+        <div class="prompt">
+          <div class="prompt-head">
+            <span class="prompt-no">{i + 1}</span>
+            <strong>{p.title}</strong>
+            <button type="button" class="copy" data-copy={p.text}>复制</button>
+          </div>
+          <pre>{p.text}</pre>
+          {p.note && <p class="note">{p.note}</p>}
+        </div>
+      ))}
+    </section>
+  )
+}
+
+{
+  humanOnly.length > 0 && (
+    <section class="wf human" id="human-only">
+      <h2><RoleTag who="me" /> 只有你能做的</h2>
+      <p class="sub">这些事 AI 替你做不了，也是最容易卡住的地方。做完一项勾一项。</p>
+      <ul class="checks">
+        {humanOnly.map((h) => (
+          <li>
+            <label>
+              <input type="checkbox" />
+              <span>
+                {h.text}
+                {h.note && <small>{h.note}</small>}
+              </span>
+            </label>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+{
+  verify.length > 0 && (
+    <section class="wf" id="verify">
+      <h2><RoleTag who="check" /> 做完检查这几条</h2>
+      <p class="sub">AI 说「做完了」不等于真的能用，下面每一条都要你亲自看。</p>
+      <ul class="checks">
+        {verify.map((v) => (
+          <li>
+            <label>
+              <input type="checkbox" />
+              <span>{v}</span>
+            </label>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+{
+  troubleshoot.length > 0 && (
+    <section class="wf" id="troubleshoot">
+      <h2>卡住了怎么办</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>现象</th><th>通常是</th><th>怎么跟 AI 说</th></tr>
+          </thead>
+          <tbody>
+            {troubleshoot.map((t) => (
+              <tr>
+                <td data-label="现象">{t.symptom}</td>
+                <td data-label="通常是">{t.cause}</td>
+                <td data-label="怎么跟 AI 说">
+                  <span class="say">{t.say}</span>
+                  <button type="button" class="copy mini" data-copy={t.say}>复制</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  )
+}
+
+{
+  boundaries.length > 0 && (
+    <section class="wf bounds" id="boundaries">
+      <h2>别让 AI 做的事</h2>
+      <ul>{boundaries.map((b) => <li>{b}</li>)}</ul>
+    </section>
+  )
+}
+
+<style>
+  .wf{margin-top:40px}
+  .wf h2{font-size:22px;margin:0 0 12px;letter-spacing:-.2px;line-height:1.4;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .sub{font-size:14px;color:var(--muted);margin:-4px 0 12px}
+  .label{font-size:13px;font-weight:700;color:var(--muted);margin-bottom:4px}
+  .prepare{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin-bottom:14px}
+  .prepare ul{padding-left:1.3em;display:grid;gap:2px;font-size:15px}
+  .prompt{border:1px solid color-mix(in srgb,var(--accent) 35%,var(--line));border-radius:12px;margin-bottom:12px;overflow:hidden;background:var(--surface)}
+  .prompt-head{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--accent-soft)}
+  .prompt-head strong{flex:1;font-size:15px}
+  .prompt-no{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:800;background:var(--accent);color:var(--accent-ink);flex:none}
+  .prompt pre{margin:0;padding:12px 16px;font-family:inherit;font-size:15px;line-height:1.75;white-space:pre-wrap;overflow-wrap:anywhere;background:none;border:0}
+  .note{font-size:13px;color:var(--muted);padding:0 16px 12px}
+  .copy{font:inherit;font-size:13px;font-weight:700;color:var(--accent);background:var(--surface);border:1px solid color-mix(in srgb,var(--accent) 40%,var(--line));border-radius:8px;padding:3px 12px;cursor:pointer;flex:none}
+  .copy:hover{background:var(--accent);color:var(--accent-ink)}
+  .copy.mini{font-size:12px;padding:1px 8px;margin-left:6px;vertical-align:1px}
+  .copy.done{background:var(--accent);color:var(--accent-ink)}
+  .checks{list-style:none;display:grid;gap:8px}
+  .checks label{display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 14px;cursor:pointer;font-size:15px;line-height:1.6}
+  .checks input{margin-top:5px;width:16px;height:16px;accent-color:var(--accent);flex:none}
+  .checks small{display:block;font-size:13px;color:var(--muted);margin-top:2px}
+  .checks input:checked + span{color:var(--muted);text-decoration:line-through}
+  .human .checks label{border-color:color-mix(in srgb,var(--warm) 35%,var(--line));background:var(--warm-soft)}
+  .table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+  table{width:100%;border-collapse:collapse;font-size:14.5px;min-width:560px}
+  th,td{border-bottom:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
+  th{background:var(--soft);font-size:13.5px}
+  tr:last-child td{border-bottom:0}
+  .say{color:var(--ink);overflow-wrap:anywhere}
+  /* 手机上排障表改成一行一张卡片 */
+  @media (max-width:560px){
+    .table-wrap{border:0;overflow:visible}
+    table{min-width:0}
+    thead{display:none}
+    table,tbody,tr,td{display:block}
+    tr{border:1px solid var(--line);border-radius:12px;margin-bottom:10px;overflow:hidden}
+    td{border-bottom:1px dashed var(--line);padding:8px 12px}
+    td::before{content:attr(data-label);display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:2px}
+    td:first-child{background:var(--soft);font-weight:600}
+    td:last-child{border-bottom:0}
+  }
+  .bounds ul{padding-left:1.3em;display:grid;gap:4px;font-size:15px}
+  .bounds li::marker{color:var(--warm)}
+</style>

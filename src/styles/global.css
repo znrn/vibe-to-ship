@@ -71,3 +71,12 @@ section.soft{background:var(--soft)}
   section{padding:40px 0}
   .page-head{padding:32px 0 20px}
 }
+
+/* 分工标签：🧑 你来做 / 🤖 交给 AI / ✅ 你来验收 */
+.role{display:inline-block;font-size:12px;font-weight:700;line-height:20px;padding:0 8px;border-radius:999px;white-space:nowrap;vertical-align:2px;text-decoration:none}
+.role.me{background:var(--warm-soft);color:var(--warm)}
+.role.ai{background:var(--accent-soft);color:var(--accent)}
+.role.check{background:var(--soft);color:var(--ink);border:1px solid var(--line)}
+
+/* 待冬瓜确认的地方（预览用，定稿前删掉） */
+.todo{background:var(--warm-soft);color:var(--warm);font-weight:700;border-radius:4px;padding:0 4px}

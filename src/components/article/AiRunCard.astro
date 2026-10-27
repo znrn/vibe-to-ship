@@ -1,0 +1,30 @@
+---
+// 文末「交给 AI 执行」：把本文链接发给 Claude / Codex，让它照着做，遇到需要本人操作的步骤停下来
+interface Props {
+  url: string;
+  task: string;
+}
+const { url, task } = Astro.props;
+const prompt = `请先阅读这篇文章：${url}
+照着它帮我完成「${task}」。
+文中标了「🧑 你来做」和「只有你能做的」步骤需要我本人操作，做到那里就停下来，告诉我具体要做什么、在哪里做。
+涉及删除、付款、修改账号或密码的操作，先问我。每一步做完，告诉我怎么验收。`;
+---
+
+<section class="airun" id="ai-run">
+  <p class="label">🤖 懒得一步步看？</p>
+  <p class="big">把这篇直接交给 Claude / Codex 执行</p>
+  <p class="hint">复制下面这段，发给你的 AI 编程助手。需要你本人操作的地方，它会停下来告诉你。</p>
+  <pre>{prompt}</pre>
+  <button type="button" class="copy" data-copy={prompt}>复制这段话</button>
+</section>
+
+<style>
+  .airun{min-width:0;margin-top:40px;background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 35%,transparent);border-radius:var(--radius);padding:20px 22px}
+  .label{font-size:12.5px;font-weight:800;color:var(--accent);letter-spacing:.3px}
+  .big{font-size:19px;font-weight:800;margin-top:2px}
+  .hint{font-size:14px;color:var(--muted);margin-top:4px}
+  pre{margin:12px 0;padding:12px 14px;background:var(--surface);border:1px solid var(--line);border-radius:10px;font-family:inherit;font-size:14.5px;line-height:1.7;white-space:pre-wrap;overflow-wrap:anywhere}
+  .copy{font:inherit;font-size:14px;font-weight:700;color:var(--accent-ink);background:var(--accent);border:0;border-radius:10px;padding:8px 16px;cursor:pointer}
+  .copy.done{opacity:.85}
+</style>
