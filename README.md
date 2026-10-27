@@ -28,7 +28,7 @@
 title: ICP 备案被驳回，最常见的 3 个原因和改法   # 读者会搜的那个问题
 description: 一两句话摘要，用于搜索结果和分享卡片
 intent: 个人 ICP 备案提交后被驳回，想知道错在哪、怎么改   # 这篇服务的搜索意图，一篇只服务一个
-keyword: ICP 备案被驳回  # 主关键词，一般就是标题里的说法
+keyword: ICP 备案被驳回  # 文章主词（这篇的主关键词），一般就是标题里的说法
 covers:                 # 同一意图下的其他问法，写进小节标题或常见问题
   - 备案审核不通过
   - 备案驳回后多久能重新提交
@@ -77,7 +77,7 @@ draft: false            # 草稿不会发布
 
 ## 选题地图
 
-`plan/topic-map.yaml` 是整站内容的施工图：每个节点是一个搜索意图，也就是一篇文章（已写的和计划写的都在里面），写明阶段、形态、主关键词、覆盖的长尾问法、优先级，以及正文该链到哪几篇。先改地图，再写文章。
+`plan/topic-map.yaml` 是整站内容的施工图：每个节点是一个搜索意图，也就是一篇文章（已写的和计划写的都在里面），写明阶段、形态、文章主词、覆盖的长尾问法、优先级，以及正文该链到哪几篇。先改地图，再写文章。
 
 ```bash
 npm run check:keywords              # build 前会自动运行
@@ -96,6 +96,8 @@ node scripts/research/report-page.mjs       # 生成问法对照页（本机导�
 node scripts/research/export-keywords.mjs   # 导出 P1 关键词查询表 → plan/research/keywords-p1.csv（--all 导出全部）
 node scripts/research/import-volume.mjs <文件.csv>   # 导入关键词工具查到的搜索量 → plan/research/volume.json
 ```
+
+关键词分四层，查询表的「类型」列和地图页都用这套叫法：**站点主词**（首页，`topic-map.yaml` 的 `site`）、**类目词**（阶段页、形态页，写在 `src/data/site.ts`）、**文章主词**（每个节点的 `keyword`）、**长尾**（节点的 `covers`）。
 
 查搜索量：把 `keywords-p1.csv` 第一列粘到百度营销关键词规划师或 5118 批量查询，导出结果（Excel 先另存为 CSV），再用 `import-volume.mjs` 导入。之后 `npm run plan:page` 重新生成地图页，卡片上会显示每个节点的需求分和搜索量，可以按两者排序。
 

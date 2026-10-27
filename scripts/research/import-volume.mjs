@@ -1,4 +1,5 @@
-// 导入关键词工具导出的搜索量，汇总到每个节点，写到 plan/research/volume.json（地图页会显示）
+// 导入关键词工具导出的搜索量，按四层结构汇总，写到 plan/research/volume.json（地图页会显示）
+//   站点主词、类目词（阶段页 / 形态页）各自记一个数；文章按节点把文章主词 + 长尾加总
 // 用法：node scripts/research/import-volume.mjs <导出的文件.csv> [--column 列名]
 //
 // 兼容百度营销关键词规划师、5118、站长工具等导出的 CSV / TSV：
@@ -11,6 +12,7 @@
 // 多次导入会合并：同一个词以最新导入的数值为准。工具额外推荐的词（地图里没有）记在 extra 里，可以挑来补长尾。
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename } from 'node:path';
+import { ROADMAP, PLATFORMS } from '../../src/data/site.ts';
 import { loadTopicMap } from '../lib/topic-map.mjs';
 
 const OUT = 'plan/research/volume.json';
@@ -94,10 +96,17 @@ function toNumber(v) {
   return Number.isFinite(n) ? n : 0;
 }
 
-// ── 关键词 → 节点 ──
+// ── 关键词 → 站点主词 / 类目词 / 文章节点 ──
 const norm = (s) => String(s).toLowerCase().replace(/[\s\p{P}\p{S}]/gu, '');
-const { merged } = loadTopicMap();
+const { map, merged } = loadTopicMap();
+const HUBS = [
+  ...ROADMAP.map((s) => ({ id: `stages/${s.slug}`, name: `阶段页 · ${s.name}`, keyword: s.keyword })),
+  ...PLATFORMS.map((p) => ({ id: `platforms/${p.slug}`, name: `形态页 · ${p.name}`, keyword: p.keyword })),
+];
+const siteTerms = [map.site?.keyword, ...(map.site?.covers ?? [])].filter(Boolean);
 const owner = new Map();
+for (const t of siteTerms) owner.set(norm(t), { term: t });
+for (const h of HUBS) owner.set(norm(h.keyword), { term: h.keyword });
 for (const n of merged) for (const t of [n.keyword, ...n.covers]) owner.set(norm(t), { id: n.id, term: t });
 
 const prev = existsSync(OUT) ? JSON.parse(readFileSync(OUT, 'utf8')) : { terms: {}, extra: {}, imports: [] };
@@ -113,7 +122,9 @@ for (const line of lines.slice(headerIdx + 1)) {
   else { prev.extra[kw] = vol; extra++; }
 }
 
-// ── 按节点汇总（主词 + 长尾） ──
+// ── 汇总：站点主词、类目词各记一个数，文章按节点把文章主词 + 长尾加总 ──
+prev.site = Object.fromEntries(siteTerms.filter((t) => t in prev.terms).map((t) => [t, prev.terms[t]]));
+prev.hubs = Object.fromEntries(HUBS.filter((h) => h.keyword in prev.terms).map((h) => [h.id, { name: h.name, keyword: h.keyword, volume: prev.terms[h.keyword] }]));
 const nodes = {};
 for (const n of merged) {
   const terms = [n.keyword, ...n.covers].filter((t) => t in prev.terms);
@@ -131,6 +142,8 @@ writeFileSync(OUT, JSON.stringify(prev, null, 1));
 
 console.log(`读取 ${basename(file)}：搜索量列 ${volCols.map((i) => `「${header[i]}」`).join(' + ')}`);
 console.log(`对上地图的词 ${hit} 个，地图里没有的词 ${extra} 个（记在 extra，可挑来补长尾）`);
-console.log(`已有搜索量的节点 ${Object.keys(nodes).length} 个 → ${OUT}`);
+console.log(`站点主词：${Object.entries(prev.site).map(([t, v]) => `${t} ${v}`).join('，') || '无数据'}`);
+console.log(`类目词：${Object.values(prev.hubs).map((h) => `${h.keyword} ${h.volume}`).join('，') || '无数据'}`);
+console.log(`已有搜索量的文章节点 ${Object.keys(nodes).length} 个 → ${OUT}`);
 const top = Object.entries(nodes).sort((a, b) => b[1].volume - a[1].volume).slice(0, 10);
 for (const [id, v] of top) console.log(`  ${String(v.volume).padStart(8)}  ${id}（${v.queried}/${v.total} 个词有数据）`);

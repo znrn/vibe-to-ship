@@ -6,7 +6,7 @@
 // 提示：
 //   - 两个词字面上很像：搜一下，前 10 条结果重合多就并成一篇；
 //     确认意图不同的，在地图节点的 distinct 里登记，之后不再提示
-//   - 地图里写的阶段 / 形态 / 主词和文章 frontmatter 不一致
+//   - 地图里写的阶段 / 形态 / 文章主词和文章 frontmatter 不一致
 //   - 两篇都已发布，但正文里没按 links 链过去
 //   - 已发布的文章没有 sources（参考来源）
 // 用法：npm run check:keywords（npm run build 会先自动跑一遍）
@@ -24,7 +24,7 @@ const PLATFORM_SLUGS = PLATFORMS.map((p) => p.slug);
 
 for (const n of merged) {
   if (!n.intent) errors.push(`${n.id}: 缺少 intent（这篇服务的搜索意图）`);
-  if (!n.keyword) errors.push(`${n.id}: 缺少 keyword（主关键词）`);
+  if (!n.keyword) errors.push(`${n.id}: 缺少 keyword（文章主词）`);
   if (!STAGES.includes(n.stage)) errors.push(`${n.id}: stage「${n.stage}」不是 ${STAGES.join(' / ')} 之一`);
   if (!n.platforms.length || n.platforms.some((p) => !PLATFORM_SLUGS.includes(p))) {
     errors.push(`${n.id}: platforms 必须是 ${PLATFORM_SLUGS.join(' / ')} 中的一个或几个`);
@@ -41,7 +41,7 @@ for (const n of merged) {
   }
 }
 
-// ── 撞词检查：主词、聚合页类目词、各节点的词 ──
+// ── 撞词检查：站点主词、聚合页类目词、各节点的文章主词和长尾 ──
 const normalize = (s) => String(s).toLowerCase().replace(/[\s\p{P}\p{S}]/gu, '');
 
 function bigrams(s) {

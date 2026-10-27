@@ -16,6 +16,8 @@ const readJson = (f) => (existsSync(f) ? JSON.parse(readFileSync(f, 'utf8')) : n
 const demand = readJson('plan/research/demand.json')?.demand ?? {};
 const volume = readJson('plan/research/volume.json')?.nodes ?? {};
 const hasVolume = Object.keys(volume).length > 0;
+const volumeAll = readJson('plan/research/volume.json');
+const vtag = (v) => (v == null ? '' : `<em>${v}</em>`);
 const byId = new Map(merged.map((n) => [n.id, n]));
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const platformName = (s) => PLATFORMS.find((p) => p.slug === s)?.name ?? s;
@@ -55,7 +57,7 @@ const card = (n) => {
     <p class="intent">${esc(n.intent)}</p>
     <div class="signal">
       <span class="dm ${demand[n.id]?.score ? '' : 'zero'}" title="${esc((demand[n.id]?.top ?? []).join(' / ') || '没有联想词命中')}">需求分 <b>${demand[n.id]?.score ?? 0}</b></span>
-      ${volume[n.id] ? `<span class="vol" title="主词 ${volume[n.id].keyword ?? '无数据'}">搜索量 <b>${volume[n.id].volume}</b><small>（${volume[n.id].queried}/${volume[n.id].total} 个词有数据）</small></span>` : hasVolume ? '<span class="vol muted">搜索量 未查</span>' : ''}
+      ${volume[n.id] ? `<span class="vol" title="文章主词 ${volume[n.id].keyword ?? '无数据'}">搜索量 <b>${volume[n.id].volume}</b><small>（${volume[n.id].queried}/${volume[n.id].total} 个词有数据）</small></span>` : hasVolume ? '<span class="vol muted">搜索量 未查</span>' : ''}
     </div>
     ${n.covers.length ? `<div class="covers">${n.covers.map((c) => `<span>${esc(c)}</span>`).join('')}</div>` : ''}
     <div class="meta">
@@ -73,7 +75,7 @@ const html = `<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>冬瓜站选题地图</title>
-<meta name="description" content="冬瓜 AI 独立开发实战站的内容框架：主词、五步路线 × 产品形态的类目词、${merged.length} 个选题节点及其长尾问法和内链。由 vibe-to-ship 的 ${MAP} 生成。">
+<meta name="description" content="冬瓜 AI 独立开发实战站的内容框架：站点主词、五步路线 × 产品形态的类目词、${merged.length} 个选题节点及其长尾问法和内链。由 vibe-to-ship 的 ${MAP} 生成。">
 <meta name="launchpad-group" content="AI 开发培训">
 <style>
 :root{--bg:#f7f6f2;--surface:#fff;--ink:#1d1f1c;--muted:#6b6f68;--line:#e3e1da;--accent:#2f6f4f;--accent-soft:#e6f0ea;--warm:#b4622a;--warm-soft:#f8ebe0;--draft:#7a5cc2;--draft-soft:#eee8fa}
@@ -98,6 +100,7 @@ h2{font-size:20px;margin:40px 0 14px}
 .layer p{font-size:13px;color:var(--muted)}
 .layer .kw{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .kw span{font-size:12.5px;background:var(--accent-soft);color:var(--accent);border-radius:6px;padding:1px 8px}
+.kw em{font-style:normal;font-weight:700;margin-left:6px;color:var(--ink)}
 .table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
 .matrix{border-collapse:collapse;width:100%;min-width:760px}
 .matrix th,.matrix td{border-bottom:1px solid var(--line);border-right:1px solid var(--line);padding:10px;vertical-align:top;text-align:left}
@@ -163,9 +166,9 @@ footer{margin-top:48px;font-size:12.5px;color:var(--muted)}
 
   <h2>四层结构</h2>
   <div class="layers">
-    <div class="layer"><div class="n">第 1 层 · 主词</div><h3>首页</h3><p>整站只有一个</p><div class="kw">${[map.site?.keyword, ...(map.site?.covers ?? [])].filter(Boolean).map((k) => `<span>${esc(k)}</span>`).join('')}</div></div>
-    <div class="layer"><div class="n">第 2 层 · 类目词</div><h3>阶段页 + 形态页</h3><p>五步路线 × 四种形态，各一个聚合页</p><div class="kw">${[...ROADMAP.map((s) => s.keyword), ...PLATFORMS.map((p) => p.keyword)].map((k) => `<span>${esc(k)}</span>`).join('')}</div></div>
-    <div class="layer"><div class="n">第 3 层 · 问题簇</div><h3>文章</h3><p>一个搜索意图 = 一篇文章，标题即主关键词。下方每张卡片是一个节点。</p></div>
+    <div class="layer"><div class="n">第 1 层 · 站点主词</div><h3>首页</h3><p>整站只有一个</p><div class="kw">${[map.site?.keyword, ...(map.site?.covers ?? [])].filter(Boolean).map((k) => `<span>${esc(k)}${vtag(volumeAll?.site?.[k])}</span>`).join('')}</div></div>
+    <div class="layer"><div class="n">第 2 层 · 类目词</div><h3>阶段页 + 形态页</h3><p>五步路线 × 四种形态，各一个聚合页</p><div class="kw">${[...ROADMAP.map((s) => [`stages/${s.slug}`, s.keyword]), ...PLATFORMS.map((p) => [`platforms/${p.slug}`, p.keyword])].map(([id, k]) => `<span>${esc(k)}${vtag(volumeAll?.hubs?.[id]?.volume)}</span>`).join('')}</div></div>
+    <div class="layer"><div class="n">第 3 层 · 问题簇</div><h3>文章</h3><p>一个搜索意图 = 一篇文章，标题即文章主词。下方每张卡片是一个节点。</p></div>
     <div class="layer"><div class="n">第 4 层 · 长尾问法</div><h3>小节与常见问题</h3><p>同一意图的其他说法，写进文章的小节标题和文末常见问题，不另写一篇。卡片里虚线框的就是。</p></div>
   </div>
 
@@ -186,7 +189,7 @@ footer{margin-top:48px;font-size:12.5px;color:var(--muted)}
     return `<section class="stage" data-stage="${s.slug}"><div class="stage-head"><h3>${s.icon} ${s.step} · ${esc(s.name)}</h3><span>${esc(s.desc)}</span></div><div class="cards">${list.map(card).join('')}</div></section>`;
   }).join('')}
 
-  <footer>需求分：联想词里和该节点足够像的问法条数，按出现在几个搜索引擎里加权，只用来比较相对大小（node scripts/research/match.mjs 重算）。搜索量：关键词工具导出后用 node scripts/research/import-volume.mjs 导入，按节点把主词和长尾加总。<br>改地图：编辑 vibe-to-ship/${MAP}，然后在项目里运行 <code>npm run check:keywords</code> 检查、<code>npm run plan:page</code> 重新生成本页。</footer>
+  <footer>需求分：联想词里和该节点足够像的问法条数，按出现在几个搜索引擎里加权，只用来比较相对大小（node scripts/research/match.mjs 重算）。搜索量：关键词工具导出后用 node scripts/research/import-volume.mjs 导入，站点主词和类目词各记一个数，文章按节点把文章主词和长尾加总。<br>改地图：编辑 vibe-to-ship/${MAP}，然后在项目里运行 <code>npm run check:keywords</code> 检查、<code>npm run plan:page</code> 重新生成本页。</footer>
 </div>
 <script>
 const f = { platform: document.getElementById('f-platform'), priority: document.getElementById('f-priority'), status: document.getElementById('f-status'), sort: document.getElementById('f-sort') };

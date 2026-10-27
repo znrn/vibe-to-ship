@@ -1,6 +1,6 @@
 // 把采集到的问法匹配到选题地图节点，写到 plan/research/matched.json
 // 分三类：
-//   covered    和某个节点的主词 / covers 几乎一样，已覆盖
+//   covered    和某个节点的文章主词 / covers 几乎一样，已覆盖
 //   addable    明显属于某个节点，但说法没写进 covers，可以补
 //   unmatched  对不上任何节点，人工判断要不要新增节点
 // 同时算出每个节点的需求分，写到 plan/research/demand.json（地图页会显示）

@@ -143,7 +143,7 @@ footer{margin-top:48px;font-size:12.5px;color:var(--muted)}
 
   ${proposals.summary ? sec('结论', '', `<div class="card">${proposals.summary.split('\n').filter(Boolean).map((l) => `<p>${esc(l)}</p>`).join('')}</div>`) : ''}
   ${newNodes ? sec('建议新增的节点', '地图里没有、但真实问法里反复出现的意图。', `<div class="cards">${newNodes}</div>`) : ''}
-  ${changes ? sec('建议调整的节点', '改主词、合并、拆分、调优先级。', `<div class="table-wrap"><table>${changes}</table></div>`) : ''}
+  ${changes ? sec('建议调整的节点', '改文章主词、合并、拆分、调优先级。', `<div class="table-wrap"><table>${changes}</table></div>`) : ''}
   ${addCovers ? sec('建议补进长尾的问法', '属于已有节点，写进 covers，并在文章的小节或常见问题里回答。', `<div class="table-wrap"><table>${addCovers}</table></div>`) : ''}
   ${sec('每个节点命中的问法', '自动匹配结果。橙色数字 = 没有任何搜索联想词命中，可能是说法不对或需求小。', nodeRows)}
   ${sec('未匹配的问法', '自动匹配对不上的原始问法，人工整理建议时参考。', unmatchedList)}

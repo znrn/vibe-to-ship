@@ -11,7 +11,7 @@ const articles = defineCollection({
     description: z.string(),
     // 搜索意图：读者搜这类词时真正想解决的那件事。一篇文章只服务一个意图
     intent: z.string(),
-    // 主关键词：一般就是标题里的那个说法
+    // 文章主词（这篇的主关键词）：一般就是标题里的那个说法
     keyword: z.string(),
     // 同一意图下的其他问法，写进小节标题或 FAQ；意图不同的问法应该另写一篇
     // npm run check:keywords 会检查两篇文章的词有没有撞车
