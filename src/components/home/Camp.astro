@@ -1,0 +1,48 @@
+---
+import { CAMP } from '../../data/site';
+---
+
+<section id="camp">
+  <div class="wrap">
+    <div class="camp">
+      <div>
+        <span class="eyebrow">{CAMP.format}</span>
+        <h2>{CAMP.name}<br />周末两天，把你的产品推上线</h2>
+        <p class="lead">手册免费开源，自己能摸索就自己来。时间宝贵、想有人当场帮你排雷，再来实战营。</p>
+        <div class="promise">
+          {CAMP.promises.map((p) => <div><b>✓</b><span>{p}</span></div>)}
+        </div>
+        <div class="price"><b>{CAMP.price}</b><span>{CAMP.priceNote}</span></div>
+        <div class="ctas">
+          <span class="btn primary">预约下一期（报名入口待开）</span>
+          <span class="btn placeholder">看准备清单（整理中）</span>
+        </div>
+      </div>
+      <div class="days">
+        <div class="day"><strong>开营前 3 周</strong><p>领准备清单；需要的同学开始办执照、备案、商户号；开营前一周线上 1 小时预备课</p></div>
+        <div class="day"><strong>周六 · 做出来</strong><p>对齐工具链，拆需求、定第一版范围；下午用大白话让 AI 生成页面，晚上手机上跑起来</p></div>
+        <div class="day"><strong>周日 · 放上网、收到钱</strong><p>上午服务器、域名、HTTPS；下午接收款、小程序提审；傍晚每人上台演示自己的产品</p></div>
+        <div class="day"><strong>结业后 30 天</strong><p>审核结果、上线后的问题，群里继续答疑</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .camp{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:36px;display:grid;grid-template-columns:1.2fr 1fr;gap:36px}
+  .camp h2{font-size:28px;line-height:1.3}
+  .lead{color:var(--muted);margin:10px 0 18px}
+  .promise{display:grid;gap:10px;margin-bottom:22px}
+  .promise div{display:flex;gap:10px;font-size:14.5px}
+  .promise b{color:var(--accent)}
+  .days{display:flex;flex-direction:column;gap:12px}
+  .day{background:var(--soft);border-radius:12px;padding:14px 16px}
+  .day strong{font-size:14px;color:var(--accent)}
+  .day p{font-size:13.5px;color:var(--muted);margin-top:2px}
+  .price{display:flex;align-items:baseline;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+  .price b{font-size:26px}
+  .price span{font-size:13px;color:var(--muted)}
+  .ctas{display:flex;gap:12px;flex-wrap:wrap}
+  @media (max-width:900px){ .camp{grid-template-columns:1fr} }
+  @media (max-width:560px){ .camp{padding:22px} }
+</style>

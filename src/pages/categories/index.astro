@@ -1,0 +1,40 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CategoryGrid from '../../components/CategoryGrid.astro';
+import ArticleList from '../../components/ArticleList.astro';
+import { CATEGORIES } from '../../data/site';
+import { getArticles } from '../../lib/articles';
+
+const articles = await getArticles();
+---
+
+<BaseLayout title="文章分类" description="八类问题：最小可上线、账号与资质、上线链路、工具怎么选、成本与时间账、按岗位对号、翻车与排错、作品证明。">
+  <div class="wrap page-head">
+    <nav class="crumbs" aria-label="面包屑"><a href="/">首页</a><span>/</span><span>文章分类</span></nav>
+    <h1>文章分类</h1>
+    <p>八类问题，先找到自己卡在哪一类。</p>
+  </div>
+  <div class="wrap body">
+    <CategoryGrid articles={articles} />
+    {
+      CATEGORIES.map((c) => {
+        const list = articles.filter((a) => a.data.category === c.slug);
+        return (
+          list.length > 0 && (
+            <div class="group">
+              <h2><a href={`/categories/${c.slug}/`}>{c.icon} {c.name}</a></h2>
+              <ArticleList articles={list} />
+            </div>
+          )
+        );
+      })
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .body{padding-bottom:64px}
+  .group{margin-top:36px}
+  .group h2{font-size:19px;margin-bottom:12px}
+  .group h2 a:hover{color:var(--accent)}
+</style>

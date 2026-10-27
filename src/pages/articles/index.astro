@@ -1,0 +1,57 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArticleList from '../../components/ArticleList.astro';
+import { getArticles } from '../../lib/articles';
+
+const articles = await getArticles();
+---
+
+<BaseLayout title="全部文章" description="按卡点找答案：冬瓜 AI 独立开发实战站的全部文章，每篇开头直接给结论。">
+  <div class="wrap page-head">
+    <nav class="crumbs" aria-label="面包屑"><a href="/">首页</a><span>/</span><span>全部文章</span></nav>
+    <h1>全部文章</h1>
+    <p>共 {articles.length} 篇，每篇开头 150 字直接给结论。按分类看请去 <a class="more" href="/categories/">文章分类 →</a></p>
+  </div>
+  <div class="wrap page-body">
+    <form class="filter" role="search" onsubmit="return false">
+      <span aria-hidden="true">🔍</span>
+      <input id="q" name="q" placeholder="输入你卡住的问题，比如：备案" aria-label="筛选文章" />
+    </form>
+    <p id="status" class="status" hidden></p>
+    <ArticleList articles={articles} showDesc />
+  </div>
+</BaseLayout>
+
+<script>
+  // 纯前端筛选：首页搜索框和问题标签会带 ?q= 跳过来
+  const input = document.getElementById('q') as HTMLInputElement;
+  const status = document.getElementById('status')!;
+  const items = Array.from(document.querySelectorAll<HTMLElement>('.item'));
+  const apply = () => {
+    const words = input.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    let shown = 0;
+    for (const el of items) {
+      const text = (el.dataset.search ?? '').toLowerCase();
+      // 中文问题常常整句输入，任意一个词或连续两个字命中都算
+      const hit = words.length === 0 || words.some((w) => text.includes(w) || [...w].some((_, i, arr) => i < arr.length - 1 && text.includes(arr[i] + arr[i + 1])));
+      el.hidden = !hit;
+      if (hit) shown++;
+    }
+    status.hidden = words.length === 0;
+    status.textContent = shown > 0 ? `找到 ${shown} 篇相关文章` : '暂时没有直接对应的文章，这个问题已经记下了，可以先看看下面的路线图或全部文章。';
+    if (shown === 0) items.forEach((el) => (el.hidden = false));
+  };
+  input.value = new URLSearchParams(location.search).get('q') ?? '';
+  input.addEventListener('input', apply);
+  apply();
+</script>
+
+<style>
+  .page-body{padding-bottom:64px;max-width:820px;margin-left:auto;margin-right:auto}
+  .page-head{max-width:820px}
+  .filter{display:flex;align-items:center;gap:10px;background:var(--surface);border:1.5px solid var(--line);border-radius:999px;padding:10px 18px;margin-bottom:16px}
+  .filter:focus-within{border-color:var(--accent)}
+  .filter input{flex:1;min-width:0;border:0;outline:0;background:transparent;font:inherit;color:var(--ink)}
+  .status{font-size:13.5px;color:var(--muted);margin:-4px 0 12px 6px}
+  :global(.item[hidden]){display:none}
+</style>

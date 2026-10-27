@@ -1,0 +1,48 @@
+---
+import CategoryGrid from '../CategoryGrid.astro';
+import ArticleList from '../ArticleList.astro';
+import type { Article } from '../../lib/articles';
+
+interface Props {
+  articles: Article[];
+}
+const { articles } = Astro.props;
+---
+
+<section id="articles">
+  <div class="wrap">
+    <div class="sec-head">
+      <div><h2>按卡点找答案</h2><p>八类问题，每篇开头 150 字直接给结论</p></div>
+      <a class="more" href="/articles/">全部文章 →</a>
+    </div>
+    <CategoryGrid articles={articles} />
+
+    <div class="two">
+      <div>
+        <h3 class="col-title">最新文章</h3>
+        <ArticleList articles={articles.slice(0, 5)} />
+      </div>
+      <div>
+        <h3 class="col-title">你是哪种人？</h3>
+        <div class="roles">
+          <a class="role" href="/categories/roles/"><h4>运营 / 业务骨干</h4><p>提需求总被排期？自己做个小工具，先解决手头的事。</p></a>
+          <a class="role" href="/categories/roles/"><h4>产品经理</h4><p>不再只画原型，直接给出一个能点的公网版本。</p></a>
+          <a class="role" href="/categories/roles/"><h4>创业者 / 个体老板</h4><p>外包要 3~5 万、等两个月？先花几天自己做出 MVP 测付费。</p></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .two{display:grid;grid-template-columns:1.4fr 1fr;gap:28px;margin-top:36px}
+  .col-title{font-size:18px;margin-bottom:12px}
+  .roles{display:flex;flex-direction:column;gap:12px}
+  .role{background:var(--soft);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;transition:.15s}
+  .role:hover{border-color:var(--accent)}
+  .role h4{font-size:15px}
+  .role p{font-size:13.5px;color:var(--muted);margin-top:2px}
+  @media (max-width:900px){
+    .two{grid-template-columns:1fr}
+  }
+</style>

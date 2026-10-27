@@ -1,0 +1,38 @@
+<section id="works" class="soft">
+  <div class="wrap">
+    <div class="sec-head">
+      <div><h2>作品墙</h2><p>先看我自己做的，再看学员做的。全部是真实上线的产品</p></div>
+    </div>
+    <div class="works">
+      <div class="work">
+        <div class="shot">内容工作台 截图</div>
+        <div class="body"><h4>内容工作台</h4><p>一条选题自动生成配音视频、PPT 页、小红书图和长短文。</p>
+          <div class="stats"><span class="pill">冬瓜本人</span><span class="pill">用时：待填</span></div></div>
+      </div>
+      <div class="work">
+        <div class="shot">灵感妙记 截图</div>
+        <div class="body"><h4>灵感妙记</h4><p>随手记灵感的 App，已上架 App Store（介绍待替换）。</p>
+          <div class="stats"><span class="pill">冬瓜本人</span><span class="pill">用时：待填</span></div></div>
+      </div>
+      <div class="work empty">
+        <div class="shot">首期学员作品位</div>
+        <div class="body"><h4>下一个可能是你</h4><p>一对一试跑和首期实战营的作品会陆续放在这里，附上线链接和复盘。</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .works{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .work{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column}
+  .shot{aspect-ratio:16/10;background:linear-gradient(135deg,var(--accent-soft),var(--soft));display:grid;place-items:center;color:var(--accent);font-weight:700;font-size:15px}
+  .body{padding:16px 18px;flex:1}
+  .work h4{font-size:16px}
+  .work p{font-size:13.5px;color:var(--muted);margin-top:4px}
+  .stats{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .pill{font-size:12px;padding:2px 9px;border-radius:999px;background:var(--soft);color:var(--muted)}
+  .work.empty{border-style:dashed;background:transparent}
+  .work.empty .shot{background:transparent;color:var(--muted);font-weight:500}
+  @media (max-width:900px){ .works{grid-template-columns:1fr 1fr} }
+  @media (max-width:560px){ .works{grid-template-columns:1fr} }
+</style>

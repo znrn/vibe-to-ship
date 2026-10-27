@@ -1,0 +1,25 @@
+<section id="about" class="soft">
+  <div class="wrap about">
+    <div class="avatar">🍈</div>
+    <div>
+      <h2>我是冬瓜，一个不写代码的独立开发者</h2>
+      <p>我不是程序员。我做的每一个产品，代码都是 AI 写的，我负责想清楚要什么、把它推上线、让它能收钱。这一路上踩过的坑，我都写在了这个站和 GitHub 上。（个人经历待补充）</p>
+      <p>如果你也有想做的东西，但卡在「怎么上线」，这里就是为你准备的。</p>
+      <div class="socials">
+        <span class="btn placeholder">抖音（待填）</span><span class="btn placeholder">小红书（待填）</span><span class="btn placeholder">视频号（待填）</span><span class="btn placeholder">GitHub（即将公开）</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .about{display:grid;grid-template-columns:120px 1fr;gap:28px;align-items:start}
+  .avatar{width:120px;height:120px;border-radius:50%;background:var(--accent-soft);display:grid;place-items:center;font-size:44px}
+  h2{font-size:24px;margin-bottom:8px}
+  p{color:var(--muted);margin-bottom:10px}
+  .socials{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+  @media (max-width:560px){
+    .about{grid-template-columns:1fr}
+    .avatar{width:84px;height:84px;font-size:32px}
+  }
+</style>

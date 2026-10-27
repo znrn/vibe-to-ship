@@ -1,0 +1,23 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/home/Hero.astro';
+import Roadmap from '../components/home/Roadmap.astro';
+import Articles from '../components/home/Articles.astro';
+import Works from '../components/home/Works.astro';
+import Camp from '../components/home/Camp.astro';
+import About from '../components/home/About.astro';
+import Faq from '../components/home/Faq.astro';
+import { getArticles } from '../lib/articles';
+
+const articles = await getArticles();
+---
+
+<BaseLayout>
+  <Hero />
+  <Roadmap />
+  <Articles articles={articles} />
+  <Works />
+  <Camp />
+  <About />
+  <Faq />
+</BaseLayout>

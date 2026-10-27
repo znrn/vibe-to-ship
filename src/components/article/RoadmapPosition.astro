@@ -1,0 +1,63 @@
+---
+// 文章页的路线图定位：电脑上是侧栏，手机上放在标题上方（横排紧凑版）。
+import { ROADMAP, CN_NUM } from '../../data/site';
+
+interface Props {
+  current: number;
+}
+const { current } = Astro.props;
+const left = ROADMAP.length - current;
+---
+
+<aside class="pos" aria-label="上线路线图定位">
+  <p class="pos-title">从零到上线 · 五层窗户纸</p>
+  <p class="pos-here">你在<b>第{CN_NUM[current]}层窗户纸</b></p>
+  <ol class="steps">
+    {
+      ROADMAP.map((s) => (
+        <li class:list={['s', s.step < current && 'before', s.step === current && 'now', s.step > current && 'after']}>
+          <span class="dot">{s.step}</span>
+          <span class="txt">
+            <strong>{s.name}</strong>
+            <small>{s.step === current ? '这篇在这一步' : s.desc}</small>
+          </span>
+        </li>
+      ))
+    }
+  </ol>
+  <p class="pos-foot">
+    {left > 0 ? <>这篇只捅破了其中一层，后面还有 <b>{left} 层</b>。</> : <>这是最后一层，但前面四层也得都通。</>}
+  </p>
+</aside>
+
+<style>
+  .pos{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px 18px 16px}
+  .pos-title{font-size:12.5px;color:var(--muted);font-weight:600;letter-spacing:.3px}
+  .pos-here{font-size:15px;margin:2px 0 12px}
+  .pos-here b{color:var(--accent)}
+  .steps{list-style:none;position:relative}
+  .steps::before{content:"";position:absolute;left:14px;top:14px;bottom:14px;width:2px;background:var(--line)}
+  .s{display:grid;grid-template-columns:30px 1fr;gap:10px;align-items:start;padding:6px 0;position:relative}
+  .dot{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:13px;background:var(--surface);border:2px solid var(--line);color:var(--muted);position:relative;z-index:1}
+  .txt strong{display:block;font-size:14.5px;line-height:1.3;margin-top:4px}
+  .txt small{display:block;font-size:12.5px;color:var(--muted);line-height:1.5}
+  .before .dot{border-color:var(--accent);color:var(--accent)}
+  .after strong{color:var(--muted)}
+  .now .dot{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);box-shadow:0 0 0 4px var(--accent-soft)}
+  .now .txt strong{color:var(--accent)}
+  .now .txt small{color:var(--accent);font-weight:600}
+  .pos-foot{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line);font-size:13px;color:var(--muted)}
+  .pos-foot b{color:var(--warm)}
+
+  /* 手机：横排 5 个点，放在标题上方 */
+  @media (max-width:900px){
+    .pos{padding:14px 14px 12px}
+    .pos-here{margin-bottom:10px}
+    .steps{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+    .steps::before{left:10%;right:10%;top:15px;bottom:auto;width:auto;height:2px}
+    .s{grid-template-columns:1fr;justify-items:center;text-align:center;gap:4px;padding:0}
+    .txt strong{font-size:13px;margin-top:0}
+    .txt small{display:none}
+    .pos-foot{margin-top:10px;padding-top:10px}
+  }
+</style>

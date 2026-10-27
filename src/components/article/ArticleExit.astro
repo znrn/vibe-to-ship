@@ -1,0 +1,100 @@
+---
+// 文末出口：接下来会卡在哪 → 下一篇 → 免费台阶 → 实战营
+import { ROADMAP, CATEGORIES, FREE_STEP, CAMP } from '../../data/site';
+import { articleUrl, type Article } from '../../lib/articles';
+
+interface Props {
+  step: number;
+  stuckNext?: string;
+  next?: Article;
+}
+const { step, stuckNext, next } = Astro.props;
+const nextStep = ROADMAP.find((s) => s.step === step + 1);
+const stuck = stuckNext ?? (nextStep ? nextStep.stuck : '上线之后的各种意外');
+const nextCat = next && CATEGORIES.find((c) => c.slug === next.data.category);
+---
+
+<div class="exit">
+  <div class="block stuck">
+    <p class="label">这一步解决了</p>
+    <p class="big">但接下来，通常会卡在<b>{stuck}</b>。</p>
+    {nextStep && <p class="hint">也就是路线图上的第 {nextStep.step} 步「{nextStep.name}」：{nextStep.desc}。</p>}
+  </div>
+
+  {
+    next ? (
+      <a class="block next" href={articleUrl(next)}>
+        <p class="label">下一篇 →</p>
+        <p class="big">{next.data.title}</p>
+        <p class="hint">
+          {nextCat?.name} · 第 {next.data.roadmapStep} 步
+          {next.data.sample && <span class="sample-tag">示例</span>}
+        </p>
+      </a>
+    ) : (
+      <div class="block next empty">
+        <p class="label">下一篇</p>
+        <p class="big">这一步的文章还在写，先看看全部文章</p>
+        <a class="more" href="/articles/">全部文章 →</a>
+      </div>
+    )
+  }
+
+  <div class="block free">
+    <p class="label">不想一篇篇找？免费领</p>
+    <div class="free-grid">
+      <div class="free-item">
+        <strong>{FREE_STEP.checklist.label}</strong>
+        <p>{FREE_STEP.checklist.note}</p>
+        <span class="btn placeholder">清单整理中（占位）</span>
+      </div>
+      <div class="free-item">
+        <strong>{FREE_STEP.wechat.label}</strong>
+        <p>{FREE_STEP.wechat.note}</p>
+        <span class="btn placeholder">{FREE_STEP.wechat.value}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="block camp">
+    <p class="label">想有人当场帮你排雷</p>
+    <p class="big">{CAMP.name}：周末两天，把你的产品推上线</p>
+    <ul>
+      {CAMP.promises.slice(0, 2).map((p) => <li>✓ {p}</li>)}
+    </ul>
+    <div class="row">
+      <a class="btn primary" href={CAMP.href}>看实战营安排</a>
+      <span class="price">{CAMP.price} · {CAMP.format}</span>
+    </div>
+  </div>
+</div>
+
+<style>
+  .exit{display:grid;gap:14px;margin-top:40px}
+  .block{display:block;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px 22px}
+  .label{font-size:12.5px;font-weight:700;color:var(--muted);letter-spacing:.3px}
+  .big{font-size:18px;font-weight:700;line-height:1.5;margin-top:4px}
+  .hint{font-size:13.5px;color:var(--muted);margin-top:6px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .stuck{background:var(--warm-soft);border-color:transparent}
+  .stuck .label,.stuck b{color:var(--warm)}
+  .next{transition:.15s}
+  a.next:hover{border-color:var(--accent)}
+  a.next:hover .big{color:var(--accent)}
+  .next .label{color:var(--accent)}
+  .next.empty{border-style:dashed}
+  .next.empty .more{display:inline-block;margin-top:6px}
+  .free-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+  .free-item{background:var(--soft);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+  .free-item strong{font-size:15px}
+  .free-item p{font-size:13px;color:var(--muted);line-height:1.55;flex:1}
+  .camp{background:var(--accent-soft);border-color:transparent}
+  .camp .label{color:var(--accent)}
+  .camp ul{list-style:none;margin:10px 0 14px;display:grid;gap:4px;font-size:14px}
+  .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  .price{font-size:13px;color:var(--muted)}
+  @media (max-width:560px){
+    .free-grid{grid-template-columns:1fr}
+    .block{padding:18px}
+    .big{font-size:17px}
+  }
+</style>

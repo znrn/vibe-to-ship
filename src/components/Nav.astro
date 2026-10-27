@@ -1,0 +1,32 @@
+---
+import { CAMP } from '../data/site';
+---
+
+<nav>
+  <div class="wrap">
+    <a class="logo" href="/"><i>瓜</i>冬瓜 <small>AI 独立开发</small></a>
+    <div class="nav-links">
+      <a href="/articles/">排错文章</a>
+      <a href="/categories/">分类</a>
+      <a href="/#roadmap">上线手册</a>
+      <a href="/#works">作品墙</a>
+      <a href="/#camp">实战营</a>
+      <a href="/#about">关于我</a>
+    </div>
+    <a class="btn primary" href={CAMP.href}>预约实战营</a>
+  </div>
+</nav>
+
+<style>
+  nav{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  nav .wrap{display:flex;align-items:center;gap:28px;height:60px}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:17px;white-space:nowrap}
+  .logo i{width:30px;height:30px;border-radius:9px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-style:normal;font-size:15px}
+  .logo small{font-weight:500;color:var(--muted);font-size:13px}
+  .nav-links{display:flex;gap:22px;font-size:14.5px;color:var(--muted);margin-left:auto}
+  .nav-links a:hover{color:var(--ink)}
+  @media (max-width:900px){
+    .nav-links{display:none}
+    nav .btn{margin-left:auto}
+  }
+</style>

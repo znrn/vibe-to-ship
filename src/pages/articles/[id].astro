@@ -1,0 +1,139 @@
+---
+// 文章页 = 落地页。读者多半从搜索结果直接进来：
+// 首屏给答案 → 路线图告诉他还有几层 → 文末给出口。
+import { getEntry, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import RoadmapPosition from '../../components/article/RoadmapPosition.astro';
+import ArticleExit from '../../components/article/ArticleExit.astro';
+import { SITE, ROADMAP, categoryOf } from '../../data/site';
+import { getArticles, formatDate, type Article } from '../../lib/articles';
+
+export async function getStaticPaths() {
+  const articles = await getArticles();
+  return articles.map((article) => ({ params: { id: article.id }, props: { article } }));
+}
+
+const { article } = Astro.props as { article: Article };
+const { data } = article;
+const { Content } = await render(article);
+const next = data.next ? await getEntry(data.next) : undefined;
+const cat = categoryOf(data.category);
+const step = ROADMAP.find((s) => s.step === data.roadmapStep)!;
+const url = new URL(Astro.url.pathname, Astro.site).href;
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: data.title,
+    description: data.description,
+    inLanguage: 'zh-CN',
+    datePublished: data.date.toISOString(),
+    dateModified: (data.updated ?? data.date).toISOString(),
+    articleSection: cat.name,
+    mainEntityOfPage: { '@type': 'WebPage', '@id': url },
+    url,
+    author: { '@type': 'Person', name: SITE.author.name, url: SITE.url, description: SITE.author.description },
+    publisher: { '@type': 'Person', name: SITE.author.name, url: SITE.url },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: '首页', item: SITE.url + '/' },
+      { '@type': 'ListItem', position: 2, name: cat.name, item: `${SITE.url}/categories/${cat.slug}/` },
+      { '@type': 'ListItem', position: 3, name: data.title, item: url },
+    ],
+  },
+];
+---
+
+<BaseLayout title={data.title} description={data.description} ogType="article">
+  <Fragment slot="head">
+    <meta property="article:published_time" content={data.date.toISOString()} />
+    <meta property="article:author" content={SITE.author.name} />
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  </Fragment>
+
+  <div class="wrap layout">
+    <article class="main">
+      <nav class="crumbs" aria-label="面包屑">
+        <a href="/">首页</a><span>/</span><a href={`/categories/${cat.slug}/`}>{cat.name}</a>
+      </nav>
+      <h1>{data.title}</h1>
+
+      <div class="answer" id="answer">
+        <p class="answer-label">结论</p>
+        <p class="answer-text">{data.answer}</p>
+        {
+          data.steps.length > 0 && (
+            <ol class="answer-steps">
+              {data.steps.map((s) => <li>{s}</li>)}
+            </ol>
+          )
+        }
+      </div>
+
+      <div class="meta">
+        {data.sample && <span class="sample-tag">示例文章</span>}
+        <span>{cat.icon} {cat.name}</span>
+        <span>路线第 {step.step} 步 · {step.name}</span>
+        <span>作者 {SITE.author.name}</span>
+        <time datetime={data.date.toISOString()}>{formatDate(data.date)}</time>
+      </div>
+
+      <div class="prose">
+        <Content />
+      </div>
+
+      <ArticleExit step={data.roadmapStep} stuckNext={data.stuckNext} next={next} />
+    </article>
+
+    <div class="side">
+      <RoadmapPosition current={data.roadmapStep} />
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .layout{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:40px;align-items:start;padding-top:36px;padding-bottom:64px}
+  .main{max-width:720px}
+  .side{position:sticky;top:84px}
+  h1{font-size:clamp(26px,4vw,36px);line-height:1.3;letter-spacing:-.3px;font-weight:800}
+
+  .answer{margin-top:20px;background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);border-left:4px solid var(--accent);border-radius:var(--radius);padding:18px 22px}
+  .answer-label{font-size:12.5px;font-weight:800;color:var(--accent);letter-spacing:1px}
+  .answer-text{font-size:17px;font-weight:600;line-height:1.65;margin-top:2px}
+  .answer-steps{margin:10px 0 0;padding-left:1.4em;display:grid;gap:4px;font-size:15px}
+  .answer-steps li::marker{color:var(--accent);font-weight:700}
+
+  .meta{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;font-size:13px;color:var(--muted);margin:16px 0 8px}
+
+  .prose{font-size:16.5px;line-height:1.85}
+  .prose :global(h2){font-size:22px;margin:36px 0 12px;letter-spacing:-.2px;line-height:1.4}
+  .prose :global(h3){font-size:18px;margin:28px 0 10px}
+  .prose :global(p){margin:14px 0}
+  .prose :global(ul),.prose :global(ol){margin:14px 0;padding-left:1.4em}
+  .prose :global(li){margin:4px 0}
+  .prose :global(li::marker){color:var(--accent)}
+  .prose :global(a){color:var(--accent);text-decoration:underline;text-underline-offset:3px}
+  .prose :global(strong){color:var(--ink)}
+  .prose :global(blockquote){margin:18px 0;padding:12px 18px;border-left:4px solid var(--warm);background:var(--warm-soft);border-radius:0 10px 10px 0;color:var(--ink)}
+  .prose :global(blockquote p){margin:4px 0}
+  .prose :global(code){font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9em;background:var(--soft);border:1px solid var(--line);border-radius:6px;padding:1px 6px}
+  .prose :global(pre){background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow-x:auto;margin:16px 0}
+  .prose :global(pre code){border:0;padding:0;background:none}
+  .prose :global(table){width:100%;border-collapse:collapse;font-size:14.5px;margin:16px 0;display:block;overflow-x:auto}
+  .prose :global(th),.prose :global(td){border:1px solid var(--line);padding:8px 12px;text-align:left}
+  .prose :global(th){background:var(--soft)}
+
+  @media (max-width:900px){
+    .layout{grid-template-columns:1fr;gap:20px;padding-top:20px}
+    .side{position:static;order:-1}
+    .main{max-width:none}
+  }
+  @media (max-width:560px){
+    .answer{padding:16px 16px}
+    .answer-text{font-size:16px}
+  }
+</style>

@@ -1,0 +1,27 @@
+---
+// 八大分类卡片，篇数从内容集合实时统计
+import { CATEGORIES } from '../data/site';
+import type { Article } from '../lib/articles';
+
+interface Props {
+  articles: Article[];
+}
+const { articles } = Astro.props;
+const count = (slug: string) => articles.filter((a) => a.data.category === slug).length;
+---
+
+<div class="cats">
+  {
+    CATEGORIES.map((c) => {
+      const n = count(c.slug);
+      return (
+        <a class="cat" href={`/categories/${c.slug}/`}>
+          <div class="ic">{c.icon}</div>
+          <h3>{c.name}</h3>
+          <p>{c.desc}</p>
+          <div class:list={['n', n === 0 && 'zero']}>{n > 0 ? `${n} 篇` : '即将更新'}</div>
+        </a>
+      );
+    })
+  }
+</div>
