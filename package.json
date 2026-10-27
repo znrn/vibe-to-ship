@@ -10,7 +10,8 @@
     "build": "node scripts/check-keywords.mjs && astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "check:keywords": "node scripts/check-keywords.mjs"
+    "check:keywords": "node scripts/check-keywords.mjs",
+    "plan:page": "node scripts/topic-map-page.mjs"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.19",

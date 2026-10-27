@@ -10,70 +10,15 @@
 //   - 两篇都已发布，但正文里没按 links 链过去
 // 用法：npm run check:keywords（npm run build 会先自动跑一遍）
 //       npm run check:keywords -- --report  额外打印「阶段 × 形态」覆盖矩阵和待写的 P1
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
-import { parse } from 'yaml';
 import { ROADMAP, PLATFORMS } from '../src/data/site.ts';
+import { loadTopicMap } from './lib/topic-map.mjs';
 
-const DIR = 'src/content/articles';
-const MAP = 'plan/topic-map.yaml';
 const SIMILAR = 0.5; // 两个词的字符二元组 Jaccard 相似度，超过就提示
 
-const errors = [];
-const warnings = [];
+const { map, nodes, articles, merged, errors, warnings } = loadTopicMap();
 const STAGES = ROADMAP.map((s) => s.slug);
 const PLATFORM_SLUGS = PLATFORMS.map((p) => p.slug);
 
-// ── 读文章 ──
-const articles = new Map();
-for (const f of readdirSync(DIR).filter((f) => f.endsWith('.md'))) {
-  const text = readFileSync(join(DIR, f), 'utf8');
-  const m = text.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
-  const data = m ? parse(m[1]) : {};
-  const id = f.replace(/\.md$/, '');
-  // 正文 + 常见问题 + next 都算「链出去」
-  const linkText = [m?.[2] ?? '', JSON.stringify(data.faq ?? []), data.next ? `/articles/${data.next}/` : ''].join('\n');
-  articles.set(id, { data, linkText });
-}
-
-// ── 读地图，用文章覆盖 ──
-const map = existsSync(MAP) ? parse(readFileSync(MAP, 'utf8')) : { nodes: [] };
-const nodes = new Map();
-for (const n of map.nodes ?? []) {
-  if (nodes.has(n.id)) errors.push(`地图里 ${n.id} 出现了两次`);
-  nodes.set(n.id, n);
-}
-
-const merged = [];
-for (const [id, n] of nodes) {
-  const a = articles.get(id);
-  const status = a ? (a.data.draft ? 'draft' : 'published') : 'planned';
-  if (a) {
-    for (const key of ['stage', 'keyword']) {
-      if (n[key] && n[key] !== a.data[key]) warnings.push(`${id}: 地图 ${key}「${n[key]}」和文章「${a.data[key]}」不一致，以文章为准`);
-    }
-    if (n.platforms && [...n.platforms].sort().join() !== [...(a.data.platforms ?? [])].sort().join()) {
-      warnings.push(`${id}: 地图 platforms 和文章不一致，以文章为准`);
-    }
-  }
-  const d = a ? a.data : n;
-  merged.push({
-    id,
-    status,
-    priority: n.priority ?? 'P3',
-    stage: d.stage,
-    platforms: d.platforms ?? [],
-    intent: d.intent,
-    keyword: d.keyword,
-    covers: d.covers ?? [],
-    links: n.links ?? [],
-    distinct: n.distinct ?? [],
-  });
-}
-
-for (const id of articles.keys()) {
-  if (!nodes.has(id)) errors.push(`${id}: 文章在 ${MAP} 里没有节点，先在地图里登记（至少写 id 和 priority）`);
-}
 
 for (const n of merged) {
   if (!n.intent) errors.push(`${n.id}: 缺少 intent（这篇服务的搜索意图）`);
