@@ -13,7 +13,7 @@
 // 用法：npm run check:keywords（npm run build 会先自动跑一遍）
 //       npm run check:keywords -- --report  额外打印覆盖矩阵、待写的 P1、未核对的文章、缺导语的聚合页
 import { existsSync } from 'node:fs';
-import { ROADMAP, PLATFORMS, TOPICS } from '../src/data/site.ts';
+import { ROADMAP, PLATFORMS, TOPICS, WHAT_IS } from '../src/data/site.ts';
 import { loadTopicMap } from './lib/topic-map.mjs';
 
 const SIMILAR = 0.5; // 两个词的字符二元组 Jaccard 相似度，超过就提示
@@ -71,6 +71,7 @@ for (const s of ROADMAP) if (!flowArticles.has(s.slug)) warnings.push(`流程第
 
 const owners = [
   { id: '首页', words: [map.site?.keyword, ...(map.site?.covers ?? [])] },
+  { id: `入口页 ${WHAT_IS.path}`, words: [WHAT_IS.keyword, ...WHAT_IS.covers] },
   ...ROADMAP.filter((s) => !flowArticles.has(s.slug)).map((s) => ({ id: `流程页 ${s.slug}`, words: [s.keyword] })),
   ...PLATFORMS.map((p) => ({ id: `形态页 ${p.slug}`, words: [p.keyword] })),
   ...merged.map((n) => ({ id: n.id, words: [n.keyword, ...n.covers] })),

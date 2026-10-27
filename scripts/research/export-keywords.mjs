@@ -5,7 +5,7 @@
 // 「类型」列对应四层结构：站点主词（首页）/ 类目词（流程页、形态页）/ 文章主词 / 长尾。
 // 文件带 UTF-8 BOM，Excel / WPS 直接打开不乱码。
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { ROADMAP, PLATFORMS } from '../../src/data/site.ts';
+import { ROADMAP, PLATFORMS, WHAT_IS } from '../../src/data/site.ts';
 import { loadTopicMap } from '../lib/topic-map.mjs';
 
 const all = process.argv.includes('--all');
@@ -28,6 +28,8 @@ for (const kw of [map.site?.keyword, ...(map.site?.covers ?? [])].filter(Boolean
 // 第 2 层：类目词（流程页 / 形态页）
 for (const s of ROADMAP) push(s.keyword, '类目词', `hub:flow/${s.slug}`, '', '', '');
 for (const p of PLATFORMS) push(p.keyword, '类目词', `hub:platforms/${p.slug}`, '', '', '');
+// 「是什么」入口页
+for (const [i, kw] of [WHAT_IS.keyword, ...WHAT_IS.covers].entries()) push(kw, i === 0 ? '类目词' : '长尾', 'page:ai-indie-dev', '', '', '');
 // 第 3、4 层：文章主词 + 长尾
 for (const n of merged.filter((n) => all || n.priority === 'P1')) {
   for (const [i, kw] of [n.keyword, ...n.covers].entries()) {

@@ -15,6 +15,7 @@ const matched = JSON.parse(readFileSync('plan/research/matched.json', 'utf8'));
 const ROUNDS = [
   { file: 'plan/research/proposals.yaml', title: '第一轮 · 联想词和技术社区' },
   { file: 'plan/research/proposals-r2.yaml', title: '第二轮 · grokbot 采集和文章主词核验' },
+  { file: 'plan/research/proposals-method.yaml', title: '冬瓜教法补充' },
 ].filter((r) => existsSync(r.file)).map((r) => ({ ...r, p: parse(readFileSync(r.file, 'utf8')) }));
 const verify = existsSync('plan/research/verify.json') ? JSON.parse(readFileSync('plan/research/verify.json', 'utf8')) : null;
 const raw = JSON.parse(readFileSync('plan/research/raw.json', 'utf8'));

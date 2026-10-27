@@ -1,0 +1,40 @@
+---
+// 首页「适合谁 / 不适合谁」：读者和痛点来自 plan/METHOD.md（src/data/site.ts 的 AUDIENCE、NOT_FOR）
+import { AUDIENCE, NOT_FOR, WHAT_IS } from '../../data/site';
+---
+
+<section id="who">
+  <div class="wrap">
+    <div class="sec-head">
+      <div><h2>这里写给谁</h2><p>不会写代码，但想亲手把产品做出来、放上网、收到钱的人</p></div>
+      <a class="more" href={WHAT_IS.path}>什么是 AI 独立开发者 →</a>
+    </div>
+    <div class="cards">
+      {
+        AUDIENCE.map((a) => (
+          <div class="card">
+            <h3>{a.icon} {a.who}</h3>
+            <p class="pain">{a.pain}</p>
+            <p class="want">→ {a.want}</p>
+          </div>
+        ))
+      }
+    </div>
+    <p class="notfor">
+      <b>不适合：</b>{NOT_FOR.map((n, i) => <>{i > 0 && '；'}{n.who}（{n.why}）</>)}。
+    </p>
+  </div>
+</section>
+
+<style>
+  .cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px}
+  .card h3{font-size:16.5px;margin-bottom:8px}
+  .pain{font-size:14.5px;color:var(--muted);line-height:1.7}
+  .want{font-size:14.5px;color:var(--accent);font-weight:600;line-height:1.7;margin-top:8px}
+  .notfor{margin-top:16px;font-size:14px;color:var(--muted);line-height:1.7}
+  .notfor b{color:var(--warm)}
+  @media (max-width:760px){
+    .cards{grid-template-columns:minmax(0,1fr)}
+  }
+</style>

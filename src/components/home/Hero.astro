@@ -1,14 +1,14 @@
 ---
-import { SITE } from '../../data/site';
+import { SITE, WHAT_IS } from '../../data/site';
 
-const chips = ['Cursor 报 403', 'ICP 备案被驳回', '域名解析不生效', 'HTTPS 小锁不亮', '小程序审核被拒', '支付沙盒切生产'];
+const chips = ['ICP 备案被驳回', 'SSH 密钥配置', '域名解析不生效', 'HTTPS 小锁不亮', '小程序审核被拒', '没执照怎么收钱'];
 ---
 
 <header class="hero">
   <div class="wrap">
-    <span class="eyebrow">不教写代码，只管把东西推上线</span>
-    <h1>用 AI 打造你的<em>一人公司</em><br />非程序员也能上线第一款产品</h1>
-    <p class="sub">写代码已经是一层窗户纸，难的是域名、服务器、备案、收款、审核这一路。这里把每一个卡点都写成了能直接照做的答案。</p>
+    <span class="eyebrow">AI 独立开发 · 不教写代码，只管把东西推上线</span>
+    <h1>不会写代码，<em>也能靠 AI</em><br />一个人把产品做到上线并收到钱</h1>
+    <p class="sub">写代码已经交给 AI，难的是想清楚做什么、放上网、收到钱。这里按 9 步拆开每一步：你来决定什么、交给 AI 做什么、哪些事只能你亲自做。</p>
     <form class="search" action="/articles/" method="get" role="search">
       <span aria-hidden="true">🔍</span>
       <input name="q" placeholder="你卡在哪一步了？比如：备案被驳回" aria-label="搜索问题" />
@@ -18,7 +18,8 @@ const chips = ['Cursor 报 403', 'ICP 备案被驳回', '域名解析不生效',
       {chips.map((c) => <a class="chip" href={`/articles/?q=${encodeURIComponent(c)}`}>{c}</a>)}
     </div>
     <div class="hero-ctas">
-      <a class="btn primary" href="#roadmap">从零开始看路线图 →</a>
+      <a class="btn primary" href="/flow/">从第 1 步开始 →</a>
+      <a class="btn" href={WHAT_IS.path}>什么是 AI 独立开发者？</a>
       {SITE.github ? <a class="btn" href={SITE.github}>⭐ GitHub 开源手册</a> : <span class="btn placeholder">⭐ GitHub 开源手册（即将公开）</span>}
     </div>
   </div>

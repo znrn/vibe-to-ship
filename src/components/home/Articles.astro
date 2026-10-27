@@ -1,6 +1,7 @@
 ---
 import CategoryGrid from '../CategoryGrid.astro';
 import ArticleList from '../ArticleList.astro';
+import { WHAT_IS } from '../../data/site';
 import type { Article } from '../../lib/articles';
 
 interface Props {
@@ -23,11 +24,11 @@ const { articles } = Astro.props;
         <ArticleList articles={articles.slice(0, 5)} />
       </div>
       <div>
-        <h3 class="col-title">你是哪种人？</h3>
-        <div class="roles">
-          <a class="role" href="/topics/roles/"><h4>运营 / 业务骨干</h4><p>提需求总被排期？自己做个小工具，先解决手头的事。</p></a>
-          <a class="role" href="/topics/roles/"><h4>产品经理</h4><p>不再只画原型，直接给出一个能点的公网版本。</p></a>
-          <a class="role" href="/topics/roles/"><h4>创业者 / 个体老板</h4><p>外包要 3~5 万、等两个月？先花几天自己做出 MVP 测付费。</p></a>
+        <h3 class="col-title">从哪开始？</h3>
+        <div class="starts">
+          <a class="start" href={WHAT_IS.path}><h4>还在想要不要做</h4><p>先看什么是 AI 独立开发者、适不适合你。</p></a>
+          <a class="start" href="/flow/idea/"><h4>已经有想法了</h4><p>从第 1 步「想清楚做什么」开始，第一版先砍掉一半功能。</p></a>
+          <a class="start" href="/flow/deploy/"><h4>做出来了，放不上网</h4><p>直接看第 5 步「服务器和部署」，全程交给 AI。</p></a>
         </div>
       </div>
     </div>
@@ -37,11 +38,11 @@ const { articles } = Astro.props;
 <style>
   .two{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:28px;margin-top:36px}
   .col-title{font-size:18px;margin-bottom:12px}
-  .roles{display:flex;flex-direction:column;gap:12px}
-  .role{background:var(--soft);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;transition:.15s}
-  .role:hover{border-color:var(--accent)}
-  .role h4{font-size:15px}
-  .role p{font-size:13.5px;color:var(--muted);margin-top:2px}
+  .starts{display:flex;flex-direction:column;gap:12px}
+  .start{background:var(--soft);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;transition:.15s}
+  .start:hover{border-color:var(--accent)}
+  .start h4{font-size:15px}
+  .start p{font-size:13.5px;color:var(--muted);margin-top:2px}
   @media (max-width:900px){
     .two{grid-template-columns:minmax(0,1fr)}
   }

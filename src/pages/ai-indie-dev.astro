@@ -1,0 +1,180 @@
+---
+// 入口页：独立开发者是什么意思 / AI 独立开发者是谁 / 适不适合你。
+// 承接定义类问法（WHAT_IS.keyword），定位和读者来自 plan/METHOD.md，首页的站点主词不在这里抢。
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE, ROADMAP, WHAT_IS, AUDIENCE, NOT_FOR } from '../data/site';
+import { flowUrl } from '../data/flow';
+
+const title = '独立开发者是什么意思？AI 时代，不会写代码也能一个人把产品做上线';
+const description = `${SITE.definition}写代码交给 AI，难的是想清楚做什么、放上网、收到钱。看看你适不适合，以及从哪一步开始。`;
+const url = new URL(WHAT_IS.path, SITE.url).href;
+
+const faq = [
+  {
+    q: '独立开发者是什么意思？',
+    a: '原本指一个人（或很小的团队）不依附公司，自己把一个软件产品从做出来、上线到运营全包下来的人，过去基本都是程序员。AI 能写代码以后，不会写代码的人也能走这条路，这就是本文说的「AI 独立开发者」。',
+  },
+  {
+    q: '独立开发者是干嘛的？',
+    a: '一个人做完一个产品从想法到收钱的全部事情：想清楚做什么、做出来、放上网、处理域名备案和 HTTPS、接收款、过平台审核，上线后还要维护和找用户。AI 独立开发者把写代码这部分交给 AI，自己负责做决定、做那些只能本人做的事，并验收结果。',
+  },
+  {
+    q: '不会写代码，真的能做吗？',
+    a: '能做出能用、能上线、能收钱的第一版。写代码已经可以交给 Claude、Codex 这类 AI；真正卡人的是代码之外的事：服务器、域名、备案、收款、审核。这些不需要会写代码，但需要有人带你把路走一遍。',
+  },
+  {
+    q: '独立开发者适合新手吗？',
+    a: '适合「想做出东西」的新手，比如产品经理、创业者、运营。第一个产品要小：一个核心功能、手机能打开、能收集反馈，几天内做完上线。不适合只想听暴富故事、不打算动手的人。',
+  },
+  {
+    q: 'AI 独立开发者和程序员有什么区别？',
+    a: '程序员的核心是写代码；AI 独立开发者的核心是做决定和把产品交付出去：做什么、砍掉什么、怎么上线、怎么收钱。代码由 AI 写，你负责说清楚要什么、检查结果对不对。',
+  },
+  {
+    q: '要不要先成立公司或办营业执照？',
+    a: '第一版不用。先用现成收款工具或私聊收款，验证有没有人愿意付钱；确定要做下去、要接微信支付等正式收款时，再去办执照。',
+  },
+];
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: title,
+    description,
+    url,
+    inLanguage: 'zh-CN',
+    author: { '@type': 'Person', name: SITE.author.name, url: SITE.url, description: SITE.author.description },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: '首页', item: SITE.url + '/' },
+      { '@type': 'ListItem', position: 2, name: '什么是 AI 独立开发者', item: url },
+    ],
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+  },
+];
+---
+
+<BaseLayout title={title} description={description}>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  </Fragment>
+
+  <div class="wrap page">
+    <nav class="crumbs" aria-label="面包屑"><a href="/">首页</a><span>/</span></nav>
+    <h1>{title}</h1>
+
+    <div class="answer">
+      <p class="answer-label">一句话</p>
+      <p class="answer-text">{SITE.definition}</p>
+      <p class="answer-more">写代码这一层已经交给 AI，真正的门槛变成了代码之外的事：想清楚做什么、放上网、收到钱。</p>
+    </div>
+
+    <section>
+      <h2>独立开发者原本是什么意思</h2>
+      <p>独立开发者，指一个人（或很小的团队）不依附公司，自己把一个软件产品从做出来、上线到运营全包下来。过去这条路基本只属于程序员，因为第一关就是写代码。</p>
+      <p>AI 能写代码以后，这一关变成了一层窗户纸。你用大白话说清楚要什么，Claude、Codex 这类 AI 就能把代码写出来、改好、部署上去。于是不会写代码的人，也能当独立开发者。</p>
+    </section>
+
+    <section>
+      <h2>AI 接走了写代码，剩下的是这些事</h2>
+      <p>大多数人不是卡在写代码，而是卡在代码之外：工具和账号、满屏报错、服务器、域名和备案、HTTPS、收款、上架审核。没有一关需要你会写代码，但每一关都可能把人劝退。所以在这里，每一步都分成三件事讲清楚：</p>
+      <ul class="roles">
+        <li><span class="role-tag me">🧑 你来做</span>决定做什么、选哪条路，以及实名、付款、短信核验这些只能本人做的事</li>
+        <li><span class="role-tag ai">🤖 交给 AI</span>写代码、改代码、连服务器、配环境、上 HTTPS</li>
+        <li><span class="role-tag check">✅ 你来验收</span>AI 说做完了，你亲自检查是不是真的能用</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>适合谁</h2>
+      <div class="cards">
+        {
+          AUDIENCE.map((a) => (
+            <div class="card">
+              <h3>{a.icon} {a.who}</h3>
+              <p class="label">现在卡在</p>
+              <p>{a.pain}</p>
+              <p class="label">想要的是</p>
+              <p class="want">{a.want}</p>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <section>
+      <h2>不适合谁</h2>
+      <ul class="notfor">
+        {NOT_FOR.map((n) => <li><b>{n.who}</b>：{n.why}。</li>)}
+      </ul>
+    </section>
+
+    <section>
+      <h2>一个人要做的全部事情：{ROADMAP.length} 步</h2>
+      <ol class="flow">
+        {
+          ROADMAP.map((s) => (
+            <li>
+              <a href={flowUrl(s.slug)}>
+                <span class="no">{s.step}</span>
+                <span><strong>{s.name}</strong><small>{s.desc}</small></span>
+              </a>
+            </li>
+          ))
+        }
+      </ol>
+      <div class="ctas">
+        <a class="btn primary" href={flowUrl(ROADMAP[0].slug)}>从第 1 步开始 →</a>
+        <a class="btn" href="/flow/">看完整上线流程</a>
+      </div>
+    </section>
+
+    <section class="faq">
+      <h2>常见问题</h2>
+      {faq.map((f, i) => <details open={i === 0}><summary>{f.q}</summary><p>{f.a}</p></details>)}
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .page{max-width:780px;padding-top:28px;padding-bottom:64px}
+  h1{font-size:clamp(26px,4vw,36px);line-height:1.3;letter-spacing:-.3px;font-weight:800;margin-top:6px}
+  .answer{margin-top:20px;background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);border-left:4px solid var(--accent);border-radius:var(--radius);padding:18px 22px}
+  .answer-label{font-size:12.5px;font-weight:800;color:var(--accent);letter-spacing:1px}
+  .answer-text{font-size:19px;font-weight:700;line-height:1.6;margin-top:2px}
+  .answer-more{font-size:15px;color:var(--muted);margin-top:8px}
+  section{margin-top:40px}
+  section h2{font-size:22px;margin-bottom:12px;letter-spacing:-.2px}
+  section > p{font-size:16.5px;line-height:1.85;margin:10px 0}
+  .roles{list-style:none;display:grid;gap:8px;margin-top:12px}
+  .roles li{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-size:15px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+  .cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px}
+  .card h3{font-size:16px;margin-bottom:8px}
+  .card .label{font-size:12px;font-weight:700;color:var(--muted);margin-top:8px}
+  .card p{font-size:14.5px;line-height:1.7}
+  .card .want{color:var(--accent);font-weight:600}
+  .notfor{padding-left:1.3em;display:grid;gap:6px;font-size:16px}
+  .notfor li::marker{color:var(--warm)}
+  .flow{list-style:none;display:grid;gap:8px}
+  .flow a{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 14px}
+  .flow a:hover{border-color:var(--accent)}
+  .flow .no{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:13px;border:2px solid var(--accent);color:var(--accent)}
+  .flow strong{display:block;font-size:15.5px}
+  .flow small{display:block;font-size:13px;color:var(--muted)}
+  .ctas{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+  .faq details{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin-bottom:10px}
+  .faq summary{cursor:pointer;font-weight:600;font-size:15.5px}
+  .faq details p{color:var(--muted);font-size:15px;line-height:1.75;margin-top:8px}
+  @media (max-width:760px){
+    .cards{grid-template-columns:minmax(0,1fr)}
+  }
+</style>
