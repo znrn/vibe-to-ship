@@ -26,3 +26,6 @@ pnpm-debug.log*
 # 问法研究的自动匹配结果，可由 scripts/research/match.mjs 重新生成
 plan/research/matched.json
 plan/research/r2-input-*.json
+
+# 本地临时文件（关键词工具导出等）
+temp/
