@@ -6,6 +6,8 @@
 //   - 编码自动识别：UTF-8、UTF-16（带 BOM）、GBK
 //   - 关键词列：表头含「关键词 / 关键字 / keyword」的第一列
 //   - 搜索量列：表头含「整体 / 总」的搜索量列优先；否则把所有「搜索量 / 指数 / volume」列（如 PC + 移动）相加
+//   - 5118 低等级账号导出的指数 / 检索量列都是「VIP特权数据」（被屏蔽成 0），这时改读「长尾词数」，
+//     记为另一种指标，节点取各词最大值而不是加总（长尾词数互相包含，加总没意义）
 //   - 也可以用 --column 指定列名
 //   - 数值里的逗号、「<5」、「100-1000」这类区间都会换算成数字
 // Excel 文件请先另存为 CSV。
@@ -57,7 +59,8 @@ function parseLine(line, sep) {
 }
 const lines = text.split(/\r?\n/).filter((l) => l.trim());
 const KW = /关键词|关键字|keyword/i;
-const headerIdx = lines.findIndex((l) => KW.test(l));
+// 5118 第一行是「批量查询关键词流量参数_xxx」标题，没有分隔符，跳过
+const headerIdx = lines.findIndex((l) => KW.test(l) && /[,\t]/.test(l));
 if (headerIdx < 0) {
   console.error('没找到含「关键词」的表头行，请确认文件是关键词工具导出的列表');
   process.exit(1);
@@ -67,12 +70,15 @@ const header = parseLine(lines[headerIdx], sep);
 const kwCol = header.findIndex((h) => KW.test(h));
 
 let volCols;
+const masked5118 = header.some((h) => /VIP特权数据/.test(h)) && header.includes('长尾词数');
 if (colArg) {
   volCols = [header.indexOf(colArg)];
   if (volCols[0] < 0) {
     console.error(`没有名为「${colArg}」的列。可用的列：${header.join(' | ')}`);
     process.exit(1);
   }
+} else if (masked5118) {
+  volCols = [header.indexOf('长尾词数')];
 } else {
   const VOL = /搜索量|指数|volume|searches/i;
   const candidates = header.map((h, i) => [h, i]).filter(([h, i]) => i !== kwCol && VOL.test(h) && !/竞争|出价|价格|变化|趋势|同比|环比/.test(h));
@@ -109,7 +115,14 @@ for (const t of siteTerms) owner.set(norm(t), { term: t });
 for (const h of HUBS) owner.set(norm(h.keyword), { term: h.keyword });
 for (const n of merged) for (const t of [n.keyword, ...n.covers]) owner.set(norm(t), { id: n.id, term: t });
 
+const metric = volCols.length === 1 && header[volCols[0]] === '长尾词数' ? '长尾词数' : '搜索量';
 const prev = existsSync(OUT) ? JSON.parse(readFileSync(OUT, 'utf8')) : { terms: {}, extra: {}, imports: [] };
+prev.metric ??= metric;
+if (prev.metric !== metric) {
+  console.error(`${OUT} 里已经是「${prev.metric}」，这次读到的是「${metric}」，两种数不能混在一起。要换指标请先删掉 ${OUT}`);
+  process.exit(1);
+}
+const combine = metric === '长尾词数' ? (vals) => Math.max(...vals) : (vals) => vals.reduce((s, v) => s + v, 0);
 let hit = 0;
 let extra = 0;
 for (const line of lines.slice(headerIdx + 1)) {
@@ -130,7 +143,7 @@ for (const n of merged) {
   const terms = [n.keyword, ...n.covers].filter((t) => t in prev.terms);
   if (!terms.length) continue;
   nodes[n.id] = {
-    volume: terms.reduce((s, t) => s + prev.terms[t], 0),
+    volume: combine(terms.map((t) => prev.terms[t])),
     keyword: prev.terms[n.keyword] ?? null,
     queried: terms.length,
     total: 1 + n.covers.length,
@@ -140,10 +153,10 @@ prev.nodes = nodes;
 prev.imports.push({ file: basename(file), at: new Date().toISOString(), columns: volCols.map((i) => header[i]), matched: hit, extra });
 writeFileSync(OUT, JSON.stringify(prev, null, 1));
 
-console.log(`读取 ${basename(file)}：搜索量列 ${volCols.map((i) => `「${header[i]}」`).join(' + ')}`);
+console.log(`读取 ${basename(file)}：${metric === '长尾词数' ? '5118 指数列被屏蔽，改读' : '搜索量列'} ${volCols.map((i) => `「${header[i]}」`).join(' + ')}`);
 console.log(`对上地图的词 ${hit} 个，地图里没有的词 ${extra} 个（记在 extra，可挑来补长尾）`);
 console.log(`站点主词：${Object.entries(prev.site).map(([t, v]) => `${t} ${v}`).join('，') || '无数据'}`);
 console.log(`类目词：${Object.values(prev.hubs).map((h) => `${h.keyword} ${h.volume}`).join('，') || '无数据'}`);
-console.log(`已有搜索量的文章节点 ${Object.keys(nodes).length} 个 → ${OUT}`);
+console.log(`已有${metric}的文章节点 ${Object.keys(nodes).length} 个 → ${OUT}`);
 const top = Object.entries(nodes).sort((a, b) => b[1].volume - a[1].volume).slice(0, 10);
 for (const [id, v] of top) console.log(`  ${String(v.volume).padStart(8)}  ${id}（${v.queried}/${v.total} 个词有数据）`);

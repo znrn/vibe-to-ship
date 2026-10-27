@@ -17,6 +17,7 @@ const demand = readJson('plan/research/demand.json')?.demand ?? {};
 const volume = readJson('plan/research/volume.json')?.nodes ?? {};
 const hasVolume = Object.keys(volume).length > 0;
 const volumeAll = readJson('plan/research/volume.json');
+const metric = volumeAll?.metric ?? '搜索量';
 const vtag = (v) => (v == null ? '' : `<em>${v}</em>`);
 const byId = new Map(merged.map((n) => [n.id, n]));
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -30,7 +31,7 @@ const now = new Date();
 const stamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
 const chip = (n) =>
-  `<a class="node-chip s-${n.status} ${n.priority === 'P1' ? 'p1' : ''}" href="#${esc(n.id)}" title="${esc(n.intent)}${demand[n.id] ? ` · 需求分 ${demand[n.id].score}` : ''}${volume[n.id] ? ` · 搜索量 ${volume[n.id].volume}` : ''}">${esc(n.keyword)}</a>`;
+  `<a class="node-chip s-${n.status} ${n.priority === 'P1' ? 'p1' : ''}" href="#${esc(n.id)}" title="${esc(n.intent)}${demand[n.id] ? ` · 需求分 ${demand[n.id].score}` : ''}${volume[n.id] ? ` · ${metric} ${volume[n.id].volume}` : ''}">${esc(n.keyword)}</a>`;
 
 const matrix = `
 <div class="table-wrap"><table class="matrix">
@@ -57,7 +58,7 @@ const card = (n) => {
     <p class="intent">${esc(n.intent)}</p>
     <div class="signal">
       <span class="dm ${demand[n.id]?.score ? '' : 'zero'}" title="${esc((demand[n.id]?.top ?? []).join(' / ') || '没有联想词命中')}">需求分 <b>${demand[n.id]?.score ?? 0}</b></span>
-      ${volume[n.id] ? `<span class="vol" title="文章主词 ${volume[n.id].keyword ?? '无数据'}">搜索量 <b>${volume[n.id].volume}</b><small>（${volume[n.id].queried}/${volume[n.id].total} 个词有数据）</small></span>` : hasVolume ? '<span class="vol muted">搜索量 未查</span>' : ''}
+      ${volume[n.id] ? `<span class="vol" title="文章主词 ${volume[n.id].keyword ?? '无数据'}">${metric} <b>${volume[n.id].volume}</b><small>（${volume[n.id].queried}/${volume[n.id].total} 个词有数据）</small></span>` : hasVolume ? `<span class="vol muted">${metric} 未查</span>` : ''}
     </div>
     ${n.covers.length ? `<div class="covers">${n.covers.map((c) => `<span>${esc(c)}</span>`).join('')}</div>` : ''}
     <div class="meta">
@@ -181,7 +182,7 @@ footer{margin-top:48px;font-size:12.5px;color:var(--muted)}
     <label>形态<select id="f-platform"><option value="">全部</option>${PLATFORMS.map((p) => `<option value="${p.slug}">${esc(p.name)}</option>`).join('')}</select></label>
     <label>优先级<select id="f-priority"><option value="">全部</option><option>P1</option><option>P2</option><option>P3</option></select></label>
     <label>状态<select id="f-status"><option value="">全部</option><option value="planned">计划</option><option value="draft">草稿</option><option value="published">已发布</option></select></label>
-    <label>排序<select id="f-sort"><option value="">优先级</option><option value="demand">需求分</option>${hasVolume ? '<option value="volume">搜索量</option>' : ''}</select></label>
+    <label>排序<select id="f-sort"><option value="">优先级</option><option value="demand">需求分</option>${hasVolume ? `<option value="volume">${metric}</option>` : ''}</select></label>
     <span class="shown" id="shown"></span>
   </div>
   ${ROADMAP.map((s) => {
@@ -189,7 +190,7 @@ footer{margin-top:48px;font-size:12.5px;color:var(--muted)}
     return `<section class="stage" data-stage="${s.slug}"><div class="stage-head"><h3>${s.icon} ${s.step} · ${esc(s.name)}</h3><span>${esc(s.desc)}</span></div><div class="cards">${list.map(card).join('')}</div></section>`;
   }).join('')}
 
-  <footer>需求分：联想词里和该节点足够像的问法条数，按出现在几个搜索引擎里加权，只用来比较相对大小（node scripts/research/match.mjs 重算）。搜索量：关键词工具导出后用 node scripts/research/import-volume.mjs 导入，站点主词和类目词各记一个数，文章按节点把文章主词和长尾加总。<br>改地图：编辑 vibe-to-ship/${MAP}，然后在项目里运行 <code>npm run check:keywords</code> 检查、<code>npm run plan:page</code> 重新生成本页。</footer>
+  <footer>需求分：联想词里和该节点足够像的问法条数，按出现在几个搜索引擎里加权，只用来比较相对大小（node scripts/research/match.mjs 重算）。搜索量：关键词工具导出后用 node scripts/research/import-volume.mjs 导入，站点主词和类目词各记一个数，文章按节点把文章主词和长尾加总（指标是 5118 长尾词数时取最大值，只看相对大小）。<br>改地图：编辑 vibe-to-ship/${MAP}，然后在项目里运行 <code>npm run check:keywords</code> 检查、<code>npm run plan:page</code> 重新生成本页。</footer>
 </div>
 <script>
 const f = { platform: document.getElementById('f-platform'), priority: document.getElementById('f-priority'), status: document.getElementById('f-status'), sort: document.getElementById('f-sort') };
