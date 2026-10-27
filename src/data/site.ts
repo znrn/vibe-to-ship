@@ -83,8 +83,8 @@ export const stageOf = (slug: string) => ROADMAP.find((s) => s.slug === slug)!;
 // 四种产品形态，各有一个「完整上线流程」聚合页
 export const PLATFORMS = [
   { slug: 'web', name: '网站', icon: '🖥️', keyword: '个人网站上线流程', desc: '从一个单页到能收款的网站：域名、服务器、备案、HTTPS' },
-  { slug: 'miniprogram', name: '小程序', icon: '🟢', keyword: '个人小程序上线流程', desc: '注册主体、选类目、备案、提审，个人和个体户能做到哪一步' },
-  { slug: 'app', name: 'App', icon: '📱', keyword: '个人开发者 App 上架流程', desc: 'App Store 和国内安卓市场：开发者账号、软著、备案、审核' },
+  { slug: 'miniprogram', name: '小程序', icon: '🟢', keyword: '小程序上线流程', desc: '注册主体、选类目、备案、提审，个人和个体户能做到哪一步' },
+  { slug: 'app', name: 'App', icon: '📱', keyword: 'App 上架流程', desc: 'App Store 和国内安卓市场：开发者账号、软著、备案、审核' },
   { slug: 'desktop', name: '桌面软件', icon: '💻', keyword: '个人桌面软件发布流程', desc: 'Windows / Mac 软件打包、签名、公证和分发' },
 ] as const;
 

@@ -8,6 +8,9 @@ covers:
   - 备案被退回怎么办
   - 网站名称不合规被驳回
   - 备案驳回后多久能重新提交
+  - 备案驳回怎么修改
+  - 备案驳回后整改方法
+  - 备案驳回了再提交有影响吗
 stage: deploy
 platforms: [web]
 topics: [debug]

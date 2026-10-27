@@ -8,6 +8,8 @@ covers:
   - 不会写代码怎么做产品原型
   - 单页网站上线
   - MVP 要不要做登录
+  - 不会编程做网站怎么做
+  - 做网站需要写代码吗
 stage: build
 platforms: [web]
 date: 2026-10-20

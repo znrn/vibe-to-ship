@@ -22,3 +22,6 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# 问法研究的自动匹配结果，可由 scripts/research/match.mjs 重新生成
+plan/research/matched.json
