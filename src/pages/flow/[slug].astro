@@ -1,0 +1,63 @@
+---
+// 流程页：/flow/<步骤>/。这一步有流程页文章（kind: flow）就用它做正文；
+// 还没有的话，先显示这一步的说明和下面的问题页（没有问题页时 noindex）。
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArticleView from '../../components/article/ArticleView.astro';
+import ArticleList from '../../components/ArticleList.astro';
+import HubIntro from '../../components/HubIntro.astro';
+import { ROADMAP } from '../../data/site';
+import { flowUrl, type FlowStep } from '../../data/flow';
+import { getArticles, flowArticleOf } from '../../lib/articles';
+
+export function getStaticPaths() {
+  return ROADMAP.map((s) => ({ params: { slug: s.slug }, props: { step: s } }));
+}
+
+const { step } = Astro.props as { step: FlowStep };
+const articles = await getArticles();
+const flowArticle = flowArticleOf(articles, step.slug);
+const questions = articles.filter((a) => a.data.stage === step.slug && a.data.kind !== 'flow');
+const prevStep = ROADMAP.find((s) => s.step === step.step - 1);
+const nextStep = ROADMAP.find((s) => s.step === step.step + 1);
+---
+
+{
+  flowArticle ? (
+    <ArticleView article={flowArticle} questions={questions} />
+  ) : (
+    <BaseLayout
+      title={`第 ${step.step} 步 ${step.name}`}
+      description={`上线流程第 ${step.step} 步「${step.name}」：${step.desc}。`}
+      noindex={questions.length === 0}
+    >
+      <div class="wrap page-head">
+        <nav class="crumbs" aria-label="面包屑"><a href="/">首页</a><span>/</span><a href="/flow/">上线流程</a><span>/</span><span>{step.name}</span></nav>
+        <p class="flow-badge">{step.icon} 上线流程 · 第 {step.step} 步 / 共 {ROADMAP.length} 步</p>
+        <h1>{step.name}</h1>
+        <p>{step.desc}</p>
+      </div>
+      <div class="wrap body">
+        <HubIntro id={`flow/${step.slug}`} />
+        <p class="pending">这一步的完整流程还在写。下面是这一步已经写好的问题页。</p>
+        {questions.length > 0 ? <ArticleList articles={questions} showDesc /> : <div class="empty">这一步的文章还在写。</div>}
+        <nav class="flow-nav" aria-label="上一步和下一步">
+          {prevStep ? <a href={flowUrl(prevStep.slug)}><small>← 上一步 · 第 {prevStep.step} 步</small>{prevStep.name}</a> : <span />}
+          {nextStep ? <a class="next" href={flowUrl(nextStep.slug)}><small>下一步 · 第 {nextStep.step} 步 →</small>{nextStep.name}</a> : <span />}
+        </nav>
+      </div>
+    </BaseLayout>
+  )
+}
+
+<style>
+  .body{padding-bottom:64px;max-width:820px;margin-left:auto;margin-right:auto}
+  .page-head{max-width:820px}
+  .flow-badge{display:inline-block;font-size:13px;font-weight:700;color:var(--accent);background:var(--accent-soft);border-radius:999px;padding:2px 12px;margin:6px 0 4px}
+  .pending{font-size:14px;color:var(--muted);margin-bottom:14px}
+  .empty{border:1px dashed var(--line);border-radius:var(--radius);padding:28px;color:var(--muted);text-align:center}
+  .flow-nav{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:40px}
+  .flow-nav a{display:block;border:1px solid var(--line);border-radius:12px;padding:12px 16px;background:var(--surface);font-weight:700}
+  .flow-nav a:hover{border-color:var(--accent);color:var(--accent)}
+  .flow-nav small{display:block;font-size:12.5px;font-weight:500;color:var(--muted);margin-bottom:2px}
+  .flow-nav .next{text-align:right}
+</style>

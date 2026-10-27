@@ -2,7 +2,7 @@
 // 用法：node scripts/research/export-keywords.mjs           站点主词 + 类目词 + P1 文章的词，写到 plan/research/keywords-p1.csv
 //       node scripts/research/export-keywords.mjs --all     站点主词 + 类目词 + 全部文章的词，写到 plan/research/keywords-all.csv
 // 第一列就是关键词，批量查询时整列复制粘贴即可；其余列给自己对照用。
-// 「类型」列对应四层结构：站点主词（首页）/ 类目词（阶段页、形态页）/ 文章主词 / 长尾。
+// 「类型」列对应四层结构：站点主词（首页）/ 类目词（流程页、形态页）/ 文章主词 / 长尾。
 // 文件带 UTF-8 BOM，Excel / WPS 直接打开不乱码。
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { ROADMAP, PLATFORMS } from '../../src/data/site.ts';
@@ -25,8 +25,8 @@ const push = (kw, ...rest) => {
 
 // 第 1 层：站点主词（首页），covers 也一起查
 for (const kw of [map.site?.keyword, ...(map.site?.covers ?? [])].filter(Boolean)) push(kw, '站点主词', 'site', '', '', '');
-// 第 2 层：类目词（阶段页 / 形态页）
-for (const s of ROADMAP) push(s.keyword, '类目词', `hub:stages/${s.slug}`, '', '', '');
+// 第 2 层：类目词（流程页 / 形态页）
+for (const s of ROADMAP) push(s.keyword, '类目词', `hub:flow/${s.slug}`, '', '', '');
 for (const p of PLATFORMS) push(p.keyword, '类目词', `hub:platforms/${p.slug}`, '', '', '');
 // 第 3、4 层：文章主词 + 长尾
 for (const n of merged.filter((n) => all || n.priority === 'P1')) {

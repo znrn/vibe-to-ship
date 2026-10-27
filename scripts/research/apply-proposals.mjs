@@ -4,12 +4,13 @@
 // 支持的建议字段（格式见 plan/research/CURATION.md）：
 //   changes      改主词 / 升级 / 降级（node 以 hub: 开头的是聚合页类目词，只打印出来，需手动改 src/data/site.ts）
 //   add_covers   补长尾；已发布文章的长尾写进文章 frontmatter
-//   new_nodes    新增节点，插到同阶段最后一个节点后面；可带 links / topics
+//   new_nodes    新增节点，插到同一流程步骤最后一个节点后面；可带 links / topics
 //   moves        [{ term, from, to }] 把长尾从一个节点挪到另一个（拆分时用）
 //   links        { 节点 id: [要补链到的节点 id] }
 // 同一个词不会重复加；和节点自身文章主词相同的长尾会跳过。
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { parse, parseDocument, YAMLSeq } from 'yaml';
+import { ROADMAP } from '../../src/data/site.ts';
 
 const file = process.argv[2];
 if (!file || !existsSync(file)) {
@@ -18,7 +19,7 @@ if (!file || !existsSync(file)) {
 }
 const MAP = 'plan/topic-map.yaml';
 const ARTICLES = 'src/content/articles';
-const STAGES = ['accounts', 'build', 'deploy', 'payment', 'review'];
+const STAGES = ROADMAP.map((s) => s.slug);
 const norm = (s) => String(s).toLowerCase().replace(/[\s\p{P}\p{S}]/gu, '');
 const val = (x) => x?.value ?? x;
 

@@ -1,3 +1,4 @@
+import { FLOW_STEPS, FLOW_SLUGS, flowOf } from './flow.ts';
 // 全站共用的配置和文案。带「待填」「占位」的地方，定稿前替换成真实信息。
 
 export const SITE = {
@@ -36,49 +37,17 @@ export const CAMP = {
   href: '/#camp',
 };
 
-// ── 内容骨架：阶段 × 形态 ──────────────────────────────
-// 主骨架是「五步路线 × 四种产品形态」：每篇文章属于一个阶段（决定面包屑和分类页），
-// 适用于一种或几种形态（形态页按阶段串成该形态的完整上线流程）。
-// 工具、成本、岗位、排错这类跨阶段的视角，作为「专题」标签挂在文章上。
-// keyword 是这个聚合页要承接的类目词，会参与 npm run check:keywords 的撞词检查。
+// ── 内容骨架：上线流程 × 形态 ──────────────────────────────
+// 主骨架是「9 步上线流程 × 四种产品形态」：每篇文章挂在一步流程上（决定面包屑和流程页），
+// 适用于一种或几种形态（形态页按流程串成该形态的完整上线路线）。
+// 工具、成本、岗位、排错这类跨流程的视角，作为「专题」标签挂在文章上。
+// 流程的定义和以后怎么增删改，见 src/data/flow.ts。
 
-// 五步路线 = 五层窗户纸，也是文章的主分类
-export const ROADMAP = [
-  {
-    step: 1, slug: 'accounts', name: '备账号', icon: '🔑',
-    keyword: '个人开发者需要哪些账号和资质',
-    desc: 'AI 工具订阅、开发者账号、执照与商户号',
-    stuck: '账号、执照、商户号这些资质',
-  },
-  {
-    step: 2, slug: 'build', name: '做出来', icon: '🛠️',
-    keyword: '不会编程怎么用 AI 做产品',
-    desc: '用大白话描述需求，让 AI 写出能跑的东西',
-    stuck: '把需求说清楚、让 AI 做出能跑的东西',
-  },
-  {
-    step: 3, slug: 'deploy', name: '放上网', icon: '🌐',
-    keyword: '域名服务器和备案',
-    desc: '域名、服务器、HTTPS、ICP / 小程序 / App 备案',
-    stuck: '域名、服务器、HTTPS 和备案',
-  },
-  {
-    step: 4, slug: 'payment', name: '收到钱', icon: '💰',
-    keyword: '个人开发者怎么收款',
-    desc: '微信支付、内购或现成收款工具，先跑通一笔',
-    stuck: '收款：第一笔钱怎么进账',
-  },
-  {
-    step: 5, slug: 'review', name: '过审核', icon: '✅',
-    keyword: '上架审核被驳回',
-    desc: '小程序、App Store、应用市场提审与驳回处理',
-    stuck: '小程序或 App Store 的提审和驳回',
-  },
-] as const;
+// 兼容旧代码：ROADMAP 就是按顺序排好、带 step 的流程
+export const ROADMAP = FLOW_STEPS;
 
-export type StageSlug = (typeof ROADMAP)[number]['slug'];
-export const STAGE_SLUGS = ROADMAP.map((s) => s.slug) as [StageSlug, ...StageSlug[]];
-export const stageOf = (slug: string) => ROADMAP.find((s) => s.slug === slug)!;
+export const STAGE_SLUGS = FLOW_SLUGS;
+export const stageOf = flowOf;
 
 // 四种产品形态，各有一个「完整上线流程」聚合页
 export const PLATFORMS = [
@@ -105,4 +74,4 @@ export type TopicSlug = (typeof TOPICS)[number]['slug'];
 export const TOPIC_SLUGS = TOPICS.map((t) => t.slug) as [TopicSlug, ...TopicSlug[]];
 export const topicOf = (slug: string) => TOPICS.find((t) => t.slug === slug)!;
 
-export const CN_NUM = ['零', '一', '二', '三', '四', '五'];
+export const CN_NUM = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];

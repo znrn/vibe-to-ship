@@ -1,15 +1,16 @@
 ---
 import { ROADMAP, SITE } from '../../data/site';
+import { flowUrl } from '../../data/flow';
 ---
 
 <section id="roadmap" class="soft">
   <div class="wrap">
     <div class="sec-head">
-      <div><h2>从零到上线，一共五步</h2><p>手册全部开源免费，每一步都有清单和踩坑记录</p></div>
-      <a class="more" href="/articles/">看完整手册 →</a>
+      <div><h2>从想法到收到钱，一共 {ROADMAP.length} 步</h2><p>每一步讲清楚：你来决定什么、交给 AI 做什么、只有你能做的事</p></div>
+      <a class="more" href="/flow/">看完整流程 →</a>
     </div>
     <div class="road">
-      {ROADMAP.map((s) => <div class="step"><h3>{s.name}</h3><p>{s.desc}</p></div>)}
+      {ROADMAP.map((s) => <a class="step" href={flowUrl(s.slug)}><h3>{s.short}</h3><p>{s.desc}</p></a>)}
     </div>
     <div class="road-foot">
       {SITE.github ? <a class="btn" href={SITE.github}>GitHub · vibe-to-ship</a> : <span class="btn placeholder">GitHub · vibe-to-ship（即将公开）</span>}
@@ -18,11 +19,13 @@ import { ROADMAP, SITE } from '../../data/site';
 </section>
 
 <style>
-  .road{display:grid;grid-template-columns:repeat(5,1fr);gap:0;position:relative;counter-reset:s}
+  .road{display:grid;grid-template-columns:repeat(9,1fr);gap:0;position:relative;counter-reset:s}
   .road .step{position:relative;padding:22px 16px 0;text-align:center}
   .road .step::before{counter-increment:s;content:counter(s);display:grid;place-items:center;width:40px;height:40px;margin:0 auto 12px;border-radius:50%;background:var(--surface);border:2px solid var(--accent);color:var(--accent);font-weight:800;position:relative;z-index:1}
-  .road::after{content:"";position:absolute;left:10%;right:10%;top:42px;height:2px;background:var(--line)}
-  .road h3{font-size:16px}
+  .road::after{content:"";position:absolute;left:5%;right:5%;top:42px;height:2px;background:var(--line)}
+  .road .step{display:block}
+  .road .step:hover h3{color:var(--accent)}
+  .road h3{font-size:15px}
   .road p{font-size:13.5px;color:var(--muted);line-height:1.6;margin-top:4px}
   .road-foot{margin-top:28px;display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
   @media (max-width:900px){

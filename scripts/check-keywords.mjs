@@ -6,7 +6,8 @@
 // 提示：
 //   - 两个词字面上很像：搜一下，前 10 条结果重合多就并成一篇；
 //     确认意图不同的，在地图节点的 distinct 里登记，之后不再提示
-//   - 地图里写的阶段 / 形态 / 文章主词和文章 frontmatter 不一致
+//   - 地图里写的流程步骤 / 形态 / 文章主词和文章 frontmatter 不一致
+//   - 某一步有两篇流程页文章；哪几步还没有流程页文章
 //   - 两篇都已发布，但正文里没按 links 链过去
 //   - 已发布的文章没有 sources（参考来源）
 // 用法：npm run check:keywords（npm run build 会先自动跑一遍）
@@ -25,7 +26,7 @@ const PLATFORM_SLUGS = PLATFORMS.map((p) => p.slug);
 for (const n of merged) {
   if (!n.intent) errors.push(`${n.id}: 缺少 intent（这篇服务的搜索意图）`);
   if (!n.keyword) errors.push(`${n.id}: 缺少 keyword（文章主词）`);
-  if (!STAGES.includes(n.stage)) errors.push(`${n.id}: stage「${n.stage}」不是 ${STAGES.join(' / ')} 之一`);
+  if (!STAGES.includes(n.stage)) errors.push(`${n.id}: stage「${n.stage}」不是流程步骤 ${STAGES.join(' / ')} 之一（流程定义在 src/data/flow.ts，删掉或合并的步骤要改挂到现在的步骤）`);
   if (!n.platforms.length || n.platforms.some((p) => !PLATFORM_SLUGS.includes(p))) {
     errors.push(`${n.id}: platforms 必须是 ${PLATFORM_SLUGS.join(' / ')} 中的一个或几个`);
   }
@@ -59,9 +60,18 @@ function similarity(a, b) {
   return inter / (A.size + B.size - inter);
 }
 
+// 每一步最多一篇流程页文章（kind: flow）；有流程页文章的步骤，以那篇的文章主词为准，不再单独用 flow.ts 里的 keyword
+const flowArticles = new Map();
+for (const [id, a] of articles) {
+  if (a.data.kind !== 'flow' || a.data.draft) continue;
+  if (flowArticles.has(a.data.stage)) errors.push(`流程步骤 ${a.data.stage} 有两篇流程页文章：${flowArticles.get(a.data.stage)} 和 ${id}，只能留一篇`);
+  else flowArticles.set(a.data.stage, id);
+}
+for (const s of ROADMAP) if (!flowArticles.has(s.slug)) warnings.push(`流程第 ${s.step} 步「${s.name}」还没有流程页文章（kind: flow）`);
+
 const owners = [
   { id: '首页', words: [map.site?.keyword, ...(map.site?.covers ?? [])] },
-  ...ROADMAP.map((s) => ({ id: `阶段页 ${s.slug}`, words: [s.keyword] })),
+  ...ROADMAP.filter((s) => !flowArticles.has(s.slug)).map((s) => ({ id: `流程页 ${s.slug}`, words: [s.keyword] })),
   ...PLATFORMS.map((p) => ({ id: `形态页 ${p.slug}`, words: [p.keyword] })),
   ...merged.map((n) => ({ id: n.id, words: [n.keyword, ...n.covers] })),
 ];
@@ -93,7 +103,7 @@ for (let i = 0; i < terms.length; i++) {
 // ── 覆盖矩阵 ──
 if (process.argv.includes('--report')) {
   const pad = (s, n) => s + ' '.repeat(Math.max(0, n - [...s].reduce((w, c) => w + (c.charCodeAt(0) > 255 ? 2 : 1), 0)));
-  console.log('\n阶段 × 形态（已发布 / 计划总数）');
+  console.log('\n流程 × 形态（已发布 / 计划总数）');
   console.log(pad('', 10) + PLATFORMS.map((p) => pad(p.name, 10)).join(''));
   for (const s of ROADMAP) {
     const row = PLATFORMS.map((p) => {
@@ -101,7 +111,7 @@ if (process.argv.includes('--report')) {
       const done = cell.filter((n) => n.status === 'published').length;
       return pad(cell.length ? `${done} / ${cell.length}` : '—', 10);
     });
-    console.log(pad(`${s.step} ${s.name}`, 10) + row.join(''));
+    console.log(pad(`${s.step} ${s.short}`, 10) + row.join(''));
   }
   const todo = merged.filter((n) => n.status !== 'published' && n.priority === 'P1');
   console.log(`\n待写的 P1（${todo.length} 篇）`);
@@ -111,10 +121,10 @@ if (process.argv.includes('--report')) {
   console.log(`\n已发布但还没核对（没填 reviewed）（${unreviewed.length} 篇）`);
   for (const n of unreviewed) console.log(`  ${n.id}`);
 
-  // 有文章的聚合页才需要导语；空页本来就 noindex
+  // 有文章的聚合页才需要导语（已有流程页文章的步骤不用）；空页本来就 noindex
   const live = merged.filter((n) => n.status === 'published');
   const hubs = [
-    ...ROADMAP.filter((s) => live.some((n) => n.stage === s.slug)).map((s) => `stages/${s.slug}`),
+    ...ROADMAP.filter((s) => !flowArticles.has(s.slug) && live.some((n) => n.stage === s.slug)).map((s) => `flow/${s.slug}`),
     ...PLATFORMS.filter((p) => live.some((n) => n.platforms.includes(p.slug))).map((p) => `platforms/${p.slug}`),
     ...TOPICS.filter((t) => live.some((n) => n.topics.includes(t.slug))).map((t) => `topics/${t.slug}`),
   ].filter((id) => !existsSync(`src/content/hubs/${id}.md`));

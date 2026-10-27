@@ -35,7 +35,7 @@ const { articles } = Astro.props;
 </section>
 
 <style>
-  .two{display:grid;grid-template-columns:1.4fr 1fr;gap:28px;margin-top:36px}
+  .two{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:28px;margin-top:36px}
   .col-title{font-size:18px;margin-bottom:12px}
   .roles{display:flex;flex-direction:column;gap:12px}
   .role{background:var(--soft);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;transition:.15s}
@@ -43,6 +43,6 @@ const { articles } = Astro.props;
   .role h4{font-size:15px}
   .role p{font-size:13.5px;color:var(--muted);margin-top:2px}
   @media (max-width:900px){
-    .two{grid-template-columns:1fr}
+    .two{grid-template-columns:minmax(0,1fr)}
   }
 </style>

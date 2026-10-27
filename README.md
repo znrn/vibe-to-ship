@@ -9,15 +9,21 @@
 
 > 当前是第一版，文章都是**示例**，用来跑通模板；价格、联系方式、作品介绍等带「待填」「占位」的地方还没有定稿。
 
-## 五步路线（五层窗户纸）
+## 上线流程（9 步）
 
-| 步骤 | 名称 | 解决什么 |
-| --- | --- | --- |
-| 1 | 备账号 | AI 工具订阅、开发者账号、执照与商户号 |
-| 2 | 做出来 | 用大白话描述需求，让 AI 写出能跑的页面 |
-| 3 | 放上网 | 域名、服务器、HTTPS、备案 |
-| 4 | 收到钱 | 微信支付或现成收款工具，先跑通一笔 |
-| 5 | 过审核 | 小程序、App Store 提审与驳回处理 |
+| 顺序 | `stage` | 流程页 | 解决什么 |
+| --- | --- | --- | --- |
+| 1 | `idea` | 想清楚做什么 | 第一版做到哪、砍掉哪些功能 |
+| 2 | `base` | 选底子：开源二开还是从零写 | 找现成开源项目改，还是让 AI 从零写 |
+| 3 | `accounts` | 工具和账号 | AI 编程工具、开发者账号、小程序账号 |
+| 4 | `build` | 开发和报错 | 说想法、让 AI 写和改、看懂报错、存好版本 |
+| 5 | `deploy` | 服务器和部署 | 要不要服务器、怎么选、怎么把项目放上去 |
+| 6 | `domain` | 域名、备案和 HTTPS | 买域名、做解析、ICP 备案、配上小锁 |
+| 7 | `payment` | 收款和资质 | 没执照怎么收、执照和商户号、接入支付 |
+| 8 | `review` | 上架审核 | 小程序、App Store、应用市场提审与驳回 |
+| 9 | `grow` | 上线后：运维、更新、获客 | 网站挂了、续费、更新版本、让人找到你 |
+
+每一步有一个流程页 `/flow/<stage>/`，总览在 `/flow/`。
 
 ## 文章怎么写
 
@@ -32,9 +38,10 @@ keyword: ICP 备案被驳回  # 文章主词（这篇的主关键词），一般
 covers:                 # 同一意图下的其他问法，写进小节标题或常见问题
   - 备案审核不通过
   - 备案驳回后多久能重新提交
-stage: deploy           # 阶段，见下表
+stage: domain           # 挂在流程的哪一步，见上表
+kind: question          # question 问题页（默认）/ flow 这一步的流程页，每步最多一篇
 platforms: [web]        # 适用形态，可多选，见下表
-topics: [debug]         # 可选，跨阶段专题，见下表
+topics: [debug]         # 可选，跨流程的专题，见下表
 date: 2026-10-22
 answer: 一句话结论，显示在标题下方的「结论」块里
 steps:                  # 可选，照做步骤
@@ -54,30 +61,39 @@ draft: false            # 草稿不会发布
 ---
 ```
 
-内容骨架是「五步路线 × 四种产品形态」，取值定义在 `src/data/site.ts`：
+内容骨架是「9 步上线流程 × 四种产品形态」。流程定义在 `src/data/flow.ts`（全站唯一的地方），形态和专题在 `src/data/site.ts`。
 
-| `stage` | 阶段 | 聚合页 |
-| --- | --- | --- |
-| `accounts` | 1 备账号 | `/categories/accounts/` |
-| `build` | 2 做出来 | `/categories/build/` |
-| `deploy` | 3 放上网 | `/categories/deploy/` |
-| `payment` | 4 收到钱 | `/categories/payment/` |
-| `review` | 5 过审核 | `/categories/review/` |
+**页面分三种**：
+- **流程页** `/flow/<stage>/`：一步的完整主路径，讲「你来决定什么、交给 AI 做什么、只有你能做的事」，承接类目词。由这一步的 `kind: flow` 文章生成；还没写时显示这一步的问题页列表（没有内容时 noindex）。
+- **问题页** `/articles/<id>/`：一个具体卡点，讲透原因和改法，承接长尾词，挂回所属流程页。
+- **形态页、专题页**：按网站 / 小程序 / App / 桌面软件、按专题串起来的导航页。
 
-| `platforms` | 形态 | 聚合页（按五步串成完整流程） |
+**以后增删改流程**：都只改 `src/data/flow.ts`。改名改 `name`，调顺序改 `order`，网址都不变；删除或合并一步时在 `FLOW_MOVED` 写「旧 slug: 新 slug」，旧网址自动 301。构建会生成 `dist/redirects.nginx.conf`，在 Nginx 的 server 配置里 `include` 它，跳转才是真正的 301。还在用旧 slug 的文章和选题节点，构建和 `npm run check:keywords` 会报错。
+
+| `platforms` | 形态 | 聚合页（按流程串成完整路线） |
 | --- | --- | --- |
 | `web` | 网站 | `/platforms/web/` |
 | `miniprogram` | 小程序 | `/platforms/miniprogram/` |
 | `app` | App | `/platforms/app/` |
 | `desktop` | 桌面软件 | `/platforms/desktop/` |
 
-每个聚合页可以写一段导语，放在 `src/content/hubs/<stages|platforms|topics>/<取值>.md`，正文显示在页面标题下方，frontmatter 里的 `description` 可以覆盖默认的页面描述。还没有已发布文章的聚合页会自动加 `noindex`，也不进 sitemap。
+每个聚合页可以写一段导语，放在 `src/content/hubs/<flow|platforms|topics>/<取值>.md`，正文显示在页面标题下方，frontmatter 里的 `description` 可以覆盖默认的页面描述。还没有已发布文章的聚合页会自动加 `noindex`，也不进 sitemap。
 
 专题 `topics`：`tools` 工具怎么选、`cost` 成本与时间账、`roles` 按岗位对号、`debug` 翻车与排错、`works` 作品证明，聚合页在 `/topics/<取值>/`。
 
+## 建站进度
+
+`plan/site-plan.yaml` 是建站总账：页面、内容、SEO、上线、研究各项做到哪了、谁负责（claude / 冬瓜）、哪些在等冬瓜。
+
+```bash
+npm run status   # 终端打印进度，并更新本机导航的「冬瓜站建站进度」页
+```
+
+不用手写、由脚本自动算的：9 个流程页各自的状态、每步的问题页数、示例和没核对的文章、全站还空着的地方（「待填」「待定」「待冬瓜确认」「待办理」「（占位）」，带文件和行号）。清单里写了 `auto` 的项，以自动检查结果为准。
+
 ## 选题地图
 
-`plan/topic-map.yaml` 是整站内容的施工图：每个节点是一个搜索意图，也就是一篇文章（已写的和计划写的都在里面），写明阶段、形态、文章主词、覆盖的长尾问法、优先级，以及正文该链到哪几篇。先改地图，再写文章。
+`plan/topic-map.yaml` 是整站内容的施工图：每个节点是一个搜索意图，也就是一篇文章（已写的和计划写的都在里面），写明流程步骤、形态、文章主词、覆盖的长尾问法、优先级，以及正文该链到哪几篇。先改地图，再写文章。
 
 ```bash
 npm run check:keywords              # build 前会自动运行
@@ -100,7 +116,7 @@ node scripts/research/export-keywords.mjs   # 导出 P1 关键词查询表 → p
 node scripts/research/import-volume.mjs <文件.csv>   # 导入关键词工具查到的搜索量 → plan/research/volume.json
 ```
 
-关键词分四层，查询表的「类型」列和地图页都用这套叫法：**站点主词**（首页，`topic-map.yaml` 的 `site`）、**类目词**（阶段页、形态页，写在 `src/data/site.ts`）、**文章主词**（每个节点的 `keyword`）、**长尾**（节点的 `covers`）。
+关键词分四层，查询表的「类型」列和地图页都用这套叫法：**站点主词**（首页，`topic-map.yaml` 的 `site`）、**类目词**（流程页、形态页，写在 `src/data/flow.ts` 和 `src/data/site.ts`）、**文章主词**（每个节点的 `keyword`）、**长尾**（节点的 `covers`）。
 
 查搜索量：把 `keywords-p1.csv` 第一列粘到百度营销关键词规划师或 5118 批量查询，导出结果（Excel 先另存为 CSV），再用 `import-volume.mjs` 导入。之后 `npm run plan:page` 重新生成地图页，卡片上会显示每个节点的需求分和搜索量，可以按两者排序。
 
@@ -123,12 +139,13 @@ npm run build    # 生成静态网站到 dist/
 ```
 src/
   content/articles/   文章（开源手册正文）
-  content/hubs/       阶段 / 形态 / 专题聚合页的导语
+  content/hubs/       流程 / 形态 / 专题聚合页的导语
   content.config.ts   文章 frontmatter 的格式定义
-  data/site.ts        站点信息、五步路线、产品形态、专题、实战营和占位文案
+  data/flow.ts        上线流程 9 步的定义和旧网址跳转表
+  data/site.ts        站点信息、产品形态、专题、实战营和占位文案
   layouts/            全站布局
   components/         首页各区块、文章页的路线图定位和文末出口
-  pages/              首页、文章页、文章列表、阶段 / 形态 / 专题聚合页、RSS
+  pages/              首页、问题页、流程页、文章列表、形态 / 专题聚合页、RSS
 plan/topic-map.yaml   选题地图（不发布）
 scripts/              关键词与选题地图检查
 ```

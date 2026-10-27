@@ -11,7 +11,7 @@ covers:
   - 备案驳回怎么修改
   - 备案驳回后整改方法
   - 备案驳回了再提交有影响吗
-stage: deploy
+stage: domain
 platforms: [web]
 topics: [debug]
 date: 2026-10-22

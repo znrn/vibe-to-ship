@@ -1,5 +1,5 @@
 // 导入关键词工具导出的搜索量，按四层结构汇总，写到 plan/research/volume.json（地图页会显示）
-//   站点主词、类目词（阶段页 / 形态页）各自记一个数；文章按节点把文章主词 + 长尾加总
+//   站点主词、类目词（流程页 / 形态页）各自记一个数；文章按节点把文章主词 + 长尾加总
 // 用法：node scripts/research/import-volume.mjs <导出的文件.csv> [--column 列名]
 //
 // 兼容百度营销关键词规划师、5118、站长工具等导出的 CSV / TSV：
@@ -106,7 +106,7 @@ function toNumber(v) {
 const norm = (s) => String(s).toLowerCase().replace(/[\s\p{P}\p{S}]/gu, '');
 const { map, merged } = loadTopicMap();
 const HUBS = [
-  ...ROADMAP.map((s) => ({ id: `stages/${s.slug}`, name: `阶段页 · ${s.name}`, keyword: s.keyword })),
+  ...ROADMAP.map((s) => ({ id: `flow/${s.slug}`, name: `流程页 · ${s.name}`, keyword: s.keyword })),
   ...PLATFORMS.map((p) => ({ id: `platforms/${p.slug}`, name: `形态页 · ${p.name}`, keyword: p.keyword })),
 ];
 const siteTerms = [map.site?.keyword, ...(map.site?.covers ?? [])].filter(Boolean);

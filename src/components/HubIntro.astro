@@ -1,11 +1,12 @@
 ---
 // 聚合页导语，内容来自 src/content/hubs/<kind>/<slug>.md，没写就不显示
-import { getEntry, render } from 'astro:content';
+import { render } from 'astro:content';
+import { hubOf } from '../lib/articles';
 
 interface Props {
   id: string; // 例如 platforms/web
 }
-const entry = await getEntry('hubs', Astro.props.id);
+const entry = await hubOf(Astro.props.id);
 const { Content } = entry ? await render(entry) : { Content: null };
 ---
 

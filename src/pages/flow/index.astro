@@ -1,0 +1,62 @@
+---
+// 上线流程总览：/flow/。9 步按顺序列出，每步链到流程页。
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CategoryGrid from '../../components/CategoryGrid.astro';
+import { ROADMAP } from '../../data/site';
+import { flowUrl } from '../../data/flow';
+import { getArticles, flowArticleOf } from '../../lib/articles';
+
+const articles = await getArticles();
+---
+
+<BaseLayout title="上线流程" description={`不会写代码，用 AI 把产品从想法做到上线并收到钱，一共 ${ROADMAP.length} 步：${ROADMAP.map((s) => s.name).join('、')}。`}>
+  <div class="wrap page-head">
+    <nav class="crumbs" aria-label="面包屑"><a href="/">首页</a><span>/</span><span>上线流程</span></nav>
+    <h1>上线流程：从想法到收到钱，一共 {ROADMAP.length} 步</h1>
+    <p>每一步讲清楚：你来决定什么、交给 Claude / Codex 做什么、只有你能做的事有哪些。</p>
+  </div>
+  <div class="wrap body">
+    <ol class="flow-list">
+      {
+        ROADMAP.map((s) => {
+          const ready = Boolean(flowArticleOf(articles, s.slug));
+          const n = articles.filter((a) => a.data.stage === s.slug && a.data.kind !== 'flow').length;
+          return (
+            <li>
+              <a href={flowUrl(s.slug)}>
+                <span class="no">{s.step}</span>
+                <span class="txt">
+                  <strong>{s.icon} {s.name}</strong>
+                  <small>{s.desc}</small>
+                </span>
+                <span class:list={['state', ready && 'ready']}>{ready ? '完整流程' : '整理中'}{n > 0 && ` · ${n} 个问题`}</span>
+              </a>
+            </li>
+          );
+        })
+      }
+    </ol>
+
+    <h2>按产品形态看</h2>
+    <CategoryGrid articles={articles} kind="platform" />
+    <h2>专题</h2>
+    <CategoryGrid articles={articles} kind="topic" />
+  </div>
+</BaseLayout>
+
+<style>
+  .body{padding-bottom:64px}
+  .body h2{font-size:19px;margin:40px 0 12px}
+  .flow-list{list-style:none;display:grid;gap:10px;max-width:820px}
+  .flow-list a{display:grid;grid-template-columns:40px 1fr auto;gap:14px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px 18px;transition:.15s}
+  .flow-list a:hover{border-color:var(--accent)}
+  .no{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-weight:800;border:2px solid var(--accent);color:var(--accent)}
+  .txt strong{display:block;font-size:16px}
+  .txt small{display:block;font-size:13.5px;color:var(--muted);margin-top:2px}
+  .state{font-size:12.5px;color:var(--muted);white-space:nowrap}
+  .state.ready{color:var(--accent);font-weight:700}
+  @media (max-width:560px){
+    .flow-list a{grid-template-columns:36px 1fr;padding:12px 14px}
+    .state{grid-column:2}
+  }
+</style>

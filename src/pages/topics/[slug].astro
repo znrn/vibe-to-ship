@@ -3,9 +3,8 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ArticleList from '../../components/ArticleList.astro';
 import HubIntro from '../../components/HubIntro.astro';
-import { getEntry } from 'astro:content';
 import { TOPICS } from '../../data/site';
-import { getArticles } from '../../lib/articles';
+import { getArticles, hubOf } from '../../lib/articles';
 
 export function getStaticPaths() {
   return TOPICS.map((t) => ({ params: { slug: t.slug }, props: { topic: t } }));
@@ -13,12 +12,12 @@ export function getStaticPaths() {
 
 const { topic } = Astro.props;
 const articles = (await getArticles()).filter((a) => a.data.topics.includes(topic.slug));
-const hub = await getEntry('hubs', `topics/${topic.slug}`);
+const hub = await hubOf(`topics/${topic.slug}`);
 ---
 
 <BaseLayout title={topic.name} description={hub?.data.description ?? `${topic.name}：${topic.desc}`} noindex={articles.length === 0}>
   <div class="wrap page-head">
-    <nav class="crumbs" aria-label="面包屑"><a href="/">首页</a><span>/</span><a href="/categories/">分类</a><span>/</span><span>{topic.name}</span></nav>
+    <nav class="crumbs" aria-label="面包屑"><a href="/">首页</a><span>/</span><a href="/flow/">上线流程</a><span>/</span><span>{topic.name}</span></nav>
     <h1>{topic.icon} {topic.name}</h1>
     <p>{topic.desc}</p>
   </div>

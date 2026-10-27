@@ -76,7 +76,7 @@ const html = `<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>冬瓜站选题地图</title>
-<meta name="description" content="冬瓜 AI 独立开发实战站的内容框架：站点主词、五步路线 × 产品形态的类目词、${merged.length} 个选题节点及其长尾问法和内链。由 vibe-to-ship 的 ${MAP} 生成。">
+<meta name="description" content="冬瓜 AI 独立开发实战站的内容框架：站点主词、上线流程 × 产品形态的类目词、${merged.length} 个选题节点及其长尾问法和内链。由 vibe-to-ship 的 ${MAP} 生成。">
 <meta name="launchpad-group" content="AI 开发培训">
 <style>
 :root{--bg:#f7f6f2;--surface:#fff;--ink:#1d1f1c;--muted:#6b6f68;--line:#e3e1da;--accent:#2f6f4f;--accent-soft:#e6f0ea;--warm:#b4622a;--warm-soft:#f8ebe0;--draft:#7a5cc2;--draft-soft:#eee8fa}
@@ -168,12 +168,12 @@ footer{margin-top:48px;font-size:12.5px;color:var(--muted)}
   <h2>四层结构</h2>
   <div class="layers">
     <div class="layer"><div class="n">第 1 层 · 站点主词</div><h3>首页</h3><p>整站只有一个</p><div class="kw">${[map.site?.keyword, ...(map.site?.covers ?? [])].filter(Boolean).map((k) => `<span>${esc(k)}${vtag(volumeAll?.site?.[k])}</span>`).join('')}</div></div>
-    <div class="layer"><div class="n">第 2 层 · 类目词</div><h3>阶段页 + 形态页</h3><p>五步路线 × 四种形态，各一个聚合页</p><div class="kw">${[...ROADMAP.map((s) => [`stages/${s.slug}`, s.keyword]), ...PLATFORMS.map((p) => [`platforms/${p.slug}`, p.keyword])].map(([id, k]) => `<span>${esc(k)}${vtag(volumeAll?.hubs?.[id]?.volume)}</span>`).join('')}</div></div>
+    <div class="layer"><div class="n">第 2 层 · 类目词</div><h3>流程页 + 形态页</h3><p>${ROADMAP.length} 步上线流程 × 四种形态，各一个聚合页</p><div class="kw">${[...ROADMAP.map((s) => [`flow/${s.slug}`, s.keyword]), ...PLATFORMS.map((p) => [`platforms/${p.slug}`, p.keyword])].map(([id, k]) => `<span>${esc(k)}${vtag(volumeAll?.hubs?.[id]?.volume)}</span>`).join('')}</div></div>
     <div class="layer"><div class="n">第 3 层 · 问题簇</div><h3>文章</h3><p>一个搜索意图 = 一篇文章，标题即文章主词。下方每张卡片是一个节点。</p></div>
     <div class="layer"><div class="n">第 4 层 · 长尾问法</div><h3>小节与常见问题</h3><p>同一意图的其他说法，写进文章的小节标题和文末常见问题，不另写一篇。卡片里虚线框的就是。</p></div>
   </div>
 
-  <h2>阶段 × 形态覆盖</h2>
+  <h2>流程 × 形态覆盖</h2>
   ${matrix}
   <div class="legend"><span><i style="background:var(--accent-soft)"></i>已发布</span><span><i style="background:var(--draft-soft)"></i>草稿</span><span><i></i>计划</span><span><b>加粗</b> = P1</span><span>格子里的数字：已发布 / 计划总数（适用多种形态的选题会在多个格子里出现）</span></div>
 

@@ -11,7 +11,7 @@ const { articles, kind } = Astro.props;
 
 const items =
   kind === 'stage'
-    ? ROADMAP.map((s) => ({ href: `/categories/${s.slug}/`, icon: s.icon, name: `${s.step} · ${s.name}`, desc: s.desc, n: articles.filter((a) => a.data.stage === s.slug).length }))
+    ? ROADMAP.map((s) => ({ href: `/flow/${s.slug}/`, icon: s.icon, name: `${s.step} · ${s.short}`, desc: s.desc, n: articles.filter((a) => a.data.stage === s.slug).length }))
     : kind === 'platform'
       ? PLATFORMS.map((p) => ({ href: `/platforms/${p.slug}/`, icon: p.icon, name: `${p.name}上线流程`, desc: p.desc, n: articles.filter((a) => a.data.platforms.includes(p.slug)).length }))
       : TOPICS.map((t) => ({ href: `/topics/${t.slug}/`, icon: t.icon, name: t.name, desc: t.desc, n: articles.filter((a) => a.data.topics.includes(t.slug)).length }));

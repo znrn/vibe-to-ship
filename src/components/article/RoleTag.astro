@@ -1,5 +1,5 @@
 ---
-// 分工标签：🧑 你来做 / 🤖 交给 AI / ✅ 你来验收（样式在 global.css，正文里也能直接写 <span class="role me">）
+// 分工标签：🧑 你来做 / 🤖 交给 AI / ✅ 你来验收（样式在 global.css，正文里也能直接写 <span class="role-tag me">）
 interface Props {
   who: 'me' | 'ai' | 'check';
 }
@@ -7,4 +7,4 @@ const LABEL = { me: '🧑 你来做', ai: '🤖 交给 AI', check: '✅ 你来�
 const { who } = Astro.props;
 ---
 
-<span class:list={['role', who]}>{LABEL[who]}</span>
+<span class:list={['role-tag', who]}>{LABEL[who]}</span>

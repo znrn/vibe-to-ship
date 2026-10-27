@@ -7,7 +7,7 @@ interface Props {
   handoff?: { prepare: string[]; prompts: { title: string; text: string; note?: string }[] };
   humanOnly: { text: string; note?: string }[];
   verify: string[];
-  troubleshoot: { symptom: string; cause: string; say: string }[];
+  troubleshoot: { symptom: string; cause: string; say: string; href?: string }[];
   boundaries: string[];
 }
 const { handoff, humanOnly, verify, troubleshoot, boundaries } = Astro.props;
@@ -91,7 +91,10 @@ const { handoff, humanOnly, verify, troubleshoot, boundaries } = Astro.props;
           <tbody>
             {troubleshoot.map((t) => (
               <tr>
-                <td data-label="现象">{t.symptom}</td>
+                <td data-label="现象">
+                  {t.symptom}
+                  {t.href && <a class="more-link" href={t.href}>详细排查 →</a>}
+                </td>
                 <td data-label="通常是">{t.cause}</td>
                 <td data-label="怎么跟 AI 说">
                   <span class="say">{t.say}</span>
@@ -143,6 +146,7 @@ const { handoff, humanOnly, verify, troubleshoot, boundaries } = Astro.props;
   th,td{border-bottom:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top}
   th{background:var(--soft);font-size:13.5px}
   tr:last-child td{border-bottom:0}
+  .more-link{display:block;font-size:13px;font-weight:600;color:var(--accent);margin-top:4px}
   .say{color:var(--ink);overflow-wrap:anywhere}
   /* 手机上排障表改成一行一张卡片 */
   @media (max-width:560px){

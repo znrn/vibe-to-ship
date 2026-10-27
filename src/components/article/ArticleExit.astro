@@ -1,6 +1,7 @@
 ---
 // 文末出口：接下来会卡在哪 → 下一篇 → 免费台阶 → 实战营
 import { ROADMAP, FREE_STEP, CAMP } from '../../data/site';
+import { flowUrl } from '../../data/flow';
 import { articleUrl, stageOfArticle, type Article } from '../../lib/articles';
 
 interface Props {
@@ -18,7 +19,7 @@ const nextStage = next && stageOfArticle(next);
   <div class="block stuck">
     <p class="label">这一步解决了</p>
     <p class="big">但接下来，通常会卡在<b>{stuck}</b>。</p>
-    {nextStep && <p class="hint">也就是路线图上的第 {nextStep.step} 步「{nextStep.name}」：{nextStep.desc}。</p>}
+    {nextStep && <p class="hint">也就是上线流程的第 {nextStep.step} 步「<a href={flowUrl(nextStep.slug)}>{nextStep.name}</a>」：{nextStep.desc}。</p>}
   </div>
 
   {

@@ -3,9 +3,8 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ArticleList from '../../components/ArticleList.astro';
 import HubIntro from '../../components/HubIntro.astro';
-import { getEntry } from 'astro:content';
 import { ROADMAP, PLATFORMS } from '../../data/site';
-import { getArticles } from '../../lib/articles';
+import { getArticles, hubOf } from '../../lib/articles';
 
 export function getStaticPaths() {
   return PLATFORMS.map((p) => ({ params: { slug: p.slug }, props: { platform: p } }));
@@ -13,12 +12,12 @@ export function getStaticPaths() {
 
 const { platform } = Astro.props;
 const articles = (await getArticles()).filter((a) => a.data.platforms.includes(platform.slug));
-const hub = await getEntry('hubs', `platforms/${platform.slug}`);
+const hub = await hubOf(`platforms/${platform.slug}`);
 ---
 
 <BaseLayout title={`${platform.keyword}：从备账号到过审核`} description={hub?.data.description ?? `${platform.name}上线完整流程：${platform.desc}。按五步路线逐步说明，每篇开头直接给结论。`} noindex={articles.length === 0}>
   <div class="wrap page-head">
-    <nav class="crumbs" aria-label="面包屑"><a href="/">首页</a><span>/</span><a href="/categories/">分类</a><span>/</span><span>{platform.name}</span></nav>
+    <nav class="crumbs" aria-label="面包屑"><a href="/">首页</a><span>/</span><a href="/flow/">上线流程</a><span>/</span><span>{platform.name}</span></nav>
     <h1>{platform.icon} {platform.name}上线流程</h1>
     <p>{platform.desc}</p>
   </div>
@@ -29,7 +28,7 @@ const hub = await getEntry('hubs', `platforms/${platform.slug}`);
         const list = articles.filter((a) => a.data.stage === s.slug);
         return (
           <div class="group">
-            <h2><a href={`/categories/${s.slug}/`}><span class="no">{s.step}</span>{s.name}</a></h2>
+            <h2><a href={`/flow/${s.slug}/`}><span class="no">{s.step}</span>{s.name}</a></h2>
             {list.length > 0 ? <ArticleList articles={list} showDesc /> : <p class="empty">这一步的文章还在写</p>}
           </div>
         );

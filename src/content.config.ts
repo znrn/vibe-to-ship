@@ -18,8 +18,12 @@ const articles = defineCollection({
     covers: z.array(z.string()).default([]),
     // 文末「常见问题」：接住 covers 里正文没展开的问法，每条一两句直接回答
     faq: z.array(z.object({ q: z.string(), a: z.string() })).default([]),
-    // 阶段（主分类）：accounts 备账号 / build 做出来 / deploy 放上网 / payment 收到钱 / review 过审核
+    // 挂在上线流程的哪一步，填 src/data/flow.ts 里的 slug：
+    // idea / base / accounts / build / deploy / domain / payment / review / grow
     stage: z.enum(STAGE_SLUGS),
+    // 页面类型：question 问题页（默认，/articles/<id>/），flow 流程页（这一步的完整主路径，/flow/<stage>/）
+    // 每一步最多一篇流程页；流程页讲主路径，细节链到问题页
+    kind: z.enum(['question', 'flow']).default('question'),
     // 适用的产品形态，可多选：web 网站 / miniprogram 小程序 / app / desktop 桌面软件
     platforms: z.array(z.enum(PLATFORM_SLUGS)).min(1),
     // 跨阶段专题：tools / cost / roles / debug / works
@@ -49,8 +53,10 @@ const articles = defineCollection({
     humanOnly: z.array(z.object({ text: z.string(), note: z.string().optional() })).default([]),
     // 你来验收：AI 说做完了，你要亲自检查的点
     verify: z.array(z.string()).default([]),
-    // 卡住了怎么办：现象 → 通常的原因 → 怎么跟 AI 说
-    troubleshoot: z.array(z.object({ symptom: z.string(), cause: z.string(), say: z.string() })).default([]),
+    // 卡住了怎么办：现象 → 通常的原因 → 怎么跟 AI 说；有专门讲这个问题的文章时填 link（文章文件名）
+    troubleshoot: z
+      .array(z.object({ symptom: z.string(), cause: z.string(), say: z.string(), link: reference('articles').optional() }))
+      .default([]),
     // 别让 AI 做的事：权限和风险的边界
     boundaries: z.array(z.string()).default([]),
     // 文末是否显示「交给 AI 执行」卡片（把本文链接发给 Claude / Codex 照着做）
