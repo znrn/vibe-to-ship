@@ -1,0 +1,47 @@
+---
+// 形态聚合页：某种产品从备账号到过审核的完整流程，按五步路线分组
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArticleList from '../../components/ArticleList.astro';
+import { ROADMAP, PLATFORMS } from '../../data/site';
+import { getArticles } from '../../lib/articles';
+
+export function getStaticPaths() {
+  return PLATFORMS.map((p) => ({ params: { slug: p.slug }, props: { platform: p } }));
+}
+
+const { platform } = Astro.props;
+const articles = (await getArticles()).filter((a) => a.data.platforms.includes(platform.slug));
+---
+
+<BaseLayout title={`${platform.keyword}：从备账号到过审核`} description={`${platform.name}上线完整流程：${platform.desc}。按五步路线逐步说明，每篇开头直接给结论。`}>
+  <div class="wrap page-head">
+    <nav class="crumbs" aria-label="面包屑"><a href="/">首页</a><span>/</span><a href="/categories/">分类</a><span>/</span><span>{platform.name}</span></nav>
+    <h1>{platform.icon} {platform.name}上线流程</h1>
+    <p>{platform.desc}</p>
+  </div>
+  <div class="wrap body">
+    {
+      ROADMAP.map((s) => {
+        const list = articles.filter((a) => a.data.stage === s.slug);
+        return (
+          <div class="group">
+            <h2><a href={`/categories/${s.slug}/`}><span class="no">{s.step}</span>{s.name}</a></h2>
+            {list.length > 0 ? <ArticleList articles={list} showDesc /> : <p class="empty">这一步的文章还在写</p>}
+          </div>
+        );
+      })
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .body{padding-bottom:64px;max-width:820px;margin-left:auto;margin-right:auto}
+  .page-head{max-width:820px}
+  .group{margin-top:28px}
+  .group:first-child{margin-top:0}
+  .group h2{font-size:19px;margin-bottom:12px}
+  .group h2 a{display:inline-flex;align-items:center;gap:10px}
+  .group h2 a:hover{color:var(--accent)}
+  .no{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:800;border:2px solid var(--accent);color:var(--accent)}
+  .empty{border:1px dashed var(--line);border-radius:var(--radius);padding:14px 18px;color:var(--muted);font-size:14px}
+</style>

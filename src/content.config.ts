@@ -1,7 +1,7 @@
 import { defineCollection, reference } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
-import { CATEGORY_SLUGS } from './data/site';
+import { STAGE_SLUGS, PLATFORM_SLUGS, TOPIC_SLUGS } from './data/site';
 
 const articles = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/articles' }),
@@ -18,9 +18,12 @@ const articles = defineCollection({
     covers: z.array(z.string()).default([]),
     // 文末「常见问题」：接住 covers 里正文没展开的问法，每条一两句直接回答
     faq: z.array(z.object({ q: z.string(), a: z.string() })).default([]),
-    category: z.enum(CATEGORY_SLUGS),
-    // 五步路线：1 备账号 / 2 做出来 / 3 放上网 / 4 收到钱 / 5 过审核
-    roadmapStep: z.number().int().min(1).max(5),
+    // 阶段（主分类）：accounts 备账号 / build 做出来 / deploy 放上网 / payment 收到钱 / review 过审核
+    stage: z.enum(STAGE_SLUGS),
+    // 适用的产品形态，可多选：web 网站 / miniprogram 小程序 / app / desktop 桌面软件
+    platforms: z.array(z.enum(PLATFORM_SLUGS)).min(1),
+    // 跨阶段专题：tools / cost / roles / debug / works
+    topics: z.array(z.enum(TOPIC_SLUGS)).default([]),
     date: z.coerce.date(),
     updated: z.coerce.date().optional(),
     // 首屏「结论 / 步骤」块：一句话结论 + 照做步骤

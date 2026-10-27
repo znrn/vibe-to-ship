@@ -1,27 +1,98 @@
-// 检查文章之间的关键词有没有撞车（keyword cannibalization）
-// - 两篇文章用了同一个词（keyword 或 covers）：报错，构建中止
-// - 两篇文章的词字面上很像：提示人工判断，是同一个意图就合并，不同意图就保留
+// 对照选题地图（plan/topic-map.yaml）检查文章和关键词
+// 报错（构建中止）：
+//   - 文章在地图里没有节点
+//   - 两个节点、或节点和聚合页用了同一个词（keyword cannibalization）
+//   - 缺 intent / keyword / stage / platforms，或 links 指向不存在的节点
+// 提示：
+//   - 两个词字面上很像：搜一下，前 10 条结果重合多就并成一篇；
+//     确认意图不同的，在地图节点的 distinct 里登记，之后不再提示
+//   - 地图里写的阶段 / 形态 / 主词和文章 frontmatter 不一致
+//   - 两篇都已发布，但正文里没按 links 链过去
 // 用法：npm run check:keywords（npm run build 会先自动跑一遍）
-import { readdirSync, readFileSync } from 'node:fs';
+//       npm run check:keywords -- --report  额外打印「阶段 × 形态」覆盖矩阵和待写的 P1
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { parse } from 'yaml';
+import { ROADMAP, PLATFORMS } from '../src/data/site.ts';
 
 const DIR = 'src/content/articles';
+const MAP = 'plan/topic-map.yaml';
 const SIMILAR = 0.5; // 两个词的字符二元组 Jaccard 相似度，超过就提示
 
-// 只解析需要的三个字段：intent、keyword、covers 列表
-function parseFrontmatter(text) {
-  const fm = text.match(/^---\n([\s\S]*?)\n---/)?.[1] ?? '';
-  const scalar = (key) => fm.match(new RegExp(`^${key}:\\s*(.+)$`, 'm'))?.[1].trim();
-  const list = fm.match(/^covers:\s*\n((?:\s+-\s+.+\n?)*)/m)?.[1] ?? '';
-  const covers = list
-    .split('\n')
-    .map((l) => l.replace(/^\s+-\s+/, '').trim())
-    .filter(Boolean);
-  return { intent: scalar('intent'), keyword: scalar('keyword'), covers };
+const errors = [];
+const warnings = [];
+const STAGES = ROADMAP.map((s) => s.slug);
+const PLATFORM_SLUGS = PLATFORMS.map((p) => p.slug);
+
+// ── 读文章 ──
+const articles = new Map();
+for (const f of readdirSync(DIR).filter((f) => f.endsWith('.md'))) {
+  const text = readFileSync(join(DIR, f), 'utf8');
+  const m = text.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
+  const data = m ? parse(m[1]) : {};
+  const id = f.replace(/\.md$/, '');
+  // 正文 + 常见问题 + next 都算「链出去」
+  const linkText = [m?.[2] ?? '', JSON.stringify(data.faq ?? []), data.next ? `/articles/${data.next}/` : ''].join('\n');
+  articles.set(id, { data, linkText });
 }
 
-// 大小写、空格、标点不算区别
-const normalize = (s) => s.toLowerCase().replace(/[\s\p{P}\p{S}]/gu, '');
+// ── 读地图，用文章覆盖 ──
+const map = existsSync(MAP) ? parse(readFileSync(MAP, 'utf8')) : { nodes: [] };
+const nodes = new Map();
+for (const n of map.nodes ?? []) {
+  if (nodes.has(n.id)) errors.push(`地图里 ${n.id} 出现了两次`);
+  nodes.set(n.id, n);
+}
+
+const merged = [];
+for (const [id, n] of nodes) {
+  const a = articles.get(id);
+  const status = a ? (a.data.draft ? 'draft' : 'published') : 'planned';
+  if (a) {
+    for (const key of ['stage', 'keyword']) {
+      if (n[key] && n[key] !== a.data[key]) warnings.push(`${id}: 地图 ${key}「${n[key]}」和文章「${a.data[key]}」不一致，以文章为准`);
+    }
+    if (n.platforms && [...n.platforms].sort().join() !== [...(a.data.platforms ?? [])].sort().join()) {
+      warnings.push(`${id}: 地图 platforms 和文章不一致，以文章为准`);
+    }
+  }
+  const d = a ? a.data : n;
+  merged.push({
+    id,
+    status,
+    priority: n.priority ?? 'P3',
+    stage: d.stage,
+    platforms: d.platforms ?? [],
+    intent: d.intent,
+    keyword: d.keyword,
+    covers: d.covers ?? [],
+    links: n.links ?? [],
+    distinct: n.distinct ?? [],
+  });
+}
+
+for (const id of articles.keys()) {
+  if (!nodes.has(id)) errors.push(`${id}: 文章在 ${MAP} 里没有节点，先在地图里登记（至少写 id 和 priority）`);
+}
+
+for (const n of merged) {
+  if (!n.intent) errors.push(`${n.id}: 缺少 intent（这篇服务的搜索意图）`);
+  if (!n.keyword) errors.push(`${n.id}: 缺少 keyword（主关键词）`);
+  if (!STAGES.includes(n.stage)) errors.push(`${n.id}: stage「${n.stage}」不是 ${STAGES.join(' / ')} 之一`);
+  if (!n.platforms.length || n.platforms.some((p) => !PLATFORM_SLUGS.includes(p))) {
+    errors.push(`${n.id}: platforms 必须是 ${PLATFORM_SLUGS.join(' / ')} 中的一个或几个`);
+  }
+  for (const to of n.distinct) if (!nodes.has(to)) errors.push(`${n.id}: distinct 里的 ${to} 在地图里不存在`);
+  for (const to of n.links) {
+    if (!nodes.has(to)) errors.push(`${n.id}: links 里的 ${to} 在地图里不存在`);
+    else if (n.status !== 'planned' && articles.has(to) && !articles.get(to).data.draft) {
+      if (!articles.get(n.id).linkText.includes(`/articles/${to}/`)) warnings.push(`${n.id}: 正文里还没链到 /articles/${to}/`);
+    }
+  }
+}
+
+// ── 撞词检查：主词、聚合页类目词、各节点的词 ──
+const normalize = (s) => String(s).toLowerCase().replace(/[\s\p{P}\p{S}]/gu, '');
 
 function bigrams(s) {
   const set = new Set();
@@ -38,22 +109,15 @@ function similarity(a, b) {
   return inter / (A.size + B.size - inter);
 }
 
-const articles = readdirSync(DIR)
-  .filter((f) => f.endsWith('.md'))
-  .map((f) => ({ id: f.replace(/\.md$/, ''), ...parseFrontmatter(readFileSync(join(DIR, f), 'utf8')) }));
-
-const errors = [];
-const warnings = [];
-
-for (const a of articles) {
-  if (!a.intent) errors.push(`${a.id}: 缺少 intent（这篇文章服务的搜索意图）`);
-  if (!a.keyword) errors.push(`${a.id}: 缺少 keyword（主关键词）`);
-}
-
-// 所有词摊平，带上来源文章
-const terms = articles.flatMap((a) =>
-  [a.keyword, ...a.covers].filter(Boolean).map((t) => ({ id: a.id, raw: t, norm: normalize(t) })),
-);
+const owners = [
+  { id: '首页', words: [map.site?.keyword, ...(map.site?.covers ?? [])] },
+  ...ROADMAP.map((s) => ({ id: `阶段页 ${s.slug}`, words: [s.keyword] })),
+  ...PLATFORMS.map((p) => ({ id: `形态页 ${p.slug}`, words: [p.keyword] })),
+  ...merged.map((n) => ({ id: n.id, words: [n.keyword, ...n.covers] })),
+];
+// distinct 登记过的配对，不再提示相似
+const distinctPairs = new Set(merged.flatMap((n) => n.distinct.flatMap((to) => [`${n.id}|${to}`, `${to}|${n.id}`])));
+const terms = owners.flatMap((o) => o.words.filter(Boolean).map((t) => ({ id: o.id, raw: t, norm: normalize(t) })));
 
 for (let i = 0; i < terms.length; i++) {
   for (let j = i + 1; j < terms.length; j++) {
@@ -61,19 +125,38 @@ for (let i = 0; i < terms.length; i++) {
     const y = terms[j];
     if (x.id === y.id) continue;
     if (x.norm === y.norm) {
-      errors.push(`「${x.raw}」同时出现在 ${x.id} 和 ${y.id}：只能归一篇，另一篇删掉这个词`);
+      errors.push(`「${x.raw}」同时出现在 ${x.id} 和 ${y.id}：只能归一处，另一处删掉这个词`);
       continue;
     }
     // 一个词整个包含另一个（如「备案被驳回怎么办」含「备案被驳回」）也算很像
     const contains = Math.min(x.norm.length, y.norm.length) >= 4 && (x.norm.includes(y.norm) || y.norm.includes(x.norm));
     const score = similarity(x.norm, y.norm);
-    if (contains || score >= SIMILAR) {
+    if ((contains || score >= SIMILAR) && !distinctPairs.has(`${x.id}|${y.id}`)) {
       warnings.push(
         `${x.id}「${x.raw}」 ↔ ${y.id}「${y.raw}」 ${contains ? '互相包含' : `相似度 ${score.toFixed(2)}`}：` +
           '搜一下两个词，前 10 条结果重合多就并成一篇',
       );
     }
   }
+}
+
+// ── 覆盖矩阵 ──
+if (process.argv.includes('--report')) {
+  const pad = (s, n) => s + ' '.repeat(Math.max(0, n - [...s].reduce((w, c) => w + (c.charCodeAt(0) > 255 ? 2 : 1), 0)));
+  console.log('\n阶段 × 形态（已发布 / 计划总数）');
+  console.log(pad('', 10) + PLATFORMS.map((p) => pad(p.name, 10)).join(''));
+  for (const s of ROADMAP) {
+    const row = PLATFORMS.map((p) => {
+      const cell = merged.filter((n) => n.stage === s.slug && n.platforms.includes(p.slug));
+      const done = cell.filter((n) => n.status === 'published').length;
+      return pad(cell.length ? `${done} / ${cell.length}` : '—', 10);
+    });
+    console.log(pad(`${s.step} ${s.name}`, 10) + row.join(''));
+  }
+  const todo = merged.filter((n) => n.status !== 'published' && n.priority === 'P1');
+  console.log(`\n待写的 P1（${todo.length} 篇）`);
+  for (const n of todo) console.log(`  ${pad(n.id, 34)} ${n.keyword}`);
+  console.log('');
 }
 
 for (const w of warnings) console.warn(`⚠ ${w}`);
@@ -83,4 +166,5 @@ if (errors.length) {
   console.error(`\n关键词检查失败：${errors.length} 个错误`);
   process.exit(1);
 }
-console.log(`关键词检查通过：${articles.length} 篇文章，${terms.length} 个词，${warnings.length} 条提示`);
+const published = merged.filter((n) => n.status === 'published').length;
+console.log(`关键词检查通过：地图 ${merged.length} 个节点（已发布 ${published}），${terms.length} 个词，${warnings.length} 条提示`);

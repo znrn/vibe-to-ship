@@ -8,8 +8,8 @@ covers:
   - 没有商户号怎么收钱
   - 个人开发者第一笔收入怎么收
   - 不办执照能卖付费内容吗
-category: accounts
-roadmapStep: 4
+stage: payment
+platforms: [web]
 date: 2026-10-25
 answer: 没有执照时，先别急着接微信支付。用面包多、小报童这类现成的收款工具，把产品做成「付费内容」或「付费服务」挂上去，当天就能收到第一笔钱。确认有人买单，再去办执照和商户号。
 steps:

@@ -36,40 +36,73 @@ export const CAMP = {
   href: '/#camp',
 };
 
-export type CategorySlug =
-  | 'mvp'
-  | 'accounts'
-  | 'deploy'
-  | 'tools'
-  | 'cost'
-  | 'roles'
-  | 'debug'
-  | 'works';
+// ── 内容骨架：阶段 × 形态 ──────────────────────────────
+// 主骨架是「五步路线 × 四种产品形态」：每篇文章属于一个阶段（决定面包屑和分类页），
+// 适用于一种或几种形态（形态页按阶段串成该形态的完整上线流程）。
+// 工具、成本、岗位、排错这类跨阶段的视角，作为「专题」标签挂在文章上。
+// keyword 是这个聚合页要承接的类目词，会参与 npm run check:keywords 的撞词检查。
 
-export const CATEGORIES: { slug: CategorySlug; name: string; icon: string; desc: string }[] = [
-  { slug: 'mvp', name: '最小可上线', icon: '🚀', desc: '不要登录、不要支付，当天先上线一个单页' },
-  { slug: 'accounts', name: '账号与资质', icon: '🔑', desc: '工具订阅、Apple ID、开发者账号、执照与商户号' },
-  { slug: 'deploy', name: '上线链路', icon: '🌐', desc: '域名解析、云服务器、SSL、ICP 备案' },
-  { slug: 'tools', name: '工具怎么选', icon: '🧰', desc: '主力工具怎么搭，国产 AI 能帮到哪' },
-  { slug: 'cost', name: '成本与时间账', icon: '🧮', desc: '外包报价 vs 自己做；下班每周 5 小时怎么排' },
-  { slug: 'roles', name: '按岗位对号', icon: '🧭', desc: '运营、产品、老板第一周各容易卡在哪' },
-  { slug: 'debug', name: '翻车与排错', icon: '🧯', desc: '满屏英文报错怎么问 AI；审核驳回怎么改' },
-  { slug: 'works', name: '作品证明', icon: '🏆', desc: '真实上线的产品和完整复盘' },
-];
-
-export const CATEGORY_SLUGS = CATEGORIES.map((c) => c.slug) as [CategorySlug, ...CategorySlug[]];
-
-export function categoryOf(slug: string) {
-  return CATEGORIES.find((c) => c.slug === slug)!;
-}
-
-// 五步路线 = 五层窗户纸
+// 五步路线 = 五层窗户纸，也是文章的主分类
 export const ROADMAP = [
-  { step: 1, name: '备账号', desc: 'AI 工具订阅、开发者账号、执照与商户号', stuck: '账号、执照、商户号这些资质' },
-  { step: 2, name: '做出来', desc: '用大白话描述需求，让 AI 写出能跑的页面', stuck: '把需求说清楚、让 AI 做出能跑的东西' },
-  { step: 3, name: '放上网', desc: '域名、服务器、HTTPS、备案', stuck: '域名、服务器、HTTPS 和备案' },
-  { step: 4, name: '收到钱', desc: '微信支付或现成收款工具，先跑通一笔', stuck: '收款：第一笔钱怎么进账' },
-  { step: 5, name: '过审核', desc: '小程序、App Store 提审与驳回处理', stuck: '小程序或 App Store 的提审和驳回' },
+  {
+    step: 1, slug: 'accounts', name: '备账号', icon: '🔑',
+    keyword: '个人开发者需要哪些账号和资质',
+    desc: 'AI 工具订阅、开发者账号、执照与商户号',
+    stuck: '账号、执照、商户号这些资质',
+  },
+  {
+    step: 2, slug: 'build', name: '做出来', icon: '🛠️',
+    keyword: '不会编程怎么用 AI 做产品',
+    desc: '用大白话描述需求，让 AI 写出能跑的东西',
+    stuck: '把需求说清楚、让 AI 做出能跑的东西',
+  },
+  {
+    step: 3, slug: 'deploy', name: '放上网', icon: '🌐',
+    keyword: '域名服务器和备案',
+    desc: '域名、服务器、HTTPS、ICP / 小程序 / App 备案',
+    stuck: '域名、服务器、HTTPS 和备案',
+  },
+  {
+    step: 4, slug: 'payment', name: '收到钱', icon: '💰',
+    keyword: '个人开发者怎么收款',
+    desc: '微信支付、内购或现成收款工具，先跑通一笔',
+    stuck: '收款：第一笔钱怎么进账',
+  },
+  {
+    step: 5, slug: 'review', name: '过审核', icon: '✅',
+    keyword: '上架审核被驳回',
+    desc: '小程序、App Store、应用市场提审与驳回处理',
+    stuck: '小程序或 App Store 的提审和驳回',
+  },
 ] as const;
+
+export type StageSlug = (typeof ROADMAP)[number]['slug'];
+export const STAGE_SLUGS = ROADMAP.map((s) => s.slug) as [StageSlug, ...StageSlug[]];
+export const stageOf = (slug: string) => ROADMAP.find((s) => s.slug === slug)!;
+
+// 四种产品形态，各有一个「完整上线流程」聚合页
+export const PLATFORMS = [
+  { slug: 'web', name: '网站', icon: '🖥️', keyword: '个人网站上线流程', desc: '从一个单页到能收款的网站：域名、服务器、备案、HTTPS' },
+  { slug: 'miniprogram', name: '小程序', icon: '🟢', keyword: '个人小程序上线流程', desc: '注册主体、选类目、备案、提审，个人和个体户能做到哪一步' },
+  { slug: 'app', name: 'App', icon: '📱', keyword: '个人开发者 App 上架流程', desc: 'App Store 和国内安卓市场：开发者账号、软著、备案、审核' },
+  { slug: 'desktop', name: '桌面软件', icon: '💻', keyword: '个人桌面软件发布流程', desc: 'Windows / Mac 软件打包、签名、公证和分发' },
+] as const;
+
+export type PlatformSlug = (typeof PLATFORMS)[number]['slug'];
+export const PLATFORM_SLUGS = PLATFORMS.map((p) => p.slug) as [PlatformSlug, ...PlatformSlug[]];
+export const platformOf = (slug: string) => PLATFORMS.find((p) => p.slug === slug)!;
+
+// 跨阶段的专题标签
+export const TOPICS = [
+  { slug: 'tools', name: '工具怎么选', icon: '🧰', desc: '主力工具怎么搭，国产 AI 能帮到哪' },
+  { slug: 'cost', name: '成本与时间账', icon: '🧮', desc: '外包报价 vs 自己做；一共要花多少钱和时间' },
+  { slug: 'roles', name: '按岗位对号', icon: '🧭', desc: '运营、产品、老板第一周各容易卡在哪' },
+  { slug: 'debug', name: '翻车与排错', icon: '🧯', desc: '报错怎么问 AI；备案、审核被驳回怎么改' },
+  { slug: 'works', name: '作品证明', icon: '🏆', desc: '真实上线的产品和完整复盘' },
+] as const;
+
+export type TopicSlug = (typeof TOPICS)[number]['slug'];
+export const TOPIC_SLUGS = TOPICS.map((t) => t.slug) as [TopicSlug, ...TopicSlug[]];
+export const topicOf = (slug: string) => TOPICS.find((t) => t.slug === slug)!;
 
 export const CN_NUM = ['零', '一', '二', '三', '四', '五'];

@@ -1,27 +1,31 @@
 ---
-// 八大分类卡片，篇数从内容集合实时统计
-import { CATEGORIES } from '../data/site';
+// 聚合页卡片（阶段 / 形态 / 专题），篇数从内容集合实时统计
+import { ROADMAP, PLATFORMS, TOPICS } from '../data/site';
 import type { Article } from '../lib/articles';
 
 interface Props {
   articles: Article[];
+  kind: 'stage' | 'platform' | 'topic';
 }
-const { articles } = Astro.props;
-const count = (slug: string) => articles.filter((a) => a.data.category === slug).length;
+const { articles, kind } = Astro.props;
+
+const items =
+  kind === 'stage'
+    ? ROADMAP.map((s) => ({ href: `/categories/${s.slug}/`, icon: s.icon, name: `${s.step} · ${s.name}`, desc: s.desc, n: articles.filter((a) => a.data.stage === s.slug).length }))
+    : kind === 'platform'
+      ? PLATFORMS.map((p) => ({ href: `/platforms/${p.slug}/`, icon: p.icon, name: `${p.name}上线流程`, desc: p.desc, n: articles.filter((a) => a.data.platforms.includes(p.slug)).length }))
+      : TOPICS.map((t) => ({ href: `/topics/${t.slug}/`, icon: t.icon, name: t.name, desc: t.desc, n: articles.filter((a) => a.data.topics.includes(t.slug)).length }));
 ---
 
-<div class="cats">
+<div class:list={['cats', items.length === 5 && 'five']}>
   {
-    CATEGORIES.map((c) => {
-      const n = count(c.slug);
-      return (
-        <a class="cat" href={`/categories/${c.slug}/`}>
-          <div class="ic">{c.icon}</div>
-          <h3>{c.name}</h3>
-          <p>{c.desc}</p>
-          <div class:list={['n', n === 0 && 'zero']}>{n > 0 ? `${n} 篇` : '即将更新'}</div>
-        </a>
-      );
-    })
+    items.map((c) => (
+      <a class="cat" href={c.href}>
+        <div class="ic">{c.icon}</div>
+        <h3>{c.name}</h3>
+        <p>{c.desc}</p>
+        <div class:list={['n', c.n === 0 && 'zero']}>{c.n > 0 ? `${c.n} 篇` : '即将更新'}</div>
+      </a>
+    ))
   }
 </div>

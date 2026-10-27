@@ -6,8 +6,8 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import RoadmapPosition from '../../components/article/RoadmapPosition.astro';
 import ArticleExit from '../../components/article/ArticleExit.astro';
 import ArticleFaq from '../../components/article/ArticleFaq.astro';
-import { SITE, ROADMAP, categoryOf } from '../../data/site';
-import { getArticles, formatDate, type Article } from '../../lib/articles';
+import { SITE, platformOf, topicOf } from '../../data/site';
+import { getArticles, formatDate, stageOfArticle, type Article } from '../../lib/articles';
 
 export async function getStaticPaths() {
   const articles = await getArticles();
@@ -18,8 +18,7 @@ const { article } = Astro.props as { article: Article };
 const { data } = article;
 const { Content } = await render(article);
 const next = data.next ? await getEntry(data.next) : undefined;
-const cat = categoryOf(data.category);
-const step = ROADMAP.find((s) => s.step === data.roadmapStep)!;
+const step = stageOfArticle(article);
 const url = new URL(Astro.url.pathname, Astro.site).href;
 
 const jsonLd: object[] = [
@@ -31,7 +30,8 @@ const jsonLd: object[] = [
     inLanguage: 'zh-CN',
     datePublished: data.date.toISOString(),
     dateModified: (data.updated ?? data.date).toISOString(),
-    articleSection: cat.name,
+    articleSection: step.name,
+    keywords: [data.keyword, ...data.covers].join(','),
     mainEntityOfPage: { '@type': 'WebPage', '@id': url },
     url,
     author: { '@type': 'Person', name: SITE.author.name, url: SITE.url, description: SITE.author.description },
@@ -42,7 +42,7 @@ const jsonLd: object[] = [
     '@type': 'BreadcrumbList',
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: '首页', item: SITE.url + '/' },
-      { '@type': 'ListItem', position: 2, name: cat.name, item: `${SITE.url}/categories/${cat.slug}/` },
+      { '@type': 'ListItem', position: 2, name: step.name, item: `${SITE.url}/categories/${step.slug}/` },
       { '@type': 'ListItem', position: 3, name: data.title, item: url },
     ],
   },
@@ -70,7 +70,7 @@ if (data.faq.length > 0) {
   <div class="wrap layout">
     <article class="main">
       <nav class="crumbs" aria-label="面包屑">
-        <a href="/">首页</a><span>/</span><a href={`/categories/${cat.slug}/`}>{cat.name}</a>
+        <a href="/">首页</a><span>/</span><a href={`/categories/${step.slug}/`}>{step.name}</a>
       </nav>
       <h1>{data.title}</h1>
 
@@ -88,8 +88,9 @@ if (data.faq.length > 0) {
 
       <div class="meta">
         {data.sample && <span class="sample-tag">示例文章</span>}
-        <span>{cat.icon} {cat.name}</span>
-        <span>路线第 {step.step} 步 · {step.name}</span>
+        <a href={`/categories/${step.slug}/`}>{step.icon} 第 {step.step} 步 · {step.name}</a>
+        {data.platforms.map((p) => <a class="chip" href={`/platforms/${p}/`}>{platformOf(p).name}</a>)}
+        {data.topics.map((t) => <a class="chip" href={`/topics/${t}/`}>#{topicOf(t).name}</a>)}
         <span>作者 {SITE.author.name}</span>
         <time datetime={data.date.toISOString()}>{formatDate(data.date)}</time>
       </div>
@@ -100,11 +101,11 @@ if (data.faq.length > 0) {
 
       <ArticleFaq items={data.faq} />
 
-      <ArticleExit step={data.roadmapStep} stuckNext={data.stuckNext} next={next} />
+      <ArticleExit step={step.step} stuckNext={data.stuckNext} next={next} />
     </article>
 
     <div class="side">
-      <RoadmapPosition current={data.roadmapStep} />
+      <RoadmapPosition current={step.step} />
     </div>
   </div>
 </BaseLayout>
@@ -121,6 +122,8 @@ if (data.faq.length > 0) {
   .answer-steps{margin:10px 0 0;padding-left:1.4em;display:grid;gap:4px;font-size:15px}
   .answer-steps li::marker{color:var(--accent);font-weight:700}
 
+  .meta a:hover{color:var(--accent)}
+  .meta .chip{border:1px solid var(--line);border-radius:999px;padding:0 9px;line-height:22px}
   .meta{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;font-size:13px;color:var(--muted);margin:16px 0 8px}
 
   .prose{font-size:16.5px;line-height:1.85}

@@ -1,6 +1,6 @@
 ---
-import { categoryOf, ROADMAP } from '../data/site';
-import { articleUrl, formatDate, type Article } from '../lib/articles';
+import { platformOf } from '../data/site';
+import { articleUrl, formatDate, stageOfArticle, type Article } from '../lib/articles';
 
 interface Props {
   articles: Article[];
@@ -12,12 +12,12 @@ const { articles, showDesc = false } = Astro.props;
 <div class="list">
   {
     articles.map((a) => (
-      <a class="item" href={articleUrl(a)} data-search={`${a.data.title} ${a.data.description} ${categoryOf(a.data.category).name}`}>
+      <a class="item" href={articleUrl(a)} data-search={`${a.data.title} ${a.data.description} ${a.data.keyword} ${a.data.covers.join(' ')} ${stageOfArticle(a).name}`}>
         <h4>{a.data.title}</h4>
         {showDesc && <p class="desc">{a.data.description}</p>}
         <div class="meta">
-          <span class="tag">{categoryOf(a.data.category).name}</span>
-          <span>第 {a.data.roadmapStep} 步 · {ROADMAP[a.data.roadmapStep - 1].name}</span>
+          <span class="tag">第 {stageOfArticle(a).step} 步 · {stageOfArticle(a).name}</span>
+          <span>{a.data.platforms.map((p) => platformOf(p).name).join(' / ')}</span>
           <span>{formatDate(a.data.date)}</span>
           {a.data.sample && <span class="sample-tag">示例</span>}
         </div>

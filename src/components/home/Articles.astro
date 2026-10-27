@@ -12,10 +12,10 @@ const { articles } = Astro.props;
 <section id="articles">
   <div class="wrap">
     <div class="sec-head">
-      <div><h2>按卡点找答案</h2><p>八类问题，每篇开头 150 字直接给结论</p></div>
+      <div><h2>你要上线什么？</h2><p>按产品形态看完整流程，每篇开头 150 字直接给结论</p></div>
       <a class="more" href="/articles/">全部文章 →</a>
     </div>
-    <CategoryGrid articles={articles} />
+    <CategoryGrid articles={articles} kind="platform" />
 
     <div class="two">
       <div>
@@ -25,9 +25,9 @@ const { articles } = Astro.props;
       <div>
         <h3 class="col-title">你是哪种人？</h3>
         <div class="roles">
-          <a class="role" href="/categories/roles/"><h4>运营 / 业务骨干</h4><p>提需求总被排期？自己做个小工具，先解决手头的事。</p></a>
-          <a class="role" href="/categories/roles/"><h4>产品经理</h4><p>不再只画原型，直接给出一个能点的公网版本。</p></a>
-          <a class="role" href="/categories/roles/"><h4>创业者 / 个体老板</h4><p>外包要 3~5 万、等两个月？先花几天自己做出 MVP 测付费。</p></a>
+          <a class="role" href="/topics/roles/"><h4>运营 / 业务骨干</h4><p>提需求总被排期？自己做个小工具，先解决手头的事。</p></a>
+          <a class="role" href="/topics/roles/"><h4>产品经理</h4><p>不再只画原型，直接给出一个能点的公网版本。</p></a>
+          <a class="role" href="/topics/roles/"><h4>创业者 / 个体老板</h4><p>外包要 3~5 万、等两个月？先花几天自己做出 MVP 测付费。</p></a>
         </div>
       </div>
     </div>

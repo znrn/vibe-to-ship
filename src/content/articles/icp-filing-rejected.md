@@ -8,8 +8,9 @@ covers:
   - 备案被退回怎么办
   - 网站名称不合规被驳回
   - 备案驳回后多久能重新提交
-category: deploy
-roadmapStep: 3
+stage: deploy
+platforms: [web]
+topics: [debug]
 date: 2026-10-22
 answer: 个人备案被驳回，最常见的是三类问题：网站名称不合规、主体信息和证件或域名实名信息对不上、网站内容说明写成了经营性质。按驳回理由逐项改完重新提交，一般不需要从头再来。
 steps:

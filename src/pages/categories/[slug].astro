@@ -1,29 +1,36 @@
 ---
+// 阶段聚合页：五步路线中的一步，下面按产品形态分组
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ArticleList from '../../components/ArticleList.astro';
-import { CATEGORIES } from '../../data/site';
+import { ROADMAP, PLATFORMS } from '../../data/site';
 import { getArticles } from '../../lib/articles';
 
 export function getStaticPaths() {
-  return CATEGORIES.map((c) => ({ params: { slug: c.slug }, props: { cat: c } }));
+  return ROADMAP.map((s) => ({ params: { slug: s.slug }, props: { stage: s } }));
 }
 
-const { cat } = Astro.props;
-const articles = (await getArticles()).filter((a) => a.data.category === cat.slug);
+const { stage } = Astro.props;
+const articles = (await getArticles()).filter((a) => a.data.stage === stage.slug);
+const groups = PLATFORMS.map((p) => ({ p, list: articles.filter((a) => a.data.platforms.includes(p.slug)) })).filter((g) => g.list.length > 0);
 ---
 
-<BaseLayout title={cat.name} description={`${cat.name}：${cat.desc}`}>
+<BaseLayout title={`第 ${stage.step} 步 ${stage.name}：${stage.keyword}`} description={`上线路线第 ${stage.step} 步「${stage.name}」：${stage.desc}。按网站、小程序、App、桌面软件分别说明。`}>
   <div class="wrap page-head">
-    <nav class="crumbs" aria-label="面包屑"><a href="/">首页</a><span>/</span><a href="/categories/">文章分类</a><span>/</span><span>{cat.name}</span></nav>
-    <h1>{cat.icon} {cat.name}</h1>
-    <p>{cat.desc}</p>
+    <nav class="crumbs" aria-label="面包屑"><a href="/">首页</a><span>/</span><a href="/categories/">分类</a><span>/</span><span>{stage.name}</span></nav>
+    <h1>{stage.icon} 第 {stage.step} 步 · {stage.name}</h1>
+    <p>{stage.desc}</p>
   </div>
   <div class="wrap body">
     {
-      articles.length > 0 ? (
-        <ArticleList articles={articles} showDesc />
+      groups.length > 0 ? (
+        groups.map((g) => (
+          <div class="group">
+            <h2><a href={`/platforms/${g.p.slug}/`}>{g.p.icon} {g.p.name}</a></h2>
+            <ArticleList articles={g.list} showDesc />
+          </div>
+        ))
       ) : (
-        <div class="empty">这一类的文章还在写。先看看 <a class="more" href="/articles/">全部文章 →</a></div>
+        <div class="empty">这一步的文章还在写。先看看 <a class="more" href="/articles/">全部文章 →</a></div>
       )
     }
   </div>
@@ -32,5 +39,9 @@ const articles = (await getArticles()).filter((a) => a.data.category === cat.slu
 <style>
   .body{padding-bottom:64px;max-width:820px;margin-left:auto;margin-right:auto}
   .page-head{max-width:820px}
+  .group{margin-top:28px}
+  .group:first-child{margin-top:0}
+  .group h2{font-size:19px;margin-bottom:12px}
+  .group h2 a:hover{color:var(--accent)}
   .empty{border:1px dashed var(--line);border-radius:var(--radius);padding:28px;color:var(--muted);text-align:center}
 </style>

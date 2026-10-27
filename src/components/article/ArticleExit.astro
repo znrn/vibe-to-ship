@@ -1,7 +1,7 @@
 ---
 // 文末出口：接下来会卡在哪 → 下一篇 → 免费台阶 → 实战营
-import { ROADMAP, CATEGORIES, FREE_STEP, CAMP } from '../../data/site';
-import { articleUrl, type Article } from '../../lib/articles';
+import { ROADMAP, FREE_STEP, CAMP } from '../../data/site';
+import { articleUrl, stageOfArticle, type Article } from '../../lib/articles';
 
 interface Props {
   step: number;
@@ -11,7 +11,7 @@ interface Props {
 const { step, stuckNext, next } = Astro.props;
 const nextStep = ROADMAP.find((s) => s.step === step + 1);
 const stuck = stuckNext ?? (nextStep ? nextStep.stuck : '上线之后的各种意外');
-const nextCat = next && CATEGORIES.find((c) => c.slug === next.data.category);
+const nextStage = next && stageOfArticle(next);
 ---
 
 <div class="exit">
@@ -27,7 +27,7 @@ const nextCat = next && CATEGORIES.find((c) => c.slug === next.data.category);
         <p class="label">下一篇 →</p>
         <p class="big">{next.data.title}</p>
         <p class="hint">
-          {nextCat?.name} · 第 {next.data.roadmapStep} 步
+          第 {nextStage?.step} 步 · {nextStage?.name}
           {next.data.sample && <span class="sample-tag">示例</span>}
         </p>
       </a>

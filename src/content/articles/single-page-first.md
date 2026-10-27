@@ -8,8 +8,8 @@ covers:
   - 不会写代码怎么做产品原型
   - 单页网站上线
   - MVP 要不要做登录
-category: mvp
-roadmapStep: 2
+stage: build
+platforms: [web]
 date: 2026-10-20
 answer: 第一个产品只做一个单页：一句话说清楚它帮谁解决什么问题，加一个留联系方式或预约的入口。登录、支付、后台全部往后放，今天就能做完。
 steps:
