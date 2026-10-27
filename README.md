@@ -4,7 +4,7 @@
 
 这个仓库有两个身份：
 
-1. **网站源码**：donggua.dev 的全部代码，用 [Astro](https://astro.build) 生成静态网站。
+1. **网站源码**：eryx.cn 的全部代码，用 [Astro](https://astro.build) 生成静态网站。
 2. **开源手册**：`src/content/articles/` 里的每一篇 Markdown 就是手册的一章，不用打开网站，直接在 GitHub 上也能读。
 
 > 当前是第一版，文章都是**示例**，用来跑通模板；价格、联系方式、作品介绍等带「待填」「占位」的地方还没有定稿。

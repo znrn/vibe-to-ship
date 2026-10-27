@@ -3,9 +3,10 @@ import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import { readdirSync, readFileSync } from 'node:fs';
 import { parse } from 'yaml';
-import { ROADMAP, PLATFORMS, TOPICS } from './src/data/site.ts';
+import { SITE as SITE_DATA, ROADMAP, PLATFORMS, TOPICS } from './src/data/site.ts';
 
-const SITE = 'https://donggua.dev';
+// 主域名只在 src/data/site.ts 里改
+const SITE = SITE_DATA.url;
 
 // 还没有已发布文章的聚合页：页面上是 noindex，这里也不放进 sitemap
 function emptyHubUrls() {

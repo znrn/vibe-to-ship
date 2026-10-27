@@ -4,7 +4,7 @@ export const SITE = {
   name: '冬瓜 AI 独立开发实战站',
   shortName: '冬瓜',
   tagline: 'AI 独立开发',
-  url: 'https://donggua.dev',
+  url: 'https://eryx.cn',
   description:
     '写给非程序员的 AI 独立开发手册：域名、服务器、备案、收款、审核，每一个卡点都写成能直接照做的答案。',
   author: {
