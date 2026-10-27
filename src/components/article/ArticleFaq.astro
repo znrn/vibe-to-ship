@@ -1,0 +1,32 @@
+---
+// 文章末尾的常见问题，对应 frontmatter 的 faq；结构化数据由文章页统一输出
+interface Props {
+  items: { q: string; a: string }[];
+}
+const { items } = Astro.props;
+---
+
+{
+  items.length > 0 && (
+    <section class="faq" id="faq">
+      <h2>常见问题</h2>
+      {items.map((item, i) => (
+        <details open={i === 0}>
+          <summary>{item.q}</summary>
+          <p>{item.a}</p>
+        </details>
+      ))}
+    </section>
+  )
+}
+
+<style>
+  .faq{margin-top:40px}
+  h2{font-size:22px;margin:0 0 14px;letter-spacing:-.2px;line-height:1.4}
+  details{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin-bottom:10px}
+  summary{cursor:pointer;font-weight:600;font-size:15.5px;list-style:none;display:flex;justify-content:space-between;gap:12px}
+  summary::-webkit-details-marker{display:none}
+  summary::after{content:"+";color:var(--accent);font-weight:700}
+  details[open] summary::after{content:"–"}
+  details p{color:var(--muted);font-size:15px;line-height:1.75;margin-top:8px}
+</style>

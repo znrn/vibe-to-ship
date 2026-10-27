@@ -7,9 +7,10 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "node scripts/check-keywords.mjs && astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "check:keywords": "node scripts/check-keywords.mjs"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.19",

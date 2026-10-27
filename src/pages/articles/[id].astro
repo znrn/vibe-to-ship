@@ -5,6 +5,7 @@ import { getEntry, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import RoadmapPosition from '../../components/article/RoadmapPosition.astro';
 import ArticleExit from '../../components/article/ArticleExit.astro';
+import ArticleFaq from '../../components/article/ArticleFaq.astro';
 import { SITE, ROADMAP, categoryOf } from '../../data/site';
 import { getArticles, formatDate, type Article } from '../../lib/articles';
 
@@ -21,7 +22,7 @@ const cat = categoryOf(data.category);
 const step = ROADMAP.find((s) => s.step === data.roadmapStep)!;
 const url = new URL(Astro.url.pathname, Astro.site).href;
 
-const jsonLd = [
+const jsonLd: object[] = [
   {
     '@context': 'https://schema.org',
     '@type': 'Article',
@@ -46,6 +47,17 @@ const jsonLd = [
     ],
   },
 ];
+if (data.faq.length > 0) {
+  jsonLd.push({
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: data.faq.map((item) => ({
+      '@type': 'Question',
+      name: item.q,
+      acceptedAnswer: { '@type': 'Answer', text: item.a },
+    })),
+  });
+}
 ---
 
 <BaseLayout title={data.title} description={data.description} ogType="article">
@@ -85,6 +97,8 @@ const jsonLd = [
       <div class="prose">
         <Content />
       </div>
+
+      <ArticleFaq items={data.faq} />
 
       <ArticleExit step={data.roadmapStep} stuckNext={data.stuckNext} next={next} />
     </article>
