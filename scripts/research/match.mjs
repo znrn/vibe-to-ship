@@ -3,6 +3,7 @@
 //   covered    和某个节点的主词 / covers 几乎一样，已覆盖
 //   addable    明显属于某个节点，但说法没写进 covers，可以补
 //   unmatched  对不上任何节点，人工判断要不要新增节点
+// 同时算出每个节点的需求分，写到 plan/research/demand.json（地图页会显示）
 // 用法：node scripts/research/match.mjs
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { loadTopicMap } from '../lib/topic-map.mjs';
@@ -77,9 +78,18 @@ const count = (k) => out.filter((x) => x.kind === k).length;
 writeFileSync('plan/research/matched.json', JSON.stringify(out, null, 1));
 console.log(`去重后 ${out.length} 条：已覆盖 ${count('covered')}，可补进 covers ${count('addable')}，未匹配 ${count('unmatched')}`);
 
-// 每个节点被多少条问法命中（只算搜索引擎联想词，反映搜索需求）
+// 需求分：只算搜索引擎联想词（反映有人在搜），和节点足够像（≥ 0.6）的才计入，
+// 每条联想词按出现在几个引擎里加权。不是搜索量，只用来比较节点之间需求的相对大小
 const ENGINES = new Set(['baidu', 'bing', 'so360', 'sogou']);
-const demand = new Map(merged.map((n) => [n.id, 0]));
-for (const x of out) if (x.node && x.sources.some((s) => ENGINES.has(s))) demand.set(x.node, demand.get(x.node) + 1);
-const cold = [...demand].filter(([, n]) => n === 0).map(([id]) => id);
-console.log(`没有任何联想词命中的节点（${cold.length}）：${cold.join('、')}`);
+const DEMAND_MIN = 0.6;
+const demand = Object.fromEntries(merged.map((n) => [n.id, { score: 0, top: [] }]));
+for (const x of out) {
+  const engines = x.sources.filter((s) => ENGINES.has(s)).length;
+  if (!x.node || !engines || x.score < DEMAND_MIN) continue;
+  const d = demand[x.node];
+  d.score += engines;
+  if (d.top.length < 8) d.top.push(x.q);
+}
+writeFileSync('plan/research/demand.json', JSON.stringify({ computed: new Date().toISOString(), demand }, null, 1));
+const cold = Object.entries(demand).filter(([, d]) => d.score === 0).map(([id]) => id);
+console.log(`需求分写入 plan/research/demand.json；需求分为 0 的节点（${cold.length}）：${cold.join('、')}`);

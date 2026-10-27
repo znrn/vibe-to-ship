@@ -87,6 +87,20 @@ npm run plan:page                   # 生成选题地图浏览页（默认写到
 
 检查内容：文章必须在地图里有节点；不同节点不能用同一个词，词很像时会提示（确认意图不同的写进节点的 `distinct`）；两篇都发布后，正文要按 `links` 链过去。
 
+### 问法研究和搜索量
+
+```bash
+node scripts/research/collect.mjs           # 采集搜索联想词和社区帖子标题 → plan/research/raw.json
+node scripts/research/match.mjs             # 匹配到地图节点，并算出需求分 → plan/research/demand.json
+node scripts/research/report-page.mjs       # 生成问法对照页（本机导航）
+node scripts/research/export-keywords.mjs   # 导出 P1 关键词查询表 → plan/research/keywords-p1.csv（--all 导出全部）
+node scripts/research/import-volume.mjs <文件.csv>   # 导入关键词工具查到的搜索量 → plan/research/volume.json
+```
+
+查搜索量：把 `keywords-p1.csv` 第一列粘到百度营销关键词规划师或 5118 批量查询，导出结果（Excel 先另存为 CSV），再用 `import-volume.mjs` 导入。之后 `npm run plan:page` 重新生成地图页，卡片上会显示每个节点的需求分和搜索量，可以按两者排序。
+
+需求分只是联想词的命中次数，用来比较节点之间的相对需求；搜索量为 0 或「未收录」的长尾也不一定没人搜，两者结合看。人工整理建议的规则见 `plan/research/CURATION.md`，最终建议在 `plan/research/proposals.yaml`。
+
 内容铁律：**对号入座 → 当场给用 → 点出系统缺口**。标题就是读者的问题，开头 150 字给答案，结尾点出下一步还会卡在哪。
 
 ## 本地运行

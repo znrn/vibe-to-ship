@@ -1,7 +1,7 @@
 // 把选题地图生成一个可浏览的 HTML 页面（给自己看，不发布到网站）
 // 用法：npm run plan:page              默认写到 ~/launchpad/pages/aidev-topic-map.html
 //       npm run plan:page -- <输出路径>
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { dirname, resolve } from 'node:path';
 import { ROADMAP, PLATFORMS, TOPICS } from '../src/data/site.ts';
@@ -11,6 +11,11 @@ const out = resolve(process.argv[2] ?? `${homedir()}/launchpad/pages/aidev-topic
 const DEV = 'http://localhost:4321';
 
 const { map, merged } = loadTopicMap();
+// 需求分（联想词，scripts/research/match.mjs 算出）和搜索量（关键词工具导入，scripts/research/import-volume.mjs）
+const readJson = (f) => (existsSync(f) ? JSON.parse(readFileSync(f, 'utf8')) : null);
+const demand = readJson('plan/research/demand.json')?.demand ?? {};
+const volume = readJson('plan/research/volume.json')?.nodes ?? {};
+const hasVolume = Object.keys(volume).length > 0;
 const byId = new Map(merged.map((n) => [n.id, n]));
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const platformName = (s) => PLATFORMS.find((p) => p.slug === s)?.name ?? s;
@@ -23,7 +28,7 @@ const now = new Date();
 const stamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
 const chip = (n) =>
-  `<a class="node-chip s-${n.status} ${n.priority === 'P1' ? 'p1' : ''}" href="#${esc(n.id)}" title="${esc(n.intent)}">${esc(n.keyword)}</a>`;
+  `<a class="node-chip s-${n.status} ${n.priority === 'P1' ? 'p1' : ''}" href="#${esc(n.id)}" title="${esc(n.intent)}${demand[n.id] ? ` · 需求分 ${demand[n.id].score}` : ''}${volume[n.id] ? ` · 搜索量 ${volume[n.id].volume}` : ''}">${esc(n.keyword)}</a>`;
 
 const matrix = `
 <div class="table-wrap"><table class="matrix">
@@ -40,7 +45,7 @@ const matrix = `
 const card = (n) => {
   const links = n.links.map((to) => byId.get(to)).filter(Boolean);
   return `
-  <article class="card" id="${esc(n.id)}" data-platforms="${n.platforms.join(' ')}" data-priority="${n.priority}" data-status="${n.status}">
+  <article class="card" id="${esc(n.id)}" data-platforms="${n.platforms.join(' ')}" data-priority="${n.priority}" data-status="${n.status}" data-demand="${demand[n.id]?.score ?? 0}" data-volume="${volume[n.id]?.volume ?? -1}">
     <div class="card-top">
       <h3>${esc(n.keyword)}</h3>
       <span class="badge pri-${n.priority}">${n.priority}</span>
@@ -48,6 +53,10 @@ const card = (n) => {
     </div>
     ${n.title ? `<p class="title">《${esc(n.title)}》${n.status === 'published' ? ` <a href="${DEV}/articles/${esc(n.id)}/" target="_blank">打开 ↗</a>` : ''}</p>` : ''}
     <p class="intent">${esc(n.intent)}</p>
+    <div class="signal">
+      <span class="dm ${demand[n.id]?.score ? '' : 'zero'}" title="${esc((demand[n.id]?.top ?? []).join(' / ') || '没有联想词命中')}">需求分 <b>${demand[n.id]?.score ?? 0}</b></span>
+      ${volume[n.id] ? `<span class="vol" title="主词 ${volume[n.id].keyword ?? '无数据'}">搜索量 <b>${volume[n.id].volume}</b><small>（${volume[n.id].queried}/${volume[n.id].total} 个词有数据）</small></span>` : hasVolume ? '<span class="vol muted">搜索量 未查</span>' : ''}
+    </div>
     ${n.covers.length ? `<div class="covers">${n.covers.map((c) => `<span>${esc(c)}</span>`).join('')}</div>` : ''}
     <div class="meta">
       <code>${esc(n.id)}</code>
@@ -128,6 +137,10 @@ h2{font-size:20px;margin:40px 0 14px}
 .covers span{font-size:12.5px;border:1px dashed var(--line);border-radius:6px;padding:0 7px}
 .meta{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:12px;color:var(--muted);margin-top:10px}
 .meta code{font:12px ui-monospace,Menlo,monospace}
+.signal{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--muted);margin-top:8px}
+.signal b{color:var(--ink);font-size:14px}
+.signal .zero b{color:var(--warm)}
+.signal small{font-size:11.5px}
 .links{font-size:12.5px;color:var(--muted);margin-top:6px}
 .links a{margin-left:8px}
 .muted{color:var(--muted)}
@@ -165,6 +178,7 @@ footer{margin-top:48px;font-size:12.5px;color:var(--muted)}
     <label>形态<select id="f-platform"><option value="">全部</option>${PLATFORMS.map((p) => `<option value="${p.slug}">${esc(p.name)}</option>`).join('')}</select></label>
     <label>优先级<select id="f-priority"><option value="">全部</option><option>P1</option><option>P2</option><option>P3</option></select></label>
     <label>状态<select id="f-status"><option value="">全部</option><option value="planned">计划</option><option value="draft">草稿</option><option value="published">已发布</option></select></label>
+    <label>排序<select id="f-sort"><option value="">优先级</option><option value="demand">需求分</option>${hasVolume ? '<option value="volume">搜索量</option>' : ''}</select></label>
     <span class="shown" id="shown"></span>
   </div>
   ${ROADMAP.map((s) => {
@@ -172,11 +186,12 @@ footer{margin-top:48px;font-size:12.5px;color:var(--muted)}
     return `<section class="stage" data-stage="${s.slug}"><div class="stage-head"><h3>${s.icon} ${s.step} · ${esc(s.name)}</h3><span>${esc(s.desc)}</span></div><div class="cards">${list.map(card).join('')}</div></section>`;
   }).join('')}
 
-  <footer>改地图：编辑 vibe-to-ship/${MAP}，然后在项目里运行 <code>npm run check:keywords</code> 检查、<code>npm run plan:page</code> 重新生成本页。</footer>
+  <footer>需求分：联想词里和该节点足够像的问法条数，按出现在几个搜索引擎里加权，只用来比较相对大小（node scripts/research/match.mjs 重算）。搜索量：关键词工具导出后用 node scripts/research/import-volume.mjs 导入，按节点把主词和长尾加总。<br>改地图：编辑 vibe-to-ship/${MAP}，然后在项目里运行 <code>npm run check:keywords</code> 检查、<code>npm run plan:page</code> 重新生成本页。</footer>
 </div>
 <script>
-const f = { platform: document.getElementById('f-platform'), priority: document.getElementById('f-priority'), status: document.getElementById('f-status') };
+const f = { platform: document.getElementById('f-platform'), priority: document.getElementById('f-priority'), status: document.getElementById('f-status'), sort: document.getElementById('f-sort') };
 const cards = [...document.querySelectorAll('.card')];
+cards.forEach((c, i) => (c.dataset.order = i));
 function apply() {
   let shown = 0;
   for (const c of cards) {
@@ -186,7 +201,14 @@ function apply() {
     c.classList.toggle('hidden', !ok);
     if (ok) shown++;
   }
-  for (const s of document.querySelectorAll('.stage')) s.classList.toggle('hidden', !s.querySelector('.card:not(.hidden)'));
+  for (const s of document.querySelectorAll('.stage')) {
+    const box = s.querySelector('.cards');
+    const list = [...box.children];
+    const key = f.sort.value;
+    list.sort((a, b) => key ? Number(b.dataset[key]) - Number(a.dataset[key]) : Number(a.dataset.order) - Number(b.dataset.order));
+    list.forEach((c) => box.appendChild(c));
+    s.classList.toggle('hidden', !s.querySelector('.card:not(.hidden)'));
+  }
   document.getElementById('shown').textContent = '显示 ' + shown + ' / ' + cards.length;
 }
 Object.values(f).forEach((el) => el.addEventListener('change', apply));

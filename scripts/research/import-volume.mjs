@@ -1,0 +1,136 @@
+// 导入关键词工具导出的搜索量，汇总到每个节点，写到 plan/research/volume.json（地图页会显示）
+// 用法：node scripts/research/import-volume.mjs <导出的文件.csv> [--column 列名]
+//
+// 兼容百度营销关键词规划师、5118、站长工具等导出的 CSV / TSV：
+//   - 编码自动识别：UTF-8、UTF-16（带 BOM）、GBK
+//   - 关键词列：表头含「关键词 / 关键字 / keyword」的第一列
+//   - 搜索量列：表头含「整体 / 总」的搜索量列优先；否则把所有「搜索量 / 指数 / volume」列（如 PC + 移动）相加
+//   - 也可以用 --column 指定列名
+//   - 数值里的逗号、「<5」、「100-1000」这类区间都会换算成数字
+// Excel 文件请先另存为 CSV。
+// 多次导入会合并：同一个词以最新导入的数值为准。工具额外推荐的词（地图里没有）记在 extra 里，可以挑来补长尾。
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { basename } from 'node:path';
+import { loadTopicMap } from '../lib/topic-map.mjs';
+
+const OUT = 'plan/research/volume.json';
+const file = process.argv[2];
+const colArg = process.argv.includes('--column') ? process.argv[process.argv.indexOf('--column') + 1] : null;
+if (!file || !existsSync(file)) {
+  console.error('用法：node scripts/research/import-volume.mjs <导出的文件.csv> [--column 列名]');
+  process.exit(1);
+}
+
+// ── 读文件，识别编码 ──
+const buf = readFileSync(file);
+let text;
+if (buf[0] === 0xff && buf[1] === 0xfe) text = new TextDecoder('utf-16le').decode(buf);
+else if (buf[0] === 0xfe && buf[1] === 0xff) text = new TextDecoder('utf-16be').decode(buf);
+else {
+  try {
+    text = new TextDecoder('utf-8', { fatal: true }).decode(buf);
+  } catch {
+    text = new TextDecoder('gbk').decode(buf);
+  }
+}
+text = text.replace(/^﻿/, '');
+
+// ── 解析 CSV / TSV（支持引号） ──
+function parseLine(line, sep) {
+  const cells = [];
+  let cur = '';
+  let quoted = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (quoted) {
+      if (c === '"' && line[i + 1] === '"') { cur += '"'; i++; }
+      else if (c === '"') quoted = false;
+      else cur += c;
+    } else if (c === '"') quoted = true;
+    else if (c === sep) { cells.push(cur.trim()); cur = ''; }
+    else cur += c;
+  }
+  cells.push(cur.trim());
+  return cells;
+}
+const lines = text.split(/\r?\n/).filter((l) => l.trim());
+const KW = /关键词|关键字|keyword/i;
+const headerIdx = lines.findIndex((l) => KW.test(l));
+if (headerIdx < 0) {
+  console.error('没找到含「关键词」的表头行，请确认文件是关键词工具导出的列表');
+  process.exit(1);
+}
+const sep = (lines[headerIdx].match(/\t/g) ?? []).length > (lines[headerIdx].match(/,/g) ?? []).length ? '\t' : ',';
+const header = parseLine(lines[headerIdx], sep);
+const kwCol = header.findIndex((h) => KW.test(h));
+
+let volCols;
+if (colArg) {
+  volCols = [header.indexOf(colArg)];
+  if (volCols[0] < 0) {
+    console.error(`没有名为「${colArg}」的列。可用的列：${header.join(' | ')}`);
+    process.exit(1);
+  }
+} else {
+  const VOL = /搜索量|指数|volume|searches/i;
+  const candidates = header.map((h, i) => [h, i]).filter(([h, i]) => i !== kwCol && VOL.test(h) && !/竞争|出价|价格|变化|趋势|同比|环比/.test(h));
+  const total = candidates.filter(([h]) => /整体|总/.test(h));
+  volCols = (total.length ? total.slice(0, 1) : candidates).map(([, i]) => i);
+}
+if (!volCols.length) {
+  console.error(`没识别出搜索量列，请用 --column 指定。可用的列：${header.join(' | ')}`);
+  process.exit(1);
+}
+
+// 「1,234」「<5」「100-1000」「—」都换算成数字
+function toNumber(v) {
+  const s = String(v ?? '').replace(/[,，\s]/g, '');
+  if (!s || /^[-—–]$/.test(s)) return 0;
+  const lt = s.match(/^[<＜](\d+(?:\.\d+)?)/);
+  if (lt) return Number(lt[1]) / 2;
+  const range = s.match(/^(\d+(?:\.\d+)?)(?:[-~～至到])(\d+(?:\.\d+)?)/);
+  if (range) return (Number(range[1]) + Number(range[2])) / 2;
+  const n = parseFloat(s.replace(/[^\d.]/g, ''));
+  return Number.isFinite(n) ? n : 0;
+}
+
+// ── 关键词 → 节点 ──
+const norm = (s) => String(s).toLowerCase().replace(/[\s\p{P}\p{S}]/gu, '');
+const { merged } = loadTopicMap();
+const owner = new Map();
+for (const n of merged) for (const t of [n.keyword, ...n.covers]) owner.set(norm(t), { id: n.id, term: t });
+
+const prev = existsSync(OUT) ? JSON.parse(readFileSync(OUT, 'utf8')) : { terms: {}, extra: {}, imports: [] };
+let hit = 0;
+let extra = 0;
+for (const line of lines.slice(headerIdx + 1)) {
+  const cells = parseLine(line, sep);
+  const kw = cells[kwCol];
+  if (!kw) continue;
+  const vol = volCols.reduce((sum, i) => sum + toNumber(cells[i]), 0);
+  const o = owner.get(norm(kw));
+  if (o) { prev.terms[o.term] = vol; hit++; }
+  else { prev.extra[kw] = vol; extra++; }
+}
+
+// ── 按节点汇总（主词 + 长尾） ──
+const nodes = {};
+for (const n of merged) {
+  const terms = [n.keyword, ...n.covers].filter((t) => t in prev.terms);
+  if (!terms.length) continue;
+  nodes[n.id] = {
+    volume: terms.reduce((s, t) => s + prev.terms[t], 0),
+    keyword: prev.terms[n.keyword] ?? null,
+    queried: terms.length,
+    total: 1 + n.covers.length,
+  };
+}
+prev.nodes = nodes;
+prev.imports.push({ file: basename(file), at: new Date().toISOString(), columns: volCols.map((i) => header[i]), matched: hit, extra });
+writeFileSync(OUT, JSON.stringify(prev, null, 1));
+
+console.log(`读取 ${basename(file)}：搜索量列 ${volCols.map((i) => `「${header[i]}」`).join(' + ')}`);
+console.log(`对上地图的词 ${hit} 个，地图里没有的词 ${extra} 个（记在 extra，可挑来补长尾）`);
+console.log(`已有搜索量的节点 ${Object.keys(nodes).length} 个 → ${OUT}`);
+const top = Object.entries(nodes).sort((a, b) => b[1].volume - a[1].volume).slice(0, 10);
+for (const [id, v] of top) console.log(`  ${String(v.volume).padStart(8)}  ${id}（${v.queried}/${v.total} 个词有数据）`);
