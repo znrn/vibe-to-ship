@@ -8,9 +8,11 @@ interface Props {
   title?: string;
   description?: string;
   ogType?: 'website' | 'article';
+  // 还没有内容的聚合页：不让搜索引擎收录，链接照常跟踪
+  noindex?: boolean;
 }
 
-const { title, description = SITE.description, ogType = 'website' } = Astro.props;
+const { title, description = SITE.description, ogType = 'website', noindex = false } = Astro.props;
 const fullTitle = title ? `${title} - ${SITE.name}` : `${SITE.name} · 非程序员也能上线第一款产品`;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 ---
@@ -24,6 +26,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <meta name="description" content={description} />
     <meta name="author" content={SITE.author.name} />
     <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="alternate" type="application/rss+xml" title={SITE.name} href="/rss.xml" />
     <link rel="sitemap" href="/sitemap-index.xml" />

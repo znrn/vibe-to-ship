@@ -1,0 +1,26 @@
+---
+// 聚合页导语，内容来自 src/content/hubs/<kind>/<slug>.md，没写就不显示
+import { getEntry, render } from 'astro:content';
+
+interface Props {
+  id: string; // 例如 platforms/web
+}
+const entry = await getEntry('hubs', Astro.props.id);
+const { Content } = entry ? await render(entry) : { Content: null };
+---
+
+{
+  Content && (
+    <div class="hub-intro">
+      <Content />
+    </div>
+  )
+}
+
+<style>
+  .hub-intro{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px 20px;margin-bottom:28px;font-size:15.5px;line-height:1.85}
+  .hub-intro :global(p){margin:8px 0}
+  .hub-intro :global(p:first-child){margin-top:0}
+  .hub-intro :global(p:last-child){margin-bottom:0}
+  .hub-intro :global(a){color:var(--accent);text-decoration:underline;text-underline-offset:3px}
+</style>

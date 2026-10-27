@@ -42,6 +42,10 @@ steps:                  # 可选，照做步骤
   - 第二步
 stuckNext: 接下来通常会卡在的地方   # 可选，不填就按下一步路线自动生成
 next: first-payment-without-license  # 可选，下一篇推荐（填文件名，不带 .md）
+sources:                # 参考来源，规则、费用、流程类的说法都要附官方链接
+  - title: 阿里云 ICP 备案帮助文档
+    url: https://help.aliyun.com/zh/icp-filing/
+reviewed: 2026-10-27    # 最后一次对照来源核实的日期，填了页面上才显示「内容最后核对」
 faq:                    # 可选，文末「常见问题」，同时输出 FAQPage 结构化数据
   - q: 备案驳回后多久能重新提交？
     a: 改完就可以重新提交……
@@ -67,6 +71,8 @@ draft: false            # 草稿不会发布
 | `app` | App | `/platforms/app/` |
 | `desktop` | 桌面软件 | `/platforms/desktop/` |
 
+每个聚合页可以写一段导语，放在 `src/content/hubs/<stages|platforms|topics>/<取值>.md`，正文显示在页面标题下方，frontmatter 里的 `description` 可以覆盖默认的页面描述。还没有已发布文章的聚合页会自动加 `noindex`，也不进 sitemap。
+
 专题 `topics`：`tools` 工具怎么选、`cost` 成本与时间账、`roles` 按岗位对号、`debug` 翻车与排错、`works` 作品证明，聚合页在 `/topics/<取值>/`。
 
 ## 选题地图
@@ -75,7 +81,8 @@ draft: false            # 草稿不会发布
 
 ```bash
 npm run check:keywords              # build 前会自动运行
-npm run check:keywords -- --report  # 额外打印「阶段 × 形态」覆盖矩阵和待写的 P1
+npm run check:keywords -- --report  # 额外打印覆盖矩阵、待写的 P1、未核对的文章、缺导语的聚合页
+npm run plan:page                   # 生成选题地图浏览页（默认写到 ~/launchpad/pages/aidev-topic-map.html）
 ```
 
 检查内容：文章必须在地图里有节点；不同节点不能用同一个词，词很像时会提示（确认意图不同的写进节点的 `distinct`）；两篇都发布后，正文要按 `links` 链过去。
@@ -97,6 +104,7 @@ npm run build    # 生成静态网站到 dist/
 ```
 src/
   content/articles/   文章（开源手册正文）
+  content/hubs/       阶段 / 形态 / 专题聚合页的导语
   content.config.ts   文章 frontmatter 的格式定义
   data/site.ts        站点信息、五步路线、产品形态、专题、实战营和占位文案
   layouts/            全站布局

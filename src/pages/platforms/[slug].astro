@@ -2,6 +2,8 @@
 // 形态聚合页：某种产品从备账号到过审核的完整流程，按五步路线分组
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ArticleList from '../../components/ArticleList.astro';
+import HubIntro from '../../components/HubIntro.astro';
+import { getEntry } from 'astro:content';
 import { ROADMAP, PLATFORMS } from '../../data/site';
 import { getArticles } from '../../lib/articles';
 
@@ -11,15 +13,17 @@ export function getStaticPaths() {
 
 const { platform } = Astro.props;
 const articles = (await getArticles()).filter((a) => a.data.platforms.includes(platform.slug));
+const hub = await getEntry('hubs', `platforms/${platform.slug}`);
 ---
 
-<BaseLayout title={`${platform.keyword}：从备账号到过审核`} description={`${platform.name}上线完整流程：${platform.desc}。按五步路线逐步说明，每篇开头直接给结论。`}>
+<BaseLayout title={`${platform.keyword}：从备账号到过审核`} description={hub?.data.description ?? `${platform.name}上线完整流程：${platform.desc}。按五步路线逐步说明，每篇开头直接给结论。`} noindex={articles.length === 0}>
   <div class="wrap page-head">
     <nav class="crumbs" aria-label="面包屑"><a href="/">首页</a><span>/</span><a href="/categories/">分类</a><span>/</span><span>{platform.name}</span></nav>
     <h1>{platform.icon} {platform.name}上线流程</h1>
     <p>{platform.desc}</p>
   </div>
   <div class="wrap body">
+    <HubIntro id={`platforms/${platform.slug}`} />
     {
       ROADMAP.map((s) => {
         const list = articles.filter((a) => a.data.stage === s.slug);

@@ -26,6 +26,10 @@ const articles = defineCollection({
     topics: z.array(z.enum(TOPIC_SLUGS)).default([]),
     date: z.coerce.date(),
     updated: z.coerce.date().optional(),
+    // 参考来源：平台规则、费用、流程这类会变的事实，附上官方文档链接
+    sources: z.array(z.object({ title: z.string(), url: z.string().url() })).default([]),
+    // 最后一次对照来源核实内容的日期；不填页面上不显示「已核对」
+    reviewed: z.coerce.date().optional(),
     // 首屏「结论 / 步骤」块：一句话结论 + 照做步骤
     answer: z.string(),
     steps: z.array(z.string()).default([]),
@@ -39,4 +43,13 @@ const articles = defineCollection({
   }),
 });
 
-export const collections = { articles };
+// 聚合页导语：src/content/hubs/<stages|platforms|topics>/<slug>.md
+// 正文显示在聚合页标题下方，说明这一步 / 这条流程整体怎么走；description 可覆盖默认的页面描述
+const hubs = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/hubs' }),
+  schema: z.object({
+    description: z.string().optional(),
+  }),
+});
+
+export const collections = { articles, hubs };

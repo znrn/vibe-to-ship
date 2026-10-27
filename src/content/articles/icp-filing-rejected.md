@@ -27,6 +27,13 @@ faq:
     a: 去掉「公司」「官方」「商城」「平台」这类像企业或商业的字眼，换成「某某的作品集」「某某的学习笔记」这种一看就是个人的名称，名称也要和网站实际内容对得上。
   - q: 被驳回会影响我的域名和服务器吗？
     a: 不影响域名归属，服务器也照常可用。只是备案通过之前，网站通常不能在国内服务器上对外开放访问，接入商可能会检查。
+sources:
+  - title: 工信部 ICP/IP 地址/域名信息备案管理系统
+    url: https://beian.miit.gov.cn/
+  - title: 阿里云 ICP 备案帮助文档
+    url: https://help.aliyun.com/zh/icp-filing/
+  - title: 腾讯云网站备案帮助文档
+    url: https://cloud.tencent.com/document/product/243
 stuckNext: 网站能访问了，可第一笔钱该怎么收
 next: first-payment-without-license
 sample: true

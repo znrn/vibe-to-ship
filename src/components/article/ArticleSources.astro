@@ -1,0 +1,45 @@
+---
+// 文末参考来源 + 最后核对日期。规则会变，读者和 AI 搜索都靠这里判断内容还准不准
+import { formatDate } from '../../lib/articles';
+
+interface Props {
+  sources: { title: string; url: string }[];
+  reviewed?: Date;
+}
+const { sources, reviewed } = Astro.props;
+---
+
+{
+  (sources.length > 0 || reviewed) && (
+    <section class="sources" id="sources">
+      <h2>参考来源</h2>
+      {sources.length > 0 && (
+        <ol>
+          {sources.map((s) => (
+            <li>
+              <a href={s.url} target="_blank" rel="noopener nofollow">{s.title}</a>
+              <span class="host">{new URL(s.url).hostname}</span>
+            </li>
+          ))}
+        </ol>
+      )}
+      <p class="reviewed">
+        {reviewed ? (
+          <>内容最后核对：<time datetime={reviewed.toISOString()}>{formatDate(reviewed)}</time>。平台规则可能已有变化，以官方最新说明为准。</>
+        ) : (
+          <>这篇内容还没有对照来源逐条核对，请以官方最新说明为准。</>
+        )}
+      </p>
+    </section>
+  )
+}
+
+<style>
+  .sources{margin-top:40px;padding-top:20px;border-top:1px solid var(--line)}
+  h2{font-size:18px;margin:0 0 10px}
+  ol{padding-left:1.4em;display:grid;gap:4px;font-size:14.5px}
+  li::marker{color:var(--muted)}
+  a{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
+  .host{color:var(--muted);font-size:12.5px;margin-left:8px}
+  .reviewed{font-size:13px;color:var(--muted);margin-top:10px}
+</style>

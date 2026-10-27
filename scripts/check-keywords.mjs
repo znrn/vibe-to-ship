@@ -8,9 +8,11 @@
 //     确认意图不同的，在地图节点的 distinct 里登记，之后不再提示
 //   - 地图里写的阶段 / 形态 / 主词和文章 frontmatter 不一致
 //   - 两篇都已发布，但正文里没按 links 链过去
+//   - 已发布的文章没有 sources（参考来源）
 // 用法：npm run check:keywords（npm run build 会先自动跑一遍）
-//       npm run check:keywords -- --report  额外打印「阶段 × 形态」覆盖矩阵和待写的 P1
-import { ROADMAP, PLATFORMS } from '../src/data/site.ts';
+//       npm run check:keywords -- --report  额外打印覆盖矩阵、待写的 P1、未核对的文章、缺导语的聚合页
+import { existsSync } from 'node:fs';
+import { ROADMAP, PLATFORMS, TOPICS } from '../src/data/site.ts';
 import { loadTopicMap } from './lib/topic-map.mjs';
 
 const SIMILAR = 0.5; // 两个词的字符二元组 Jaccard 相似度，超过就提示
@@ -26,6 +28,9 @@ for (const n of merged) {
   if (!STAGES.includes(n.stage)) errors.push(`${n.id}: stage「${n.stage}」不是 ${STAGES.join(' / ')} 之一`);
   if (!n.platforms.length || n.platforms.some((p) => !PLATFORM_SLUGS.includes(p))) {
     errors.push(`${n.id}: platforms 必须是 ${PLATFORM_SLUGS.join(' / ')} 中的一个或几个`);
+  }
+  if (n.status === 'published' && !(articles.get(n.id).data.sources ?? []).length) {
+    warnings.push(`${n.id}: 还没有 sources，规则、费用、流程类的说法要附官方来源`);
   }
   for (const to of n.distinct) if (!nodes.has(to)) errors.push(`${n.id}: distinct 里的 ${to} 在地图里不存在`);
   for (const to of n.links) {
@@ -101,6 +106,20 @@ if (process.argv.includes('--report')) {
   const todo = merged.filter((n) => n.status !== 'published' && n.priority === 'P1');
   console.log(`\n待写的 P1（${todo.length} 篇）`);
   for (const n of todo) console.log(`  ${pad(n.id, 34)} ${n.keyword}`);
+
+  const unreviewed = merged.filter((n) => n.status === 'published' && !articles.get(n.id).data.reviewed);
+  console.log(`\n已发布但还没核对（没填 reviewed）（${unreviewed.length} 篇）`);
+  for (const n of unreviewed) console.log(`  ${n.id}`);
+
+  // 有文章的聚合页才需要导语；空页本来就 noindex
+  const live = merged.filter((n) => n.status === 'published');
+  const hubs = [
+    ...ROADMAP.filter((s) => live.some((n) => n.stage === s.slug)).map((s) => `stages/${s.slug}`),
+    ...PLATFORMS.filter((p) => live.some((n) => n.platforms.includes(p.slug))).map((p) => `platforms/${p.slug}`),
+    ...TOPICS.filter((t) => live.some((n) => n.topics.includes(t.slug))).map((t) => `topics/${t.slug}`),
+  ].filter((id) => !existsSync(`src/content/hubs/${id}.md`));
+  console.log(`\n有文章但缺导语的聚合页（${hubs.length} 个）`);
+  for (const id of hubs) console.log(`  src/content/hubs/${id}.md`);
   console.log('');
 }
 

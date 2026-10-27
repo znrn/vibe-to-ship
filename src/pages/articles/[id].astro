@@ -6,6 +6,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import RoadmapPosition from '../../components/article/RoadmapPosition.astro';
 import ArticleExit from '../../components/article/ArticleExit.astro';
 import ArticleFaq from '../../components/article/ArticleFaq.astro';
+import ArticleSources from '../../components/article/ArticleSources.astro';
 import { SITE, platformOf, topicOf } from '../../data/site';
 import { getArticles, formatDate, stageOfArticle, type Article } from '../../lib/articles';
 
@@ -30,6 +31,9 @@ const jsonLd: object[] = [
     inLanguage: 'zh-CN',
     datePublished: data.date.toISOString(),
     dateModified: (data.updated ?? data.date).toISOString(),
+    ...(data.sources.length > 0 && {
+      citation: data.sources.map((s) => ({ '@type': 'CreativeWork', name: s.title, url: s.url })),
+    }),
     articleSection: step.name,
     keywords: [data.keyword, ...data.covers].join(','),
     mainEntityOfPage: { '@type': 'WebPage', '@id': url },
@@ -93,6 +97,7 @@ if (data.faq.length > 0) {
         {data.topics.map((t) => <a class="chip" href={`/topics/${t}/`}>#{topicOf(t).name}</a>)}
         <span>作者 {SITE.author.name}</span>
         <time datetime={data.date.toISOString()}>{formatDate(data.date)}</time>
+        {data.updated && <span>更新于 <time datetime={data.updated.toISOString()}>{formatDate(data.updated)}</time></span>}
       </div>
 
       <div class="prose">
@@ -100,6 +105,8 @@ if (data.faq.length > 0) {
       </div>
 
       <ArticleFaq items={data.faq} />
+
+      <ArticleSources sources={data.sources} reviewed={data.reviewed} />
 
       <ArticleExit step={step.step} stuckNext={data.stuckNext} next={next} />
     </article>
