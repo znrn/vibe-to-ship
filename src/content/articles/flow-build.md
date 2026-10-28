@@ -8,6 +8,12 @@ covers:
   - 怎么用ai写代码
   - ai写程序如何入手
   - 用ai做软件很复杂吗
+  - AI编程怎么用
+  - 如何用AI编程详细步骤
+  - AI编程入门教程
+  - vibecoding是什么
+  - vibecoding教程
+  - 零基础用AI做软件
 stage: build
 kind: flow
 platforms: [web, miniprogram, app, desktop]
@@ -98,7 +104,12 @@ aiRun: true
 sources:
   - title: Claude Code：Overview
     url: https://code.claude.com/docs/en/overview
-reviewed: 2026-10-27
+  - title: CNN：「vibe coding」被柯林斯词典评为 2025 年度词汇
+    url: https://krdo.com/news/2025/11/06/vibe-coding-named-collins-dictionarys-word-of-the-year/
+  - title: Andrej Karpathy 首次提出「vibe coding」的帖子（2025 年 2 月 2 日）
+    url: https://x.com/karpathy/status/1886192184808149383
+updated: 2026-10-28
+reviewed: 2026-10-28
 faq:
   - q: 用 AI 做软件很复杂吗？
     a: 写代码这部分不复杂，交给 AI 就行。难在说清楚要什么、一步步检查、出问题时不慌。照「一次一件事、做完就检查、能用就存版本」走，大多数问题都能解决。
@@ -106,6 +117,10 @@ faq:
     a: 新建一个空文件夹，在里面打开 Claude Code 或 Codex，先用大白话说想法，让它写需求和计划，别一上来就让它写代码。
   - q: 用 AI 开发软件的基本流程是什么？
     a: 说想法、写计划、一次做一步、每步检查、能用就存版本，报错按 5 步处理。上线前还有部署、域名、审核这些步骤，见后面几步的流程页。
+  - q: vibe coding 是什么意思？
+    a: 可以理解为「凭感觉编程」：不逐行看代码，只用自然语言告诉 AI 要什么，让它写出代码。这个说法由 Andrej Karpathy 在 2025 年 2 月提出，柯林斯词典把它评为 2025 年度词汇。这一页讲的就是这种做法的完整流程。
+  - q: 零基础能用 AI 做软件吗？
+    a: 能做出能用的小软件，比如单页网站、小工具、简单的小程序。功能越多（登录、支付、数据），越需要你会判断 AI 做得对不对，所以第一个项目要小，边做边学。
   - q: 要先学编程吗？
     a: 不用先学。你需要的是把想法说清楚、会检查结果、会把报错原样交给 AI。看不懂的地方直接问它，让它用大白话解释。
   - q: 从零写，还是找现成的开源项目改？
