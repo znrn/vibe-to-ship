@@ -7,6 +7,7 @@
 //   new_nodes    新增节点，插到同一流程步骤最后一个节点后面；可带 links / topics
 //   moves        [{ term, from, to }] 把长尾从一个节点挪到另一个（拆分时用）
 //   links        { 节点 id: [要补链到的节点 id] }
+//   remove       [节点 id] 删掉节点，并从其他节点的 links / distinct 里去掉对它的引用（已发布文章的节点不能删）
 // 同一个词不会重复加；和节点自身文章主词相同的长尾会跳过。
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { parse, parseDocument, YAMLSeq } from 'yaml';
@@ -78,7 +79,7 @@ for (const c of p.changes ?? []) {
     if (isPublished(c.node)) editArticle(c.node, (fm) => fm.set('keyword', c.to));
     else node.set('keyword', c.to);
   } else if (c.action === '升级' || c.action === '降级') node.set('priority', c.to);
-  else log.push(`→ 「${c.action}」需手动处理：${c.node} → ${c.to}`);
+  else if (c.action !== '删除') log.push(`→ 「${c.action}」需手动处理：${c.node} → ${c.to}`);
 }
 // 2 新节点（先插入，后面的长尾和链接才能指向它们）
 const stageOf = (it) => it.get('stage') ?? (isPublished(it.get('id')) ? parse(readFileSync(articlePath(it.get('id')), 'utf8').match(/^---\n([\s\S]*?)\n---/)[1]).stage : null);
@@ -103,6 +104,19 @@ for (const [id, to] of Object.entries(p.links ?? {})) {
   let links = node.get('links');
   if (!links) { node.set('links', doc.createNode([])); links = node.get('links'); links.flow = true; }
   for (const t of to) if (!links.items.some((x) => val(x) === t)) links.add(t);
+}
+
+// 5 删节点
+for (const id of p.remove ?? []) {
+  if (isPublished(id)) { log.push(`✗ 删节点：${id} 已有文章，不能删`); continue; }
+  const idx = seq.items.findIndex((it) => it.get('id') === id);
+  if (idx < 0) { log.push(`✗ 删节点：${id} 不存在`); continue; }
+  seq.items.splice(idx, 1);
+  for (const it of seq.items) for (const k of ['links', 'distinct']) {
+    const list = it.get(k);
+    if (list) list.items = list.items.filter((x) => val(x) !== id);
+  }
+  log.push(`→ 已删节点 ${id}`);
 }
 
 writeFileSync(MAP, doc.toString({ lineWidth: 0, flowCollectionPadding: false }));

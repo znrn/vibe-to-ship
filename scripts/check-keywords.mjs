@@ -37,7 +37,10 @@ for (const n of merged) {
   for (const to of n.links) {
     if (!nodes.has(to)) errors.push(`${n.id}: links 里的 ${to} 在地图里不存在`);
     else if (n.status !== 'planned' && articles.has(to) && !articles.get(to).data.draft) {
-      if (!articles.get(n.id).linkText.includes(`/articles/${to}/`)) warnings.push(`${n.id}: 正文里还没链到 /articles/${to}/`);
+      // 流程页文章的网址是 /flow/<步骤>/，问题页是 /articles/<id>/
+      const target = articles.get(to).data;
+      const href = target.kind === 'flow' ? `/flow/${target.stage}/` : `/articles/${to}/`;
+      if (!articles.get(n.id).linkText.includes(href)) warnings.push(`${n.id}: 正文里还没链到 ${href}`);
     }
   }
 }

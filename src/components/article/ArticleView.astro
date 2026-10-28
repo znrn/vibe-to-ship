@@ -15,6 +15,7 @@ import ArticleList from '../ArticleList.astro';
 import { SITE, ROADMAP, platformOf, topicOf } from '../../data/site';
 import { flowUrl } from '../../data/flow';
 import { articleUrl, formatDate, stageOfArticle, type Article } from '../../lib/articles';
+import { markdownUrl } from '../../lib/markdown';
 
 interface Props {
   article: Article;
@@ -28,6 +29,7 @@ const { Content } = await render(article);
 const next = data.next ? await getEntry(data.next) : undefined;
 const step = stageOfArticle(article);
 const url = new URL(articleUrl(article), Astro.site).href;
+const mdUrl = new URL(markdownUrl(article), Astro.site).href;
 const prevStep = ROADMAP.find((s) => s.step === step.step - 1);
 const nextStep = ROADMAP.find((s) => s.step === step.step + 1);
 // 排障表里链到的问题页
@@ -94,6 +96,7 @@ if (data.faq.length > 0) {
     <meta property="article:published_time" content={data.date.toISOString()} />
     <meta property="article:author" content={SITE.author.name} />
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+    <link rel="alternate" type="text/markdown" href={markdownUrl(article)} title="纯文本版（给 AI 读）" />
   </Fragment>
 
   <div class="wrap layout">
@@ -163,7 +166,7 @@ if (data.faq.length > 0) {
 
       <ArticleFaq items={data.faq} />
 
-      {data.aiRun && <AiRunCard url={url} task={data.keyword} />}
+      {data.aiRun && <AiRunCard url={mdUrl} task={data.keyword} />}
 
       <ArticleSources sources={data.sources} reviewed={data.reviewed} />
 

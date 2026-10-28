@@ -19,8 +19,8 @@ export function loadTopicMap() {
     const m = text.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
     const data = m ? parse(m[1]) : {};
     const id = f.replace(/\.md$/, '');
-    // 正文 + 常见问题 + next 都算「链出去」
-    const linkText = [m?.[2] ?? '', JSON.stringify(data.faq ?? []), data.next ? `/articles/${data.next}/` : ''].join('\n');
+    // 正文、提示词卡、排障表、常见问题、next 里的链接都算「链出去」：整篇文件都算
+    const linkText = [text, data.next ? `/articles/${data.next}/` : ''].join('\n');
     articles.set(id, { data, linkText });
   }
 

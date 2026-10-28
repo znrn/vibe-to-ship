@@ -1,0 +1,38 @@
+---
+// 404：打错网址或页面已下线时，把人引回首页、上线流程和新手入口。
+// 构建为 dist/404.html，Nginx 里配 error_page 404 /404.html; 即可使用。
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { ROADMAP, WHAT_IS } from '../data/site';
+import { flowUrl } from '../data/flow';
+---
+
+<BaseLayout title="页面没找到" description="这个网址没有对应的页面。可以从首页、上线流程或新手入口重新开始。" noindex>
+  <div class="wrap page">
+    <p class="code">404</p>
+    <h1>这个页面没找到</h1>
+    <p class="sub">可能是网址打错了，或者文章已经换了地址。从下面找一个入口重新开始：</p>
+    <div class="ctas">
+      <a class="btn primary" href="/">回到首页</a>
+      <a class="btn" href="/flow/">看上线流程</a>
+      <a class="btn" href={WHAT_IS.path}>新手先看</a>
+      <a class="btn" href="/articles/">全部文章</a>
+    </div>
+    <h2>按步骤找</h2>
+    <ol class="flow">
+      {ROADMAP.map((s) => <li><a href={flowUrl(s.slug)}><span class="no">{s.step}</span>{s.name}</a></li>)}
+    </ol>
+  </div>
+</BaseLayout>
+
+<style>
+  .page{max-width:720px;padding-top:56px;padding-bottom:72px;text-align:center}
+  .code{font-size:64px;font-weight:800;color:var(--accent);line-height:1}
+  h1{font-size:28px;margin-top:8px}
+  .sub{color:var(--muted);margin-top:8px}
+  .ctas{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:22px}
+  h2{font-size:17px;margin:40px 0 12px}
+  .flow{list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;text-align:left}
+  .flow a{display:flex;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:14.5px}
+  .flow a:hover{border-color:var(--accent);color:var(--accent)}
+  .no{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:800;border:2px solid var(--accent);color:var(--accent);flex:none}
+</style>

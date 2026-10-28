@@ -50,12 +50,12 @@ const live = [...articles].filter(([, a]) => !a.data.draft);
 const flows = ROADMAP.map((s) => {
   const pillar = live.find(([, a]) => a.data.kind === 'flow' && a.data.stage === s.slug);
   const questions = live.filter(([, a]) => a.data.stage === s.slug && a.data.kind !== 'flow').map(([id]) => id);
-  const pending = pillar ? grep(/待冬瓜确认/).filter((x) => x.file.endsWith(`${pillar[0]}.md`)).length : 0;
+  const pending = pillar ? grep(/待冬瓜确认|待定/).filter((x) => x.file.endsWith(`/${pillar[0]}.md`)).length : 0;
   const sample = pillar?.[1].data.sample;
   const status = !pillar ? (questions.length ? 'doing' : 'todo') : pending || sample ? 'wait' : 'done';
   const note = !pillar
     ? questions.length ? `还没有流程页文章，已有 ${questions.length} 个问题页` : '还没开始'
-    : pending ? `流程页已有样板，${pending} 处待冬瓜确认` : sample ? '流程页是示例，待定稿' : `流程页已定稿，${questions.length} 个问题页`;
+    : pending ? `流程页已写，${pending} 处待定（等冬瓜）` : sample ? '流程页是示例，待定稿' : `流程页已定稿，${questions.length} 个问题页`;
   return { ...s, status, note, questions, pillar: pillar?.[0] };
 });
 
