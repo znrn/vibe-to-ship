@@ -13,7 +13,7 @@ interface Props {
 }
 
 const { title, description = SITE.description, ogType = 'website', noindex = false } = Astro.props;
-const fullTitle = title ? `${title} - ${SITE.name}` : `${SITE.name} · 不会写代码，也能靠 AI 把产品做到上线`;
+const fullTitle = title ? `${title} - ${SITE.name}` : `${SITE.homeTitle} - ${SITE.name}`;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 ---
 
@@ -31,7 +31,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <link rel="alternate" type="application/rss+xml" title={SITE.name} href="/rss.xml" />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <meta property="og:type" content={ogType} />
-    <meta property="og:title" content={title ?? SITE.name} />
+    <meta property="og:title" content={title ?? SITE.homeTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:site_name" content={SITE.name} />

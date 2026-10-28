@@ -1,5 +1,5 @@
 ---
-// 形态聚合页：某种产品从备账号到过审核的完整流程，按五步路线分组
+// 形态聚合页：某种产品从想法到上线的完整流程，按上线流程的步骤分组；标题用百度指数里有量的类目词
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ArticleList from '../../components/ArticleList.astro';
 import HubIntro from '../../components/HubIntro.astro';
@@ -15,10 +15,10 @@ const articles = (await getArticles()).filter((a) => a.data.platforms.includes(p
 const hub = await hubOf(`platforms/${platform.slug}`);
 ---
 
-<BaseLayout title={`${platform.keyword}：从备账号到过审核`} description={hub?.data.description ?? `${platform.name}上线完整流程：${platform.desc}。按五步路线逐步说明，每篇开头直接给结论。`} noindex={articles.length === 0}>
+<BaseLayout title={platform.headline} description={hub?.data.description ?? `${platform.name}上线完整流程：${platform.desc}。按上线流程逐步说明，每一步讲清你来决定什么、交给 AI 做什么。`} noindex={articles.length === 0}>
   <div class="wrap page-head">
     <nav class="crumbs" aria-label="面包屑"><a href="/">首页</a><span>/</span><a href="/flow/">上线流程</a><span>/</span><span>{platform.name}</span></nav>
-    <h1>{platform.icon} {platform.name}上线流程</h1>
+    <h1>{platform.icon} {platform.headline}</h1>
     <p>{platform.desc}</p>
   </div>
   <div class="wrap body">

@@ -80,7 +80,11 @@ const owners = [
   ...merged.map((n) => ({ id: n.id, words: [n.keyword, ...n.covers] })),
 ];
 // distinct 登记过的配对，不再提示相似
-const distinctPairs = new Set(merged.flatMap((n) => n.distinct.flatMap((to) => [`${n.id}|${to}`, `${to}|${n.id}`])));
+const distinctPairs = new Set([
+  ...merged.flatMap((n) => n.distinct.flatMap((to) => [`${n.id}|${to}`, `${to}|${n.id}`])),
+  // 站点主词（首页）也可以登记 distinct
+  ...(map.site?.distinct ?? []).flatMap((to) => [`首页|${to}`, `${to}|首页`]),
+]);
 const terms = owners.flatMap((o) => o.words.filter(Boolean).map((t) => ({ id: o.id, raw: t, norm: normalize(t) })));
 
 for (let i = 0; i < terms.length; i++) {

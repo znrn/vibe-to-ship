@@ -7,7 +7,9 @@ export const SITE = {
   tagline: 'AI 独立开发',
   url: 'https://eryx.cn',
   description:
-    'AI 独立开发者，是不会写代码、但能靠 AI 一个人把产品做到上线并收到钱的人。这里按 9 步讲清楚每一步你来决定什么、交给 AI 做什么、哪些事只能你亲自做。',
+    'Vibe coding 一人公司：不会写代码，也能靠 AI 一个人把网站、小程序、App 做到上线并收到钱。按 9 步讲清楚每一步你来决定什么、交给 AI 做什么、哪些事只能你亲自做。',
+  // 首页标题：站点主词 vibe coding、一人公司（2026-10-28 按百度指数定）
+  homeTitle: 'Vibe Coding 一人公司：不会写代码，也能靠 AI 把产品做到上线并收到钱',
   // 定位的一句话定义，来自 plan/METHOD.md，首页和入口页都用这一句
   definition: 'AI 独立开发者，是不会写代码、但能靠 AI 一个人把产品做到上线并收到钱的人。',
   author: {
@@ -86,10 +88,11 @@ export const stageOf = flowOf;
 
 // 四种产品形态，各有一个「完整上线流程」聚合页
 export const PLATFORMS = [
-  { slug: 'web', name: '网站', icon: '🖥️', keyword: '个人网站上线流程', desc: '从一个单页到能收款的网站：域名、服务器、备案、HTTPS' },
-  { slug: 'miniprogram', name: '小程序', icon: '🟢', keyword: '小程序上线流程', desc: '注册主体、选类目、备案、提审，个人和个体户能做到哪一步' },
-  { slug: 'app', name: 'App', icon: '📱', keyword: 'App 上架流程', desc: 'App Store 和国内安卓市场：开发者账号、软著、备案、审核' },
-  { slug: 'desktop', name: '桌面软件', icon: '💻', keyword: '个人桌面软件发布流程', desc: 'Windows / Mac 软件打包、签名、公证和分发' },
+  // keyword 是百度指数里有量的类目词（2026-10-28 冬瓜查过：做网站、小程序开发、app开发），headline 是页面标题
+  { slug: 'web', name: '网站', icon: '🖥️', keyword: '做网站', headline: '做网站：不会写代码，自己用 AI 从零做到上线', desc: '从一个单页到能收款的网站：域名、服务器、备案、HTTPS' },
+  { slug: 'miniprogram', name: '小程序', icon: '🟢', keyword: '小程序开发', headline: '小程序开发：不找外包，自己用 AI 做到上线', desc: '注册主体、选类目、备案、提审，个人和个体户能做到哪一步' },
+  { slug: 'app', name: 'App', icon: '📱', keyword: 'app开发', headline: 'app开发：不找外包，自己用 AI 做到上架', desc: 'App Store 和国内安卓市场：开发者账号、软著、备案、审核' },
+  { slug: 'desktop', name: '桌面软件', icon: '💻', keyword: '个人桌面软件发布流程', headline: '桌面软件：自己用 AI 做到打包发布', desc: 'Windows / Mac 软件打包、签名、公证和分发' },
 ] as const;
 
 export type PlatformSlug = (typeof PLATFORMS)[number]['slug'];
