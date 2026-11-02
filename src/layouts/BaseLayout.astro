@@ -1,7 +1,7 @@
 ---
 import '../styles/global.css';
-import Nav from '../components/Nav.astro';
-import Footer from '../components/Footer.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
 import { SITE } from '../data/site';
 
 interface Props {
@@ -40,9 +40,8 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <slot name="head" />
   </head>
   <body>
-    <div class="notice-bar">第一版 · 文章、案例、价格等带「示例」「待填」的内容均为占位，定稿前替换</div>
-    <Nav />
+    <SiteHeader />
     <slot />
-    <Footer />
+    <SiteFooter />
   </body>
 </html>

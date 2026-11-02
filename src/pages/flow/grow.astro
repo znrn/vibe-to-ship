@@ -1,0 +1,331 @@
+---
+// 第 9 步 · grow：/flow/grow/。版式、侧栏、目录、上一步下一步都在 PillarLayout 里，这里只写正文。
+import PillarLayout from '../../layouts/PillarLayout.astro';
+
+const toc = [
+  {"id": "sec-header-conclusion", "label": "先说结论", "kind": "conclusion"},
+  {"id": "sec-part1", "label": "标准应对三步法", "num": "01"},
+  {"id": "sec-part2", "label": "第 2 件事", "num": "02"},
+  {"id": "sec-part3", "label": "照说明发版，留好退路", "num": "03"},
+  {"id": "sec-part4", "label": "更新挂了？先回退，再查原因", "num": "04"},
+  {"id": "sec-part5", "label": "第 3 件事", "num": "05"},
+  {"id": "sec-part6", "label": "搞定搜索引擎收录", "num": "06"},
+  {"id": "sec-part7", "label": "戒掉「刷后台强迫症」，死磕前 10 个真实用户", "num": "07"},
+  {"id": "sec-part8", "label": "第 5 件事", "num": "08"},
+  {"id": "sec-part9", "label": "先让 AI 帮你归类清洗", "num": "09"},
+  {"id": "sec-part10", "label": "用「防变形三问」过滤伪需求", "num": "10"},
+  {"id": "sec-warning", "label": "避坑红线备忘", "kind": "warn"},
+  {"id": "sec-faq", "label": "常见问题 FAQ", "kind": "faq"},
+];
+---
+
+<PillarLayout
+  slug="grow"
+  title="第9步：产品上线后该做什么？网站维护、搜索收录与首批用户破局指南"
+  description="上线是马拉松的起点。运维牢记「先看日志再改动，遇到问题回滚优先」；资产到期日设好日历双重预警；向 Google、百度提交 Sitemap 坐等搜索收录。冷启动期彻底戒掉每 5 分钟刷后台数据的强迫症，带着产品去垂直小红书、即刻、V2EX 和"
+  toc={toc}
+>
+      <!-- 顶部 Hero 卡片 -->
+      <header class="header-card" id="sec-header-conclusion">
+        <div class="header-meta-row">
+          <div class="header-pill-group">
+            <span class="phase-pill-dark">一人公司实战体系</span>
+            <span class="step-pill-emerald">第 9 步 · 线上运维、收录与获客</span>
+          </div>
+          <span class="header-status-indicator">
+            <span class="status-dot-pulse"></span>
+            <span>核心交付：稳健自愈运维体系 + 首批 10 个真实用户破局</span>
+          </span>
+        </div>
+
+        <h1 class="header-main-h1">
+          产品上线后该做什么？网站维护、搜索收录与<span class="hl">首批用户破局</span>指南
+        </h1>
+
+        <!-- 先说结论 -->
+        <div class="header-conclusion-inner">
+          <div class="hci-badge-pill">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+            </svg>
+            <span>先说结论 · KEY TAKEAWAY</span>
+          </div>
+          <p class="hci-text">
+            <strong>上线是马拉松的起点。</strong>运维牢记「先看日志再改动，遇到问题回滚优先」；资产到期日设好日历双重预警；向 Google、百度提交 Sitemap 坐等搜索收录。冷启动期彻底戒掉每 5 分钟刷后台数据的强迫症，带着产品去垂直小红书、即刻、V2EX 和行业微信群，死磕前 10 个真实付费用户，用「防变形三问」守护核心价值。
+          </p>
+        </div>
+
+        <!-- 核心三栏指标 (SEO / GEO 结构化信息) -->
+        <div class="header-meta-grid">
+          <div class="meta-tag-card">
+            <div class="meta-tag-icon-box">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+            </div>
+            <div class="meta-tag-content">
+              <span class="meta-tag-label">核心动作:</span>
+              <span>安全巡检 + 搜索引擎收录提交 + 死磕前10个真实用户</span>
+            </div>
+          </div>
+          <div class="meta-tag-card">
+            <div class="meta-tag-icon-box">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            </div>
+            <div class="meta-tag-content">
+              <span class="meta-tag-label">交付用时:</span>
+              <span>持续日常运营 (首批获客 1~2 周)</span>
+            </div>
+          </div>
+          <div class="meta-tag-card">
+            <div class="meta-tag-icon-box">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+            </div>
+            <div class="meta-tag-content">
+              <span class="meta-tag-label">阶段产物:</span>
+              <span>稳定的公网生产运营体系与自生长的用户飞轮</span>
+            </div>
+          </div>
+        </div>
+      </header>
+      <article class="main-article-card">
+        
+      <!-- 导言 方案 A -->
+      <div class="lead-box">
+        <div class="lead-warning-tag">
+          <span>⚠️</span>
+          <span>新手最易踩的坑</span>
+        </div>
+        <p>前 8 步是把产品「生下来」，这一步则是把产品「养起来」。</p>
+        <p>很多新手觉得点完发布、收下第一笔款就大功告成了，但真实的独立开发日常恰恰从这里才拉开序幕：程序会停、证书会过期、域名会到期、硬盘会被日志撑满；同时，刚上线的网站在互联网上就像一粒尘埃，后台访问量可能一连几天都是 <code>0</code>。</p>
+        <p>面对线上维护与冷启动，核心原则只有八个字：<strong>运维不慌，获客不等</strong>。上线后，你只需要与 AI 配合，循环做好以下 <strong>5 件事</strong>。</p>
+      </div>
+        
+      <!-- Section 1 -->
+      <section class="step-card-wrap" id="sec-part1">
+        <div class="card-top-tag">
+          <h2 class="step-heading-h2">标准应对三步法</h2>
+        </div>
+        <div class="step-inner-content">
+<ol class="num-list-custom">
+  <li><strong>只查不改（只读诊断）</strong>：第一条发给 AI 的指令必须明确限制修改权限，让它先查清事实：</li>
+</ol>
+<div class="prompt-terminal-box">
+  <div class="ptb-header">
+    <span>代码 / 指令块：</span>
+    <button class="ptb-copy-btn" onclick="navigator.clipboard.writeText(this.closest('.prompt-terminal-box').querySelector('.ptb-code').innerText);this.innerText='已复制！';setTimeout(()=>this.innerText='复制',1500)">复制</button>
+  </div>
+  <pre class="ptb-code">   我的网站 [网址] 打不开了，现象是：[打开显示什么，如 502 / 截图说明]。出问题前我刚做过：[比如更新了一次 / 什么都没做]。
+   请连上服务器（IP 是 [服务器IP]），先以「只读模式」检查，绝对不要修改任何文件或配置：
+   1. 后端主程序有没有在运行？（pm2 / systemctl 状态）
+   2. Nginx 反向代理是否正常监听？
+   3. 服务器磁盘空间是不是满了？（df -h）
+   4. 内存与 CPU 是否过载？（free -m / top）
+   5. SSL 证书有没有过期？
+   请用大白话告诉我原因和打算怎么修，等我同意后再动手。</pre>
+</div>
+<ol class="num-list-custom">
+  <li><strong>单点施策</strong>：90% 的突发宕机其实只有三个极平常的原因：
+<ul class="bullet-list-custom">
+  <li><strong>程序停了</strong>（页面显示 <code>502 Bad Gateway</code>）：内存被瞬时请求占满导致进程被系统强杀，重新拉起即可。</li>
+  <li><strong>磁盘满了</strong>：运行日志写得太多把硬盘撑爆了，清理过期日志即可恢复。</li>
+  <li><strong>证书过期</strong>（浏览器提示「不安全」）：自动续期任务卡住，重新执行续签即可。</li>
+  <li><em>切记：一次只修一个问题，修完立刻用手机打开验证。</em></li>
+</ul></li>
+</ol>
+        </div>
+      </section>
+      <!-- Section 2 -->
+      <section class="step-card-wrap" id="sec-part2">
+        <div class="card-top-tag">
+          <h2 class="step-heading-h2">第 2 件事：安全更新——回退优先于前冲（交给 AI）</h2>
+        </div>
+        <div class="step-inner-content">
+<p>之前留下的那份《部署说明.md》，就是为了每次迭代更新时不踩坑准备的。</p>
+        </div>
+      </section>
+      <!-- Section 3 -->
+      <section class="step-card-wrap" id="sec-part3">
+        <div class="card-top-tag">
+          <h2 class="step-heading-h2">1. 照说明发版，留好退路</h2>
+        </div>
+        <div class="step-inner-content">
+<p>本地改好代码准备上线时，把下面这段话发给 AI：</p>
+<div class="prompt-terminal-box">
+  <div class="ptb-header">
+    <span>代码 / 指令块：</span>
+    <button class="ptb-copy-btn" onclick="navigator.clipboard.writeText(this.closest('.prompt-terminal-box').querySelector('.ptb-code').innerText);this.innerText='已复制！';setTimeout(()=>this.innerText='复制',1500)">复制</button>
+  </div>
+  <pre class="ptb-code">我在本地改好了 [这次改了什么]，要更新到线上。
+请先在本地和服务器上存好当前能用的版本作为备份，再严格照项目里「部署说明.md」的步骤更新到服务器。
+每一步先告诉我要做什么；更新完告诉我怎么验证。如果更新后网站出问题，先回到更新前的版本，再查原因。</pre>
+</div>
+<p>更新完成后，<strong>关掉手机 Wi-Fi，用移动流量把核心功能完整走一遍</strong>（避开本地缓存干扰）。</p>
+        </div>
+      </section>
+      <!-- Section 4 -->
+      <section class="step-card-wrap" id="sec-part4">
+        <div class="card-top-tag">
+          <h2 class="step-heading-h2">2. 更新挂了？先回退，再查原因</h2>
+        </div>
+        <div class="step-inner-content">
+<p>如果是更新新功能后网站挂掉，<strong>千万不要在线上边猜边改代码</strong>，不要让用户陪你一起等：</p>
+<div class="prompt-terminal-box">
+  <div class="ptb-header">
+    <span>代码 / 指令块：</span>
+    <button class="ptb-copy-btn" onclick="navigator.clipboard.writeText(this.closest('.prompt-terminal-box').querySelector('.ptb-code').innerText);this.innerText='已复制！';setTimeout(()=>this.innerText='复制',1500)">复制</button>
+  </div>
+  <pre class="ptb-code">网站更新后出问题了。先别查原因，立刻帮我把线上回退到上一个能用的稳定版本，让网站先恢复正常；恢复后再把报错日志拉回本地，告诉我这次是哪里出了问题。</pre>
+</div>
+        </div>
+      </section>
+      <!-- Section 5 -->
+      <section class="step-card-wrap" id="sec-part5">
+        <div class="card-top-tag">
+          <h2 class="step-heading-h2">第 3 件事：资产续费——把底座筑牢（你来做）</h2>
+        </div>
+        <div class="step-inner-content">
+<p>很多网站平稳运行了半年突然失联，排查半天才发现是服务器欠费停机，甚至域名到期被黑客恶意抢注。这种非技术性的失误最伤元气。</p>
+<div style="overflow-x:auto;margin:18px 0;"><table style="width:100%;border-collapse:collapse;font-size:13.5px;background:#ffffff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">
+  <tr style="font-weight:750;color:#0f172a;"><th style="padding:11px 16px;text-align:left;border:1px solid #e2e8f0;background:#f8fafc;">核心资产</th><th style="padding:11px 16px;text-align:left;border:1px solid #e2e8f0;background:#f8fafc;">谁来续费</th><th style="padding:11px 16px;text-align:left;border:1px solid #e2e8f0;background:#f8fafc;">到期没续的后果</th><th style="padding:11px 16px;text-align:left;border:1px solid #e2e8f0;background:#f8fafc;">实操建议</th></tr>
+  <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:10px 16px;color:#334155;border:1px solid #e2e8f0;"><strong>域名</strong></td><td style="padding:10px 16px;color:#334155;border:1px solid #e2e8f0;"><strong>你本人</strong>（在域名服务商后台付款）</td><td style="padding:10px 16px;color:#334155;border:1px solid #e2e8f0;">网站彻底打不开；进入赎回期高价赎回，或被他人抢注导致前期积累清零</td><td style="padding:10px 16px;color:#334155;border:1px solid #e2e8f0;">直接开启<strong>「自动扣费续费」</strong>，或一次性续满 2~3 年</td></tr>
+  <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:10px 16px;color:#334155;border:1px solid #e2e8f0;"><strong>服务器 / 数据库</strong></td><td style="padding:10px 16px;color:#334155;border:1px solid #e2e8f0;"><strong>你本人</strong>（在云厂商后台付款）</td><td style="padding:10px 16px;color:#334155;border:1px solid #e2e8f0;">网站打不开；停机超期后数据会被云厂商彻底销毁</td><td style="padding:10px 16px;color:#334155;border:1px solid #e2e8f0;">留意到期前 7 天的短信/邮件提醒；在日历设提醒，<strong>提前半个月续费</strong></td></tr>
+  <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:10px 16px;color:#334155;border:1px solid #e2e8f0;"><strong>SSL 安全证书</strong></td><td style="padding:10px 16px;color:#334155;border:1px solid #e2e8f0;"><strong>AI 自动续期 + 你抽查</strong></td><td style="padding:10px 16px;color:#334155;border:1px solid #e2e8f0;">浏览器弹出红字拦截「您的连接不是私密连接」</td><td style="padding:10px 16px;color:#334155;border:1px solid #e2e8f0;">Let's Encrypt 虽配了自动续期，但偶有端口占用导致静默失败；<strong>每月用手机看一眼地址栏的「小锁」图标</strong></td></tr>
+</table></div>
+        </div>
+      </section>
+      <!-- Section 6 -->
+      <section class="step-card-wrap" id="sec-part6">
+        <div class="card-top-tag">
+          <h2 class="step-heading-h2">1. 搞定搜索引擎收录（静待自然周期）</h2>
+        </div>
+        <div class="step-inner-content">
+<p>先认识两个基础文件：</p>
+<ul class="bullet-list-custom">
+  <li><strong><code>sitemap.xml</code>（站点地图）</strong>：给搜索引擎看的网站目录，列出你有哪些页面。</li>
+  <li><strong><code>robots.txt</code>（君子协定）</strong>：贴在门口的告示，告诉搜索引擎哪些页面能抓取、哪些后台页面别看。</li>
+</ul>
+<p><strong>第一步：让 AI 备好文件</strong></p>
+<div class="prompt-terminal-box">
+  <div class="ptb-header">
+    <span>代码 / 指令块：</span>
+    <button class="ptb-copy-btn" onclick="navigator.clipboard.writeText(this.closest('.prompt-terminal-box').querySelector('.ptb-code').innerText);this.innerText='已复制！';setTimeout(()=>this.innerText='复制',1500)">复制</button>
+  </div>
+  <pre class="ptb-code">我的网站域名是 [你的域名]。请帮我给网站生成 sitemap.xml，放在网站根目录，确保能通过 https://[你的域名]/sitemap.xml 正常打开；并设置以后新增页面时自动更新 sitemap。
+另外，请帮我检查一下 robots.txt 有没有误挡住搜索引擎爬虫。</pre>
+</div>
+<p><strong>第二步：你去搜索平台登记提交</strong></p>
+<ol class="num-list-custom">
+  <li><strong>百度搜索资源平台</strong>：登录 → 添加网站 → 用文件或 HTML 标签验证归属（把平台给的验证文件或标签丢给 AI 放到网站上）→ 验证通过后在「普通收录」里提交 <code>sitemap.xml</code> 地址。</li>
+  <li><strong>Bing Webmaster Tools</strong>：登录添加并验证（如已配置 Google Search Console 可一键导入）。</li>
+  <li><strong>Google Search Console</strong>：面向海外或泛技术用户必加。</li>
+</ol>
+<div class="quote-callout"><strong>客观规律提醒</strong>：提交后不要每天去搜索框搜自己十遍。新站在互联网上缺乏权重，搜索引擎爬虫通常需要 <strong>2 ~ 6 周</strong> 才会完成建库与初始抓取。只要确认验证文件没删、<code>sitemap</code> 正常，就可以把它抛在脑后，专心做下面的用户破局。</div>
+        </div>
+      </section>
+      <!-- Section 7 -->
+      <section class="step-card-wrap" id="sec-part7">
+        <div class="card-top-tag">
+          <h2 class="step-heading-h2">2. 戒掉「刷后台强迫症」，死磕前 10 个真实用户</h2>
+        </div>
+        <div class="step-inner-content">
+<p>刚上线时后台访问量是 <code>0</code> 太正常了——这不代表你的产品是垃圾，只代表<strong>还没人知道它的存在</strong>。把后台统计 App 从手机首屏移走，用下面这套动作去拿前 10 个活人用户：</p>
+<ol class="num-list-custom">
+  <li><strong>去痛点现场潜水</strong>：回到第 1 步你想服务的那类人聚集的地方（小红书、垂直微信群、即刻圈子、V2EX、贴吧、特定行业论坛），搜谁正在抱怨你解决的那个问题。</li>
+  <li><strong>用「帮人解决问题」代替硬广</strong>：别在别人帖子下狂丢链接说「快来看我的网站」，那样一秒会被当成广告踢掉。看到有人求助（例如「拍视频老忘词怎么破」），先认真写两百字分享你的实用经验，末尾顺带一句：<em>「我自己也深受其害，前几天让 AI 帮我搓了个极简的免费小工具，没广告，有同样痛点的朋友可以试试，顺便帮我提提意见。」</em></li>
+  <li><strong>私聊深挖 10 个真实使用者</strong>：只要有人反馈「还挺管用」，立刻诚恳请教：<em>「太感谢了！你平时一般在什么场景下用？刚才点的时候有没有哪个按钮觉得特别别扭？」</em> 从这 10 个人嘴里掏出的细节，比在屋里冥想三个月值钱一万倍。</li>
+</ol>
+        </div>
+      </section>
+      <!-- Section 8 -->
+      <section class="step-card-wrap" id="sec-part8">
+        <div class="card-top-tag">
+          <h2 class="step-heading-h2">第 5 件事：看反馈、定下一版——保卫「小而美」（AI 整理，你决策）</h2>
+        </div>
+        <div class="step-inner-content">
+<p>当开始有真实用户时，各种声音会蜂拥而至：「加个暗黑模式吧」「能做个社区论坛吗」「支持多账号切换吗」。如果逢求必应，不出一个月，清爽的小工具就会变成满是 Bug 的四不像怪物。</p>
+        </div>
+      </section>
+      <!-- Section 9 -->
+      <section class="step-card-wrap" id="sec-part9">
+        <div class="card-top-tag">
+          <h2 class="step-heading-h2">1. 先让 AI 帮你归类清洗</h2>
+        </div>
+        <div class="step-inner-content">
+<div class="prompt-terminal-box">
+  <div class="ptb-header">
+    <span>代码 / 指令块：</span>
+    <button class="ptb-copy-btn" onclick="navigator.clipboard.writeText(this.closest('.prompt-terminal-box').querySelector('.ptb-code').innerText);this.innerText='已复制！';setTimeout(()=>this.innerText='复制',1500)">复制</button>
+  </div>
+  <pre class="ptb-code">这是最近收到的用户反馈：[粘贴收集到的反馈]。
+请帮我分类整理：哪些是阻碍主流程的 Bug、哪些是新功能需求、哪些提的人最多。
+按「影响多少核心用户、改起来多难」排个序，给我一份下一版的建议清单，我来决定做哪些。</pre>
+</div>
+        </div>
+      </section>
+      <!-- Section 10 -->
+      <section class="step-card-wrap" id="sec-part10">
+        <div class="card-top-tag">
+          <h2 class="step-heading-h2">2. 用「防变形三问」过滤伪需求</h2>
+        </div>
+        <div class="step-inner-content">
+<p>决定动手写代码前，用这三把尺子量一量：</p>
+<ul class="bullet-list-custom">
+  <li><strong>一问自己（守住定位）</strong>：加了这个功能，它还能用一句话向陌生人说明白吗？它服务于 80% 的核心目标用户吗？</li>
+  <li><strong>二问用户（验证真伪）</strong>：这是反复卡住用户的真痛点，还是随口一说的「我觉得」？如果问对方「这个功能做出来收 10 块钱，你现在愿意微信转账预定吗？」，回答「算了那不要了」的，99% 是伪需求。</li>
+  <li><strong>三问时间（排定优先级）</strong>：把当前核心主流程里最别扭的那个小体验瑕疵修顺滑，是不是比冒着风险加一个大功能更让老用户满意？</li>
+</ul>
+<p>定好真正要做的那 1~2 件事后，回到<strong>第 1 步</strong>，开启你的下一轮迭代循环。</p>
+        </div>
+      </section>
+        
+      <!-- 避坑红线 -->
+      <section class="danger-summary-box" id="sec-warning">
+        <div class="danger-header">
+          <span class="danger-badge-icon">🚫</span>
+          <h2 class="danger-title">千万不要这么做：本步骤必须守住的避坑红线</h2>
+        </div>
+        <div>
+          
+        <div style="margin-bottom:14px;">
+          <h3 style="font-size:15px;font-weight:750;color:#9a3412;margin-bottom:8px;">第 1 件事：故障救急——守住「先看再改」的底线（AI 查，你拍板）</h3>
+          <div><p>凡是线上服务，没有 100% 永远不宕机的。新手最容易在网站打不开的瞬间陷入恐慌，对着 AI 喊「赶紧帮我修好！」。一旦不加限制，AI 往往会慌不择路地重装组件、乱改配置甚至误删数据，把几秒钟重启就能解决的小问题演变成大灾难。</p></div>
+        </div>
+        <div style="margin-bottom:14px;">
+          <h3 style="font-size:15px;font-weight:750;color:#9a3412;margin-bottom:8px;">这一步绝对别干的事（红线清单）</h3>
+          <div><ol class="num-list-custom">
+  <li><strong>绝不交出核心主密码</strong>：别把云厂商、域名服务商、收款平台、搜索资源平台的账号登录密码直接交给 AI。</li>
+  <li><strong>绝不盲目动线上数据</strong>：线上出问题时，先让 AI 只看不改；涉及<strong>删数据库、清空目录、重装系统</strong>的操作前，必须让 AI 先用大白话讲清后果并确认已备份。</li>
+  <li><strong>绝不无备份裸更</strong>：没有留好可随时回退的稳定版本前，别让 AI 直接改线上生产环境代码。</li>
+  <li><strong>绝不误删验证文件</strong>：更新部署时，别让 AI 把网站根目录下的搜索平台验证文件、微信校验文件或 HTML 验证标签覆盖删掉（删了会导致认证失效）。</li>
+  <li><strong>绝不搞黑帽作弊</strong>：别为了加快收录去买劣质外链、刷假流量，也别让 AI 批量生成毫无价值的凑数垃圾页面——一旦被搜索引擎判定作弊拉黑，域名就废了。</li>
+</ol></div>
+        </div>
+        </div>
+      </section>
+        
+      <!-- 常见问题答疑 FAQ -->
+      <section class="faq-section-wrap" id="sec-faq">
+        <h2 class="faq-heading-h2">第 9 步常见问题答疑</h2>
+        
+        <details class="faq-accordion-item">
+          <summary>常见问题速查（FAQ）</summary>
+          <div class="faq-accordion-body"><ul class="bullet-list-custom">
+  <li><strong>Q：网站突然显示 <code>502 Bad Gateway</code> 怎么办？</strong></li>
+</ul>
+<p><strong>A</strong>：说明后端程序停了，或者 Nginx 转发的端口对不上。把报错发给 AI，让它先查程序是否在运行、为什么停了——<strong>先说原因再动手改</strong>。</p>
+<ul class="bullet-list-custom">
+  <li><strong>Q：浏览器突然弹出红色警告「不安全」或提示证书过期？</strong></li>
+</ul>
+<p><strong>A</strong>：说明 SSL 证书自动续期任务没跑通或没生效（比如 80/443 端口被占）。让 AI 检查证书到期时间与 Certbot 续期定时任务，手动续签一次并确认自动续期恢复正常。</p>
+<ul class="bullet-list-custom">
+  <li><strong>Q：搜索平台提示「站点验证失败」？</strong></li>
+</ul>
+<p><strong>A</strong>：把平台报错原文发给 AI，让它检查验证文件或 HTML 标签能不能从外网直接访问、或者网站是不是配置了错误的强制跳转。</p>
+<ul class="bullet-list-custom">
+  <li><strong>Q：提交 sitemap 很久了，为什么还是搜不到我的网站？</strong></li>
+</ul>
+<p><strong>A</strong>：新站收录需要时间（2~6 周）。可以让 AI 检查 <code>robots.txt</code> 有没有拦截、<code>sitemap.xml</code> 能否正常打开、每个页面的标题（<code>&lt;title&gt;</code>）和描述（<code>&lt;meta description&gt;</code>）有没有写扎实。</p></div>
+        </details>
+      </section>
+        
+      </article>
+</PillarLayout>

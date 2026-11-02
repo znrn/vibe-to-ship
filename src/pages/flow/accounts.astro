@@ -1,0 +1,226 @@
+---
+// 第 3 步 · accounts：/flow/accounts/。版式、侧栏、目录、上一步下一步都在 PillarLayout 里，这里只写正文。
+import PillarLayout from '../../layouts/PillarLayout.astro';
+
+const toc = [
+  {"id": "sec-header-conclusion", "label": "先说结论", "kind": "conclusion"},
+  {"id": "sec-part1", "label": "破除心魔", "num": "01"},
+  {"id": "sec-part2", "label": "安全金库准则", "num": "02"},
+  {"id": "sec-part3", "label": "通关口诀", "num": "03"},
+  {"id": "sec-warning", "label": "避坑红线备忘", "kind": "warn"},
+  {"id": "sec-faq", "label": "常见问题 FAQ", "kind": "faq"},
+];
+---
+
+<PillarLayout
+  slug="accounts"
+  title="第3步：从动嘴到动手：新手怎么配置本地 AI 编程工具与开发者账号，才不会被命令行吓退或踩坑破产？"
+  description="命令行不是黑客专属，本质上就是个「没有图标的快捷启动器」。配置工具牢记「不见兔子不撒鹰」：前期优先使用官方按月订阅工具（如 Claude Code、Cursor、GitHub Copilot），少折腾第三方转发；涉及 API Key 必须锁"
+  toc={toc}
+>
+      <!-- 顶部 Hero 卡片 -->
+      <header class="header-card" id="sec-header-conclusion">
+        <div class="header-meta-row">
+          <div class="header-pill-group">
+            <span class="phase-pill-dark">一人公司实战体系</span>
+            <span class="step-pill-emerald">第 3 步 · 工具与账号配置</span>
+          </div>
+          <span class="header-status-indicator">
+            <span class="status-dot-pulse"></span>
+            <span>核心交付：打通本地 CLI 编程环境与 API 安全护栏</span>
+          </span>
+        </div>
+
+        <h1 class="header-main-h1">
+          从动嘴到动手：新手怎么配置本地 AI 编程工具与开发者账号，才不会<span class="hl">被命令行吓退或踩坑破产</span>？
+        </h1>
+
+        <!-- 先说结论 -->
+        <div class="header-conclusion-inner">
+          <div class="hci-badge-pill">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+            </svg>
+            <span>先说结论 · KEY TAKEAWAY</span>
+          </div>
+          <p class="hci-text">
+            <strong>命令行不是黑客专属，本质上就是个「没有图标的快捷启动器」。</strong>配置工具牢记「不见兔子不撒鹰」：前期优先使用官方按月订阅工具（如 Claude Code、Cursor、GitHub Copilot），少折腾第三方转发；涉及 API Key 必须锁死限额报警、绝不写入 Git 仓库，严防一觉醒来天价账单。
+          </p>
+        </div>
+
+        <!-- 核心三栏指标 (SEO / GEO 结构化信息) -->
+        <div class="header-meta-grid">
+          <div class="meta-tag-card">
+            <div class="meta-tag-icon-box">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+            </div>
+            <div class="meta-tag-content">
+              <span class="meta-tag-label">核心动作:</span>
+              <span>终端脱敏 + API 安全金库锁死</span>
+            </div>
+          </div>
+          <div class="meta-tag-card">
+            <div class="meta-tag-icon-box">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            </div>
+            <div class="meta-tag-content">
+              <span class="meta-tag-label">交付用时:</span>
+              <span>半天至 1 天</span>
+            </div>
+          </div>
+          <div class="meta-tag-card">
+            <div class="meta-tag-icon-box">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+            </div>
+            <div class="meta-tag-content">
+              <span class="meta-tag-label">阶段产物:</span>
+              <span>安全受控的本地 AI 编程生产环境</span>
+            </div>
+          </div>
+        </div>
+      </header>
+      <article class="main-article-card">
+        
+      <!-- 导言 方案 A -->
+      <div class="lead-box">
+        <div class="lead-warning-tag">
+          <span>⚠️</span>
+          <span>新手最易踩的坑</span>
+        </div>
+        <p>很多新手在网页版 AI（ChatGPT/Claude）里聊得很开心，但一进入“本地配置工具和申请账号”这一步，往往立刻被黑底白字的命令行、看不懂的报错代码、各种要充钱的开发者认证给劝退了。</p>
+        <p>其实，只要掌握<strong>“心理脱敏、安全红线、不见兔子不撒鹰”</strong>这三个原则，你就能零基础顺畅过渡，既不被吓退，也不会多花冤枉钱。</p>
+        <p>以下是保姆级的通关指南：</p>
+      </div>
+        
+      <!-- Section 1 -->
+      <section class="step-card-wrap" id="sec-part1">
+        <div class="card-top-tag">
+          <h2 class="step-heading-h2">一、 破除心魔：命令行到底是个啥？</h2>
+        </div>
+        <div class="step-inner-content">
+<p>很多新手看到黑底白字的终端窗口，第一反应是：“完了，我是不是得先去买一本《Linux从入门到精通》？”</p>
+<p><strong>完全不需要！</strong></p>
+<ol class="num-list-custom">
+  <li><strong>不要再人工复制粘贴代码</strong>：过去在网页版聊，你得手动把代码一段段复制到记事本里，漏个标点就报错；文件一多，网页 AI 就记前忘后。</li>
+  <li><strong>终端工具（如 Claude Code / Codex）本质上是“长了手的打工人”</strong>：</li>
+</ol>
+<ul class="bullet-list-custom">
+  <li>以前：你告诉 AI 想法，它出代码，你搬砖；</li>
+  <li>现在：你输入一句话，它自己在你电脑里<strong>新建文件、修改代码、敲命令跑测试、看报错并自动修复</strong>。</li>
+</ul>
+<ol class="num-list-custom">
+  <li><strong>你只需要会两件事</strong>：
+<ul class="bullet-list-custom">
+  <li><strong>把它当成普通的微信聊天框</strong>：直接打中文说人话（例如：“在当前目录下建一个项目”、“帮我看看刚才为什么报错”）；</li>
+  <li><strong>遇到报错直接整段复制</strong>：无论弹出多么恐怖的英文红字，别慌，全选复制给 AI：“这是刚才终端报的错，帮我排查并解决”，按回车等它修。</li>
+</ul></li>
+</ol>
+        </div>
+      </section>
+      <!-- Section 2 -->
+      <section class="step-card-wrap" id="sec-part2">
+        <div class="card-top-tag">
+          <h2 class="step-heading-h2">二、 安全金库准则：严防 API Key 泄露导致“一觉醒来破产”</h2>
+        </div>
+        <div class="step-inner-content">
+<p>这是新手踩坑最惨烈的地方——把花钱买来的 API Key（接口密钥）直接写进代码，顺手上传到 GitHub 公开仓库，几分钟内就会被黑客的爬虫扫走，一觉醒来几千美金账单打底。</p>
+<p><strong>必须死守的两条安全红线：</strong></p>
+<ol class="num-list-custom">
+  <li><strong>钥匙进保险柜（<code>.env</code> 文件隔离）</strong>：
+<ul class="bullet-list-custom">
+  <li>所有密钥、密码严禁写在代码文件里；</li>
+  <li>只能保存在本地专用的 <code>.env</code> 配置文件中，并确保你的 <code>.gitignore</code> 文件里写了 <code>.env</code>，<strong>绝不让密钥随代码同步到网上</strong>。</li>
+</ul></li>
+  <li><strong>后台死锁消费上限</strong>：
+<ul class="bullet-list-custom">
+  <li>无论用哪家 AI 服务的 API，登录平台的第一件事：<strong>设置每月/每日消费限额（Spend Limit）</strong>（例如设置每月最高 20 美元），一旦超额直接停服，彻底锁死被盗刷的财务风险。</li>
+</ul></li>
+</ol>
+        </div>
+      </section>
+      <!-- Section 3 -->
+      <section class="step-card-wrap" id="sec-part3">
+        <div class="card-top-tag">
+          <h2 class="step-heading-h2">通关口诀：记在脑子里，今天就能通关</h2>
+        </div>
+        <div class="step-inner-content">
+<div class="quote-callout"><strong>工具轻装上阵，不装花哨插件；</strong><br /><strong>终端打中文，报错丢给它修；</strong><br /><strong>Key 锁在本地，限额绝不能忘；</strong><br /><strong>本地没跑通，一分钱都不掏！</strong></div>
+        </div>
+      </section>
+        
+      <!-- 避坑红线 -->
+      <section class="danger-summary-box" id="sec-warning">
+        <div class="danger-header">
+          <span class="danger-badge-icon">🚫</span>
+          <h2 class="danger-title">千万不要这么做：本步骤必须守住的避坑红线</h2>
+        </div>
+        <div>
+          
+        <div style="margin-bottom:14px;">
+          <h3 style="font-size:15px;font-weight:750;color:#9a3412;margin-bottom:8px;">三、 账号规划：不见兔子不撒鹰，绝不冲动消费</h3>
+          <div><p>新手往往产品八字还没一撇，就激情消费：买 688 元/年的 Apple 开发者账号、租几千块钱一年的企业级云服务器，结果一年过去代码都没跑通。</p>
+<p><strong>科学的省钱与注册节奏：</strong></p>
+<ol class="num-list-custom">
+  <li><strong>三不买原则（研发期一律不买）</strong>：
+<ul class="bullet-list-custom">
+  <li><strong>不买</strong>昂贵的付费开发者会员（苹果 99 美元/年、微信企业认证等，等到本地彻底做完、真要发布提交审核那一天再买）；</li>
+  <li><strong>不买</strong>大型云服务器（本地跑 <code>localhost</code> 测试完全免费，后续上线也有 Vercel、Cloudflare 等大量免费额度）；</li>
+  <li><strong>不买</strong>域名（前期用平台自带的二级域名完全够用）。</li>
+</ul></li>
+  <li><strong>AI 列清单，本人亲自办</strong>：
+<ul class="bullet-list-custom">
+  <li>问 AI：“根据我们要做的产品，列一张未来上线必备的账号清单（如 GitHub、微信公众号/小程序、某云平台等）”；</li>
+  <li><strong>凡是涉及身份证、手机号、人脸识别实名认证的，必须由你本人操作</strong>，千万不要把身份证号或短信验证码发到 AI 聊天框里。</li>
+</ul></li>
+  <li><strong>避开“邮箱撞墙”大坑</strong>：
+<ul class="bullet-list-custom">
+  <li>微信开发者生态规则极其严格（一个小程序账号必须对应一个完全独立的未绑定过微信其他业务的邮箱）；</li>
+  <li>提前注册 1~2 个干净的专用备用邮箱，并在本地备忘录记清账号、密码、用途，做清单化资产管理。</li>
+</ul></li>
+</ol></div>
+        </div>
+        </div>
+      </section>
+        
+      <!-- 常见问题答疑 FAQ -->
+      <section class="faq-section-wrap" id="sec-faq">
+        <h2 class="faq-heading-h2">第 3 步常见问题答疑</h2>
+        
+        <details class="faq-accordion-item" open>
+          <summary>我完全不会 Linux 命令，用 Claude Code 这类终端工具是不是先得学命令行？</summary>
+          <div class="faq-accordion-body">
+            不需要。终端工具本质上是「长了手的聊天框」，你照样打中文说人话，比如「在当前目录下建一个项目」「帮我看看刚才为什么报错」，新建文件、改代码、跑命令都是它在做。你只需要会两件事：<strong>用大白话下指令，以及把报错整段复制给它。</strong>
+          </div>
+        </details>
+        
+        <details class="faq-accordion-item">
+          <summary>终端弹出一大段英文红字报错，我一个字都看不懂怎么办？</summary>
+          <div class="faq-accordion-body">
+            别试图自己读。从第一行红字复制到最后一行，整段粘给 AI，加一句「这是刚才终端报的错，帮我排查并解决」，按回车等它修。半截截图反而会让 AI 瞎猜，<strong>完整文字永远比截图好用。</strong>
+          </div>
+        </details>
+        
+        <details class="faq-accordion-item">
+          <summary>API Key 为什么不能直接写在代码里？我又没打算公开代码。</summary>
+          <div class="faq-accordion-body">
+            写在代码里的 Key 会随着代码一起被推到 GitHub、发给别人、被 AI 工具读到，而公开仓库里的 Key 几分钟内就会被爬虫扫走盗刷，一觉醒来几千美金账单的案例并不罕见。做法固定两条：<strong>Key 只放在本地 <code>.env</code> 文件里，并确认 <code>.gitignore</code> 里写了 <code>.env</code></strong>；然后去 AI 服务商后台设置每月消费上限（比如 20 美元），超额自动停服。
+          </div>
+        </details>
+        
+        <details class="faq-accordion-item">
+          <summary>苹果开发者账号、微信认证、云服务器，现在要不要先买好？</summary>
+          <div class="faq-accordion-body">
+            研发期一律不买，这叫「不见兔子不撒鹰」。本地跑 <code>localhost</code> 调试完全免费，域名用平台送的二级域名就够，开发者会员等到真要提交审核那一天再掏钱。让 AI 先列一张「上线必备账号清单」，但<strong>凡是要身份证、手机号、人脸识别的，必须你本人去办</strong>，千万别把身份证号或短信验证码发进 AI 聊天框。
+          </div>
+        </details>
+        
+        <details class="faq-accordion-item">
+          <summary>注册小程序账号时提示邮箱已被占用，是怎么回事？</summary>
+          <div class="faq-accordion-body">
+            微信开发者生态规则很严：一个小程序账号必须对应一个<strong>从未绑定过公众号、企业微信等其他微信业务的全新邮箱</strong>。提前注册 1~2 个干净的专用邮箱备用，并在本地备忘录里记清每个账号、密码和用途，做清单化管理，后面接支付、提审时就不会再撞墙。
+          </div>
+        </details>
+      </section>
+        
+      </article>
+</PillarLayout>

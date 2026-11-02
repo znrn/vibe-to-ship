@@ -85,6 +85,10 @@ export const LEGACY_REDIRECTS: Record<string, string> = {
   '/categories/review/': '/flow/review/',
   // 服务器部署这篇改成了「服务器和部署」的流程页
   '/articles/deploy-site-to-server/': '/flow/deploy/',
+  // 2026-11 改版期间首页提案的草稿地址
+  '/v3/': '/',
+  // 2026-11 改版期间支柱页的草稿地址 /step1/ ~ /step9/，正式地址是 /flow/<slug>/
+  ...Object.fromEntries(['idea', 'base', 'accounts', 'build', 'deploy', 'domain', 'payment', 'review', 'grow'].map((slug, i) => [`/step${i + 1}/`, `/flow/${slug}/`])),
 };
 
 export type FlowSlug = (typeof FLOW)[number]['slug'];

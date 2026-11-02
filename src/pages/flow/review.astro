@@ -1,0 +1,304 @@
+---
+// 第 8 步 · review：/flow/review/。版式、侧栏、目录、上一步下一步都在 PillarLayout 里，这里只写正文。
+import PillarLayout from '../../layouts/PillarLayout.astro';
+
+const toc = [
+  {"id": "sec-header-conclusion", "label": "先说结论", "kind": "conclusion"},
+  {"id": "sec-part1", "label": "先看懂游戏规则", "num": "01"},
+  {"id": "sec-part2", "label": "提审通关 5 步法", "num": "02"},
+  {"id": "sec-warning", "label": "避坑红线备忘", "kind": "warn"},
+  {"id": "sec-faq", "label": "常见问题 FAQ", "kind": "faq"},
+];
+---
+
+<PillarLayout
+  slug="review"
+  title="第8步：小程序和 App 怎么顺利过审上架？从提审避坑到被拒自救的全流程指南"
+  description="审核员也是按表打卡的普通人，绝大多数被拒不是代码不行，而是类目错选、隐私条款套话与测试账号死机。动手前让 AI 扫官方类目合规库；用真实代码扫出敏感权限起草隐私政策；为审核员准备一键登录的真实测试号。遭遇驳回严禁情绪化，让 AI 翻译官方黑"
+  toc={toc}
+>
+      <!-- 顶部 Hero 卡片 -->
+      <header class="header-card" id="sec-header-conclusion">
+        <div class="header-meta-row">
+          <div class="header-pill-group">
+            <span class="phase-pill-dark">一人公司实战体系</span>
+            <span class="step-pill-emerald">第 8 步 · 小程序与 App 上架过审</span>
+          </div>
+          <span class="header-status-indicator">
+            <span class="status-dot-pulse"></span>
+            <span>核心交付：各大应用市场审核过审并公开发布</span>
+          </span>
+        </div>
+
+        <h1 class="header-main-h1">
+          小程序和 App 怎么<span class="hl">顺利过审上架</span>？从提审避坑到被拒自救的全流程指南
+        </h1>
+
+        <!-- 先说结论 -->
+        <div class="header-conclusion-inner">
+          <div class="hci-badge-pill">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+            </svg>
+            <span>先说结论 · KEY TAKEAWAY</span>
+          </div>
+          <p class="hci-text">
+            <strong>审核员也是按表打卡的普通人，绝大多数被拒不是代码不行，而是类目错选、隐私条款套话与测试账号死机。</strong>动手前让 AI 扫官方类目合规库；用真实代码扫出敏感权限起草隐私政策；为审核员准备一键登录的真实测试号。遭遇驳回严禁情绪化，让 AI 翻译官方黑话、提供结构化合规答复，通常一行代码不改即可过审。
+          </p>
+        </div>
+
+        <!-- 核心三栏指标 (SEO / GEO 结构化信息) -->
+        <div class="header-meta-grid">
+          <div class="meta-tag-card">
+            <div class="meta-tag-icon-box">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+            </div>
+            <div class="meta-tag-content">
+              <span class="meta-tag-label">核心动作:</span>
+              <span>合规自查 + AI 起草精准隐私政策 + 结构化申诉</span>
+            </div>
+          </div>
+          <div class="meta-tag-card">
+            <div class="meta-tag-icon-box">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            </div>
+            <div class="meta-tag-content">
+              <span class="meta-tag-label">交付用时:</span>
+              <span>微信 1~2 天 / 苹果 1~3 天</span>
+            </div>
+          </div>
+          <div class="meta-tag-card">
+            <div class="meta-tag-icon-box">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+            </div>
+            <div class="meta-tag-content">
+              <span class="meta-tag-label">阶段产物:</span>
+              <span>各大应用商店公开发布上架（用户可搜可下）</span>
+            </div>
+          </div>
+        </div>
+      </header>
+      <article class="main-article-card">
+        
+      <!-- 导言 方案 A -->
+      <div class="lead-box">
+        <div class="lead-warning-tag">
+          <span>⚠️</span>
+          <span>新手最易踩的坑</span>
+        </div>
+        <p>如果做的是普通网页，代码推到服务器上就能直接访问，没人管你；但只要做的是<strong>微信小程序</strong>或<strong>苹果 iOS App</strong>，就必须迈过一道必经门槛——<strong>平台的人工与机器审核</strong>。</p>
+        <p>做完这一步，你的小程序或 App 审核通过并正式点下「发布」，用户才能在微信搜索栏或 App Store 里真正搜到、下载并使用。</p>
+        <p>很多新手在这一步特别受挫：本地跑得好好的，一提交就被打回来，驳回信里全是看不懂的官方条文。其实，<strong>绝大多数提审被拒根本不是代码写得差，而是栽在类目选错、照抄隐私政策模板、审核员登不进去等“非技术盲区”上。</strong> 只要摸清审核员的工作逻辑，并让 AI 帮你完成繁琐的排查与文书工作，过审并没有想象中那么玄乎。</p>
+      </div>
+        
+      <!-- Section 1 -->
+      <section class="step-card-wrap" id="sec-part1">
+        <div class="card-top-tag">
+          <h2 class="step-heading-h2">一、 先看懂游戏规则：审核员视角与两大平台差异</h2>
+        </div>
+        <div class="step-inner-content">
+<p>在动手提审前，先建立两个核心认知：</p>
+<h3 style="font-size:15px;font-weight:750;color:#0f172a;margin:22px 0 10px;">1. 审核员也是按表打卡的普通人</h3>
+<p>一个审核员每天要看几十上百个应用，分给每个应用的平均时间只有 <strong>2～3 分钟</strong>。</p>
+<ul class="bullet-list-custom">
+  <li>他不是在品味你的作品，而是带着极高的时间压力做合规筛查。</li>
+  <li>如果 30 秒内登不进去、或者点个按钮没反应，他不会帮你翻日志排查，标准动作就是：<strong>截图 → 勾选预设驳回条款 → 点 Reject → 切下一个</strong>。</li>
+  <li><strong>核心原则：只要你给审核员省事，审核员就给你省事。</strong></li>
+</ul>
+<h3 style="font-size:15px;font-weight:750;color:#0f172a;margin:22px 0 10px;">2. 微信小程序 vs. Apple App Store 核心差异</h3>
+<div style="overflow-x:auto;margin:18px 0;"><table style="width:100%;border-collapse:collapse;font-size:13.5px;background:#ffffff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">
+  <tr style="font-weight:750;color:#0f172a;"><th style="padding:11px 16px;text-align:left;border:1px solid #e2e8f0;background:#f8fafc;">维度</th><th style="padding:11px 16px;text-align:left;border:1px solid #e2e8f0;background:#f8fafc;">微信小程序</th><th style="padding:11px 16px;text-align:left;border:1px solid #e2e8f0;background:#f8fafc;">Apple App Store</th></tr>
+  <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:10px 16px;color:#334155;border:1px solid #e2e8f0;"><strong>审核核心关注点</strong></td><td style="padding:10px 16px;color:#334155;border:1px solid #e2e8f0;"><strong>类目资质与合规红线</strong><br>个人主体限制极多，稍涉及社交、UGC 发帖评论、在线交易或医疗健康，立刻要求前置审批资质或企业主体。</td><td style="padding:10px 16px;color:#334155;border:1px solid #e2e8f0;"><strong>软件完整性与原生生态体验</strong><br>审核员会在真机上点遍所有按钮。严抓崩溃、空页面、假按钮（条款 2.1），以及过于简单像套壳网页的应用（条款 4.2）。</td></tr>
+  <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:10px 16px;color:#334155;border:1px solid #e2e8f0;"><strong>审核周期</strong></td><td style="padding:10px 16px;color:#334155;border:1px solid #e2e8f0;">通常 <strong>1～2 个工作日</strong>（快则几小时，工作日白天效率高）。</td><td style="padding:10px 16px;color:#334155;border:1px solid #e2e8f0;">官方数据 <strong>50% 在 24 小时内、90% 在 48 小时内</strong>（审核员多在海外，常在凌晨收到状态邮件）。</td></tr>
+  <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:10px 16px;color:#334155;border:1px solid #e2e8f0;"><strong>新手最易踩的雷</strong></td><td style="padding:10px 16px;color:#334155;border:1px solid #e2e8f0;">1. <strong>个人主体选错类目</strong>或包含超范围功能（如评论区）。<br>2. <strong>未登录即黑屏</strong>：一打开就强制弹窗要手机号或授权。</td><td style="padding:10px 16px;color:#334155;border:1px solid #e2e8f0;">1. <strong>测试账号登不进去</strong>，或国内服务器对海外 IP 超时。<br>2. 出现「敬请期待」未完成页、死链接，或提到「安卓/微信支付」等字眼。</td></tr>
+</table></div>
+        </div>
+      </section>
+      <!-- Section 2 -->
+      <section class="step-card-wrap" id="sec-part2">
+        <div class="card-top-tag">
+          <h2 class="step-heading-h2">二、 提审通关 5 步法（明确人与 AI 的分工）</h2>
+        </div>
+        <div class="step-inner-content">
+<h3 style="font-size:15px;font-weight:750;color:#0f172a;margin:22px 0 10px;">第 1 步：动手前先查类目和主体（AI 查官方文档，你来拍板）</h3>
+<p>很多驳回在开工前就埋下了。最好在立项或提审前先让 AI 核对一次官方规则：</p>
+<div class="prompt-terminal-box">
+  <div class="ptb-header">
+    <span>复制给 AI 的提示词：</span>
+    <button class="ptb-copy-btn" onclick="navigator.clipboard.writeText(this.closest('.prompt-terminal-box').querySelector('.ptb-code').innerText); this.innerText='已复制！'; setTimeout(()=>this.innerText='复制', 2000);">复制</button>
+  </div>
+  <div class="ptb-code">我想做一个 [微信小程序 / iOS App]，核心功能是：[一句话说清楚]。我的注册主体是 [个人 / 个体户 / 公司]。
+请帮我查官方文档：这个服务应该选哪个服务类目？个人主体能不能选这个类目？如果不能，有哪些替代做法（换类目、砍功能、先办主体）？
+只给我能在官方页面上查到的结论，每条附上官方规则说明。</div>
+</div>
+<ul class="bullet-list-custom">
+  <li><strong>避坑铁律</strong>：如果个人主体做不了（比如带有用户自由发帖、评论互动的社区功能），只有三条路：<strong>换个人能做的类目、首版先砍掉超范围功能做纯单机/工具、或者先办营业执照升级主体</strong>。走哪条路只有你能拍板。</li>
+</ul>
+<h3 style="font-size:15px;font-weight:750;color:#0f172a;margin:22px 0 10px;">第 2 步：按真实代码写隐私政策（AI 扫代码起草，你补真实信息）</h3>
+<p><strong>千万别在网上随便抄一份“通用隐私政策模板”！</strong></p>
+<p>模板里往往写着收集通讯录、地理位置，但你的应用只是个番茄钟；或者反过来，你接入的统计 SDK 读取了设备信息，模板里却没写。现在平台都有<strong>自动化代码扫描机制</strong>，一旦发现代码实际调用的接口与声明不一致，机审就会直接驳回。</p>
+<div class="prompt-terminal-box">
+  <div class="ptb-header">
+    <span>复制给 AI 的提示词：</span>
+    <button class="ptb-copy-btn" onclick="navigator.clipboard.writeText(this.closest('.prompt-terminal-box').querySelector('.ptb-code').innerText); this.innerText='已复制！'; setTimeout(()=>this.innerText='复制', 2000);">复制</button>
+  </div>
+  <div class="ptb-code">请彻底检查这个项目的源码与所有用到的第三方 SDK，列出一张真实清单：
+1. 前端和后端实际收集了用户的哪些信息（手机号、相册、位置、设备信息、剪贴板等）？
+2. 每一项信息分别用于实现什么具体功能？
+3. 数据存在哪里、存多久、用户如何注销账号与申请删除数据？
+
+请严格根据这份真实清单，用大白话起草一份合规的《用户隐私政策》。代码里没有收集的信息，千万不要为了凑字数写上去。</div>
+</div>
+<ul class="bullet-list-custom">
+  <li><strong>你要做的事</strong>：把你的真实联系邮箱、主体名称补进去，部署成一个公网可直接打开的静态网页（如 <code>https://你的域名/privacy.html</code>），在提审后台和 App 内同时放好链接。</li>
+</ul>
+<h3 style="font-size:15px;font-weight:750;color:#0f172a;margin:22px 0 10px;">第 3 步：备好“开门钥匙”测试账号（必须真实可用）</h3>
+<p>如果你的应用需要登录（尤其是手机验证码登录），而你没给免验证码的测试账号，审核员收不到短信，会 100% 直接驳回。</p>
+<ol class="num-list-custom">
+  <li><strong>写死免密/固定测试账号</strong>：在后端数据库固定一个无需短信验证码的测试号（如账号 <code>reviewer@test.com</code>，密码设为简单的纯数字或小写字母，防止审核员在 iPad 屏幕上输错复杂符号）。</li>
+  <li><strong>灌入生动的演示数据</strong>：别让测试账号进去后一片空白。提前预置几条真实的笔记、记录或演示项目，让审核员点开第一眼就看到软件正常运转的样子。</li>
+  <li><strong>默认开通最高权限</strong>：如果有会员或付费墙，直接把测试账号设为高级 VIP，确保审核员不用付钱就能走通所有子页面。</li>
+  <li><strong>审核期间严禁关停服务器</strong>：提交后到过审前（尤其是夜间，苹果审核员在加州上班），切勿重启后端或关闭数据库。同时确保国内服务器不会拦截海外 IP 访问。</li>
+</ol>
+<h3 style="font-size:15px;font-weight:750;color:#0f172a;margin:22px 0 10px;">第 4 步：对照规则逐条自查 & 提交发布（AI 查风险，你走查提审）</h3>
+<p>提交前，先让 AI 对照官方拒绝情形做一次全面体检：</p>
+<div class="prompt-terminal-box">
+  <div class="ptb-header">
+    <span>复制给 AI 的提示词：</span>
+    <button class="ptb-copy-btn" onclick="navigator.clipboard.writeText(this.closest('.prompt-terminal-box').querySelector('.ptb-code').innerText); this.innerText='已复制！'; setTimeout(()=>this.innerText='复制', 2000);">复制</button>
+  </div>
+  <div class="ptb-code">我要把这个项目提交 [微信小程序 / App Store] 审核。
+请对照官方审核规则（[微信小程序平台常见拒绝情形 / App Store Review Guidelines]），逐条检查当前项目代码，列出一张表：涉及条款、我的项目现状、是否有被拒风险、修改建议。
+先只列表，不要改代码，我看完再决定改哪些。</div>
+</div>
+<p>接着，<strong>换上审核员的眼光，自己在真机上走一遍這 4 条保命检查</strong>：</p>
+<ul class="bullet-list-custom">
+  <li>[ ] <strong>不登录能看首页</strong>：打开应用不能直接锁屏弹窗要手机号/授权，必须允许游客先浏览首页内容，点具体功能（如保存、同步）时再引导登录。</li>
+  <li>[ ] <strong>测试号全流程走通</strong>：退出自己账号，用给审核员的测试账号完整点一遍所有按钮。</li>
+  <li>[ ] <strong>无半成品痕迹</strong>：页面上绝不能出现「测试」「Demo」「敬请期待」或点不开的空按钮。</li>
+  <li>[ ] <strong>隐私链接有效</strong>：登录页和设置页里的《隐私政策》链接在无登录状态下也能正常点开。</li>
+</ul>
+<p>确认无误后去后台填资料提审。</p>
+<div class="quote-callout">⚠️ <strong>特别提醒：微信小程序审核通过后，不会自动上线！</strong> 状态变成「审核通过」后，你必须亲自回到微信公众平台「版本管理」里手动点击绿色的<strong>「发布」</strong>按钮，用户才能搜到。很多人干等好几天以为还在审，其实早就通过了。</div>
+<h3 style="font-size:15px;font-weight:750;color:#0f172a;margin:22px 0 10px;">第 5 步：被驳回了怎么自救？（AI 翻译拆招，你来回复）</h3>
+<p>做独立开发，被苹果或微信拒个两三次是家常便饭。收到红色的 <code>Rejected</code> 别慌，它只是审核员和你的一次标准工作沟通。</p>
+<h3 style="font-size:15px;font-weight:750;color:#0f172a;margin:22px 0 10px;">1. 先让 AI 把官方条文“翻译成人话”</h3>
+<div class="prompt-terminal-box">
+  <div class="ptb-header">
+    <span>复制给 AI 的提示词：</span>
+    <button class="ptb-copy-btn" onclick="navigator.clipboard.writeText(this.closest('.prompt-terminal-box').querySelector('.ptb-code').innerText); this.innerText='已复制！'; setTimeout(()=>this.innerText='复制', 2000);">复制</button>
+  </div>
+  <div class="ptb-code">我的 [小程序 / App] 审核被驳回了，下面是官方驳回信原文（含条款编号）：
+[粘贴驳回理由原文]
+
+请帮我做三件事：
+1. 用大白话告诉我：审核员在测哪个环节时遇到了障碍？他核心质疑的问题到底是什么？
+2. 判断这是「后台资料漏填」、「前端表现微调」还是「核心功能违规」？
+3. 列出改动最小、成本最低的修改方案，一条对应一条。先别改代码，我确认后再动手。</div>
+</div>
+<h3 style="font-size:15px;font-weight:750;color:#0f172a;margin:22px 0 10px;">2. 苹果两大高频“玄学杀手”实战拆招（常常一行代码不用改！）</h3>
+<p>很多时候被拒是因为审核员没看懂或网络卡顿，<strong>千万别一被拒就盲目改代码重传包</strong>：</p>
+<ul class="bullet-list-custom">
+  <li><strong>杀手一：Guideline 2.1（Performance - 崩溃 / 加载空白 / 无法登录）</strong></li>
+  <li><strong>真相</strong>：你在国内测好好的，但苹果审核员在美国加州，你的服务器可能海外连接超时，或者审核员输错了密码。</li>
+  <li><strong>解法</strong>：检查海外网络连通性后，<strong>用手机直接对着另一台真机录制一段 15～30 秒、一镜到底无剪辑的操作视频</strong>（从输入测试账号密码、登录成功到顺畅点击核心功能），上传并附在回复里，证明功能完好。</li>
+  <li><strong>杀手二：Guideline 4.2（Minimum Functionality - 功能太简单 / 像网页套壳）</strong></li>
+  <li><strong>真相</strong>：审核员可能只看了一眼首页，觉得功能太单一。</li>
+  <li><strong>解法</strong>：<strong>千万别熬夜瞎堆无用功能！</strong> 直接礼貌回信阐述你的“垂直场景小而美定位”，指出应用专为特定人群极简设计，并列举你用到的原生特性（如本地存储、原生触感反馈 Haptics、离线运行能力等），通常直接申诉即可解封。</li>
+</ul>
+<h3 style="font-size:15px;font-weight:750;color:#0f172a;margin:22px 0 10px;">3. 结构化回复审核员（附英文沟通模板）</h3>
+<p>如果确实改了代码，遵循“一次改一条、改完自测”的原则，然后让 AI 拟定回复说明；如果是解释说明，可在 App Store Connect 直接使用以下结构化模板礼貌回信：</p>
+<div class="prompt-terminal-box">
+  <div class="ptb-header">
+    <span>代码 / 指令块：</span>
+    <button class="ptb-copy-btn" onclick="navigator.clipboard.writeText(this.closest('.prompt-terminal-box').querySelector('.ptb-code').innerText);this.innerText='已复制！';setTimeout(()=>this.innerText='复制',1500)">复制</button>
+  </div>
+  <pre class="ptb-code">Dear Apple App Review Team,
+
+Thank you for your valuable feedback regarding our app [App Name] (ID: [App ID]).
+
+Regarding Guideline [条款编号，如 2.1 / 4.2]:
+We completely understand your concern and appreciate the opportunity to clarify this feature.
+
+1. Clarification:
+[用简短两三句话说明该功能的设计定位，或说明已修复某问题]
+
+2. Step-by-step reproduction:
+- Step 1: Open the app and sign in using the demo account: [测试账号 / 密码]
+- Step 2: Tap on the "[按钮名称]" button on the [位置].
+- Step 3: The [核心功能] works immediately without any restriction.
+
+3. Demonstration Video:
+To assist your review, we have recorded a quick 30-second real-device walkthrough video demonstrating this exact flow: [附上视频链接或说明见附件].
+
+We hope this clarifies the experience. Please let us know if any further information is needed.
+
+Best regards,
+[你的名字 / 团队名称]</pre>
+</div>
+        </div>
+      </section>
+        
+      <!-- 避坑红线 -->
+      <section class="danger-summary-box" id="sec-warning">
+        <div class="danger-header">
+          <span class="danger-badge-icon">🚫</span>
+          <h2 class="danger-title">千万不要这么做：本步骤必须守住的避坑红线</h2>
+        </div>
+        <div>
+          
+        <div style="margin-bottom:14px;">
+          <h3 style="font-size:15px;font-weight:750;color:#9a3412;margin-bottom:8px;">三、 这一步绝对不能踩的 5 条红线</h3>
+          <div><ol class="num-list-custom">
+  <li><strong>别让 AI 编造资质与证件</strong>：后台填报的营业执照、备案号、主体信息必须真实并亲自核对。</li>
+  <li><strong>别把后台密码交给 AI</strong>：微信公众平台、Apple Developer 账号密码及私钥自己保管，提审和点发布必须亲手操作。</li>
+  <li><strong>别搞“阴阳版本（AB 面）”</strong>：千万别做“审核时给审核员看计算器，通过后远程开关变成违规内容”。一旦被查出提审版与线上版不一致，直接封号且无法申诉。</li>
+  <li><strong>隐私政策绝不弄虚作假</strong>：代码改了权限或新增了 SDK，记得同步更新隐私政策与后台《用户隐私保护指引》。</li>
+  <li><strong>发给审核员的话自己通读一遍</strong>：永远保持平实、客气、就事论事，别把情绪化的抱怨或 AI 写的强词夺理原样发出去。</li>
+</ol></div>
+        </div>
+        </div>
+      </section>
+        
+      <!-- 常见问题答疑 FAQ -->
+      <section class="faq-section-wrap" id="sec-faq">
+        <h2 class="faq-heading-h2">第 8 步常见问题答疑</h2>
+        
+        <details class="faq-accordion-item" open>
+          <summary>我的小程序本地跑得好好的，为什么一提交就被驳回？</summary>
+          <div class="faq-accordion-body">
+            绝大多数驳回不是代码问题，而是「非技术盲区」：类目选错或个人主体做了超范围功能、隐私政策照抄模板和代码实际行为对不上、审核员登不进去。审核员平均只给每个应用 2~3 分钟，30 秒内登不进去就直接勾驳回条款。<strong>只要你给审核员省事，审核员就给你省事。</strong>
+          </div>
+        </details>
+        
+        <details class="faq-accordion-item">
+          <summary>个人主体想做带评论区或社区功能的小程序，怎么办？</summary>
+          <div class="faq-accordion-body">
+            微信对个人主体限制很多，涉及社交、用户发帖评论、在线交易、医疗健康的类目基本都要企业主体或前置资质。先用文中第 1 步的 Prompt 让 AI 去查官方文档，然后只有三条路：<strong>换一个个人能做的类目、首版砍掉超范围功能做纯工具、或者先办个体户执照升级主体</strong>。走哪条只有你能拍板。
+          </div>
+        </details>
+        
+        <details class="faq-accordion-item">
+          <summary>隐私政策能不能直接抄一份网上的模板？</summary>
+          <div class="faq-accordion-body">
+            千万别。模板里写了你根本没收集的通讯录和位置，或者漏掉了你接入的统计 SDK 读取的设备信息，平台的自动代码扫描一发现声明和实际调用不一致就直接驳回。正确做法是让 AI 扫一遍源码和所有第三方 SDK，列出真实收集清单，再据此起草，你补上真实联系邮箱和主体名称，<strong>部署成一个公网能打开的静态页面</strong>，提审后台和 App 内都放好链接。
+          </div>
+        </details>
+        
+        <details class="faq-accordion-item">
+          <summary>审核通过了，为什么用户还是搜不到我的小程序？</summary>
+          <div class="faq-accordion-body">
+            因为微信小程序审核通过后<strong>不会自动上线</strong>。你必须亲自回到微信公众平台的「版本管理」里，手动点那个绿色的「发布」按钮，用户才能搜到。很多人干等好几天以为还在审，其实早就通过了。
+          </div>
+        </details>
+        
+        <details class="faq-accordion-item">
+          <summary>苹果以 2.1 或 4.2 拒了我，一定要改代码重新打包吗？</summary>
+          <div class="faq-accordion-body">
+            经常一行代码都不用改。2.1「崩溃 / 加载空白 / 无法登录」多半是审核员在美国连你的国内服务器超时，或者密码输错了：检查海外连通性后，录一段 15~30 秒一镜到底的真机操作视频附在回复里。4.2「功能太简单」则礼貌回信说明你的垂直场景定位，列出用到的原生特性（本地存储、触感反馈、离线运行等），通常直接申诉就能过。<strong>先让 AI 把驳回信翻译成人话、判断属于哪一类，再决定动不动代码。</strong>
+          </div>
+        </details>
+      </section>
+        
+      </article>
+</PillarLayout>

@@ -1,0 +1,236 @@
+---
+// 支柱页 / 文章页共用布局：顶部悬浮导航和页脚与首页同一套组件，中间三栏（9 步侧栏 · 正文 · 本页目录）。
+// mode = 'flow'：/flow/<slug>/ 的流程支柱页，底部给「下一步」；
+// mode = 'article'：/articles/<id>/ 的问题页，底部给「看这一步的完整流程」，侧栏可通过 sidebar 插槽追加内容。
+// 侧栏和上一步/下一步从 src/data/flow.ts 读，改步骤名只改那一处。
+import '../styles/pillar.css';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import { SITE, CAMP } from '../data/site';
+import { FLOW_STEPS, flowUrl, flowOf, type FlowSlug } from '../data/flow';
+
+interface TocItem {
+  id: string;
+  label: string;
+  num?: string;
+  kind?: 'conclusion' | 'warn' | 'faq';
+}
+interface Crumb {
+  name: string;
+  href: string;
+}
+interface Props {
+  slug: FlowSlug;
+  title: string;
+  description: string;
+  toc: TocItem[];
+  mode?: 'flow' | 'article';
+  // 文章页自带更完整的面包屑和结构化数据时传入，不传按流程页生成
+  crumbs?: Crumb[];
+  jsonLd?: object[];
+  ogType?: 'article' | 'website';
+}
+
+const HOME = '/';
+const PHASES = [
+  { title: '阶段一 · 需求与架构奠基', steps: [1, 2, 3] },
+  { title: '阶段二 · 构建与云端部署', steps: [4, 5, 6] },
+  { title: '阶段三 · 商业变现与维护', steps: [7, 8, 9] },
+];
+
+const { slug, title, description, toc, mode = 'flow', ogType = 'article' } = Astro.props;
+const step = flowOf(slug);
+const prev = FLOW_STEPS.find((s) => s.step === step.step - 1);
+const next = FLOW_STEPS.find((s) => s.step === step.step + 1);
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const fullTitle = `${title} - ${SITE.name}`;
+const crumbs: Crumb[] = Astro.props.crumbs ?? [
+  { name: '首页', href: HOME },
+  { name: '上线流程', href: '/flow/' },
+  { name: `第 ${step.step} 步 · ${step.name}`, href: canonical.pathname },
+];
+
+// 正文先渲染成字符串：一是输出，二是从中抽出 FAQ 做结构化数据，问答只写一遍
+const body = await Astro.slots.render('default');
+const text = (s: string) => s.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+// 开发模式下 Astro 会给标签加 data-astro-source-* 属性，所以属性部分用 [^>]* 兜住
+const faqs = [...body.matchAll(/<summary[^>]*>([\s\S]*?)<\/summary>\s*<div class="faq-accordion-body"[^>]*>([\s\S]*?)<\/div>/g)].map((m) => ({
+  '@type': 'Question',
+  name: text(m[1]),
+  acceptedAnswer: { '@type': 'Answer', text: text(m[2]) },
+}));
+
+const jsonLd = Astro.props.jsonLd ?? [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: crumbs.map((c, i) => ({ '@type': 'ListItem', position: i + 1, name: c.name, item: new URL(c.href, Astro.site).href })),
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: title,
+    description,
+    inLanguage: 'zh-CN',
+    mainEntityOfPage: canonical.href,
+    author: { '@type': 'Person', name: SITE.author.name, description: SITE.author.description },
+    publisher: { '@type': 'Organization', name: SITE.name, url: Astro.site?.href },
+    isPartOf: { '@type': 'HowTo', name: '一人公司上线全流程：9 步从想法到收到钱', url: new URL('/flow/', Astro.site).href, step: `第 ${step.step} 步` },
+  },
+  ...(faqs.length ? [{ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faqs }] : []),
+];
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content={SITE.author.name} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate" type="application/rss+xml" title={SITE.name} href="/rss.xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:locale" content="zh_CN" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+    {mode === 'flow' && prev && <link rel="prev" href={flowUrl(prev.slug)} />}
+    {mode === 'flow' && next && <link rel="next" href={flowUrl(next.slug)} />}
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+    <slot name="head" />
+  </head>
+  <body>
+    <SiteHeader />
+
+    <div class="layout-grid">
+      <aside class="left-sidebar" aria-label="9 步上线流程">
+        {PHASES.map((phase, i) => (
+          <>
+            <div class="sb-phase-title" style={i ? 'margin-top:14px;' : undefined}>{phase.title}</div>
+            <div class="sb-timeline">
+              {FLOW_STEPS.filter((s) => phase.steps.includes(s.step)).map((s) => (
+                <a href={flowUrl(s.slug)} class:list={['sb-node', { active: s.slug === slug }]} aria-current={s.slug === slug && mode === 'flow' ? 'page' : undefined}>
+                  {String(s.step).padStart(2, '0')}. {s.name}
+                </a>
+              ))}
+            </div>
+          </>
+        ))}
+        <slot name="sidebar" />
+      </aside>
+
+      <main>
+        <nav class="crumbs" aria-label="面包屑">
+          {crumbs.map((c, i) => (
+            <>
+              {i > 0 && <span>/</span>}
+              {i < crumbs.length - 1 ? <a href={c.href}>{c.name}</a> : <span>{c.name}</span>}
+            </>
+          ))}
+        </nav>
+        <Fragment set:html={body} />
+
+        <nav class="flow-next" aria-label={mode === 'flow' ? '上一步和下一步' : '这一步的完整流程'}>
+          {mode === 'article' ? (
+            <a href={flowUrl(step.slug)} class="flow-next-primary">
+              <div class="flow-next-label">本文属于 · STEP {String(step.step).padStart(2, '0')}</div>
+              <div class="flow-next-title">看第 {step.step} 步「{step.name}」完整流程 ➔</div>
+            </a>
+          ) : next ? (
+            <a href={flowUrl(next.slug)} class="flow-next-primary">
+              <div class="flow-next-label">下一步 · STEP {String(next.step).padStart(2, '0')}</div>
+              <div class="flow-next-title">{next.name} ➔</div>
+            </a>
+          ) : (
+            <a href={`${HOME}#flow`} class="flow-next-primary">
+              <div class="flow-next-label">9 步已走完 · 回到总览</div>
+              <div class="flow-next-title">回首页看全部 9 步与实战手册 ➔</div>
+            </a>
+          )}
+          <a href={CAMP.href} class="flow-next-camp">
+            <div class="flow-next-label">48 小时脱产实训营</div>
+            <div class="flow-next-title">现场主讲逐屏排雷，两天真机上线 ➔</div>
+          </a>
+        </nav>
+        {mode === 'flow' && prev && (
+          <p class="flow-prev">
+            <a href={flowUrl(prev.slug)}>← 上一步 · 第 {prev.step} 步 {prev.name}</a>
+          </p>
+        )}
+      </main>
+
+      <aside class="toc-aside">
+        <div class="toc-card toc-card-b">
+          <div class="toc-header">
+            <span class="toc-title-b">本页阅读脉络</span>
+            <span class="toc-pill-status">阅读中</span>
+          </div>
+          <div class="toc-timeline">
+            <div class="toc-track-line"></div>
+            {toc.map((t, i) => (
+              <a href={`#${t.id}`} class:list={['toc-node', { active: i === 0 }]}>
+                <span class:list={['toc-dot', t.kind && `toc-dot-${t.kind}`]}></span>
+                <span class="toc-text">
+                  {t.num && <b class="step-num">{t.num}</b>} {t.label}
+                </span>
+              </a>
+            ))}
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <SiteFooter />
+
+    <script>
+      // 右侧目录随滚动高亮
+      const links = Array.from(document.querySelectorAll<HTMLAnchorElement>('.toc-timeline a.toc-node'));
+      const sections = links
+        .map((link) => ({ link, target: document.getElementById(decodeURIComponent(link.getAttribute('href')!.slice(1))) }))
+        .filter((s): s is { link: HTMLAnchorElement; target: HTMLElement } => !!s.target);
+      const onScroll = () => {
+        const pos = window.scrollY + 140;
+        let current = sections[0];
+        for (const sec of sections) if (sec.target.offsetTop <= pos) current = sec;
+        links.forEach((l) => l.classList.remove('active'));
+        current?.link.classList.add('active');
+      };
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+
+      // 文章页提示词卡、排障表、「交给 AI 执行」卡片的复制按钮（[data-copy]）
+      document.addEventListener('click', async (e) => {
+        const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-copy]');
+        if (!btn) return;
+        const value = btn.dataset.copy ?? '';
+        try {
+          await navigator.clipboard.writeText(value);
+        } catch {
+          const ta = document.createElement('textarea');
+          ta.value = value;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          ta.remove();
+        }
+        const old = btn.textContent;
+        btn.textContent = '已复制';
+        btn.classList.add('done');
+        setTimeout(() => {
+          btn.textContent = old;
+          btn.classList.remove('done');
+        }, 1500);
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,253 @@
+---
+// 第 1 步 · idea：/flow/idea/。版式、侧栏、目录、上一步下一步都在 PillarLayout 里，这里只写正文。
+import PillarLayout from '../../layouts/PillarLayout.astro';
+
+const toc = [
+  {"id": "sec-header-conclusion", "label": "先说结论", "kind": "conclusion"},
+  {"id": "sec-step1", "label": "纸上回答 3 问", "num": "01"},
+  {"id": "sec-step2", "label": "降维网页文件", "num": "02"},
+  {"id": "sec-step3", "label": "刁民反向追问", "num": "03"},
+  {"id": "sec-step4", "label": "半小时搓样板间", "num": "04"},
+  {"id": "sec-summary", "label": "避坑红线两条", "kind": "warn"},
+  {"id": "sec-faq", "label": "常见问题 FAQ", "kind": "faq"},
+];
+---
+
+<PillarLayout
+  slug="idea"
+  title="第1步：新手用 AI 写软件，第一步到底该怎么把模糊的想法落地成“能跑的原型”？"
+  description="很多新手用 AI 写软件，最容易犯的错误就是直接让 AI 帮我写一个类似某某的产品。要把脑子里模糊的想法在半天内变成鼠标可点击、流程能跑通的原型，照着4步流水线操作。"
+  toc={toc}
+>
+      <header class="header-card" id="sec-header-conclusion">
+        <div class="header-meta-row">
+          <div class="header-pill-group">
+            <span class="phase-pill-dark">一人公司实战体系</span>
+            <span class="step-pill-emerald">第 1 步 · AI 原型设计与 MVP 落地</span>
+          </div>
+          <div class="header-status-indicator">
+            <span class="status-dot-pulse"></span>
+            <span>核心交付：0 代码跑通单文件 HTML 样板间</span>
+          </div>
+        </div>
+
+        <h1 class="header-main-h1">
+          新手用 AI 写软件，第一步到底该怎么把模糊的想法落地成<span class="hl">“能跑的原型”</span>？
+        </h1>
+
+        <!-- 内嵌整合的“先说结论” -->
+        <div class="header-conclusion-inner">
+          <div class="hci-badge-pill">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+            </svg>
+            <span>先说结论 · KEY TAKEAWAY</span>
+          </div>
+          <p class="hci-text">
+            <strong>千万不要直接让 AI“帮我写一个类似某某的产品”。</strong>真正的第一步，是在纸上用 3 个问题把想法收敛成一句大白话，<strong>坚决不碰 App 和小程序，直接让 AI 搓出一个双击就能在浏览器跑的纯单文件 HTML</strong>。登录、支付全用弹窗占位，数据全部写死，只通核心业务那一盏灯——半天之内，手里必须先拿到一个鼠标可点、能发给朋友测反馈的“活样板间”。
+          </p>
+        </div>
+
+        <!-- 底部 SEO/GEO 结构化元数据看板 -->
+        <div class="header-meta-grid">
+          <!-- 核心动作 -->
+          <div class="meta-tag-card">
+            <div class="meta-tag-icon-box">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <circle cx="12" cy="12" r="6"></circle>
+                <circle cx="12" cy="12" r="2"></circle>
+              </svg>
+            </div>
+            <div class="meta-tag-content">
+              <span class="meta-tag-label">核心动作:</span>
+              <span>克制野心 · 降维做单文件网页</span>
+            </div>
+          </div>
+
+          <!-- 交付用时 -->
+          <div class="meta-tag-card">
+            <div class="meta-tag-icon-box">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+            </div>
+            <div class="meta-tag-content">
+              <span class="meta-tag-label">交付用时:</span>
+              <span>半天 (约 2~4 小时极速成型)</span>
+            </div>
+          </div>
+
+          <!-- 阶段产出物 -->
+          <div class="meta-tag-card">
+            <div class="meta-tag-icon-box">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="16 18 22 12 16 6"></polyline>
+                <polyline points="8 6 2 12 8 18"></polyline>
+              </svg>
+            </div>
+            <div class="meta-tag-content">
+              <span class="meta-tag-label">阶段产物:</span>
+              <span>可点击单文件 HTML 样板间</span>
+            </div>
+          </div>
+        </div>
+      </header>
+      <article class="main-article-card">
+        
+      <!-- 导言 方案 A -->
+      <div class="lead-box">
+        <div class="lead-warning-tag">
+          <span>⚠️</span>
+          <span>新手最易踩的坑</span>
+        </div>
+        <p>很多新手用 AI 写软件，最容易犯的错误就是<strong>“直接让 AI 帮我写一个类似某某的产品”</strong>，结果往往是：AI 吐出一堆跑不起来的代码，或者直接陷入无休止的“登录、权限、数据库”配置中，热情在第一天就被耗尽。</p>
+        <p>要把脑子里模糊的想法，在半天之内变成一个<strong>“可以用鼠标点一点、流程能跑通的原型”</strong>，你只需要照着以下 <strong>4 步流水线</strong> 操作：</p>
+      </div>
+
+      <!-- 第一步 -->
+      <section class="step-card-wrap" id="sec-step1">
+        <div class="card-top-tag">
+          <h2 class="step-heading-h2">第一步：在纸上回答 3 个问题，用一句话定心骨（你自己定）</h2>
+        </div>
+        <div class="step-inner-content">
+          <p>不要一开始就开聊天框让 AI 替你决定。先拿出一张纸或备忘录，写清这 3 点：</p>
+          <ol class="num-list-custom">
+            <li><strong>给谁用？</strong>（具体身份，如：经常拍 1 分钟口播的博主，而不是“所有人”）</li>
+            <li><strong>解决什么具体的麻烦？</strong>（如：背不下来稿子、眼神老往镜头外飘）</li>
+            <li><strong>凭什么比现有办法省事？</strong>（如：别人要录音转字再拷进提词器，我这直接在同一个界面里念）</li>
+          </ol>
+          <div class="quote-callout">
+            <strong>最终成果</strong>：拼成一句极其直白的话：<br />
+            <em>“这个工具是帮 [谁]，在 [什么场景下]，用比现有办法快 3 倍的方式搞定 [什么麻烦]。”</em>
+          </div>
+        </div>
+      </section>
+
+      <!-- 第二步 -->
+      <section class="step-card-wrap" id="sec-step2">
+        <div class="card-top-tag">
+          <h2 class="step-heading-h2">第二步：克制野心，把形态降维到“网页文件”（轻量优先）</h2>
+        </div>
+        <div class="step-inner-content">
+          <p>新手最喜欢说“我要做个安卓/iOS App”或“做个微信小程序”。<strong>在第一步，千万别做 App！</strong></p>
+          <ul class="bullet-list-custom">
+            <li>App 需要搭开发环境、打包证书、配模拟器，能卡死新手三天；</li>
+            <li>小程序需要注册开发者账号、配安全域名、过审；</li>
+            <li><strong>唯一推荐的形态：单文件网页（HTML）</strong>。</li>
+          </ul>
+          <p>不管你未来想做 App 还是小程序，第一步都<strong>做成一个能在电脑或手机浏览器里直接双击打开的网页</strong>。只要把界面比例做成手机大小（比如模拟一个手机外壳），体验上完全没有任何差别。</p>
+        </div>
+      </section>
+
+      <!-- 第三步 -->
+      <section class="step-card-wrap" id="sec-step3">
+        <div class="card-top-tag">
+          <h2 class="step-heading-h2">第三步：把 AI 当成“挑剔的刁民”，让它追问你（它问，你答）</h2>
+        </div>
+        <div class="step-inner-content">
+          <p>把第一步的那句话发给 AI，但<strong>千万不要直接让它写代码</strong>，而是给它下达这个指令：</p>
+          <div class="prompt-terminal-box">
+            <div class="ptb-header">
+              <span>实操 Prompt（可直接复制）：</span>
+              <button class="ptb-copy-btn" onclick="navigator.clipboard.writeText(this.closest('.prompt-terminal-box').querySelector('.ptb-code').innerText); this.innerText='已复制！'; setTimeout(()=>this.innerText='复制', 2000);">复制</button>
+            </div>
+            <div class="ptb-code">“我打算做一款产品，核心想法是：`[粘贴你第一步总结的那句话]`。
+现在请先不要写任何代码！ 请你扮演一位挑剔的产品经理或真实用户，反过来向我提 3~5 个关于业务闭环、使用痛点和极端场景的刁钻问题，帮我查漏补缺。我们一问一答，等我全部回答完并让你开始时，你再做下一步。”</div>
+          </div>
+          <p>通过这轮交锋，AI 会逼你想清楚：</p>
+          <ul class="bullet-list-custom">
+            <li>“如果用户没说话怎么办？”</li>
+            <li>“生成出来的东西用户想改哪几个字怎么操作？”</li>
+          </ul>
+          <p>这时候你只需要用大白话如实回答。AI 会帮你理清真正的<strong>核心单点流程</strong>。</p>
+        </div>
+      </section>
+
+      <!-- 第四步 -->
+      <section class="step-card-wrap" id="sec-step4">
+        <div class="card-top-tag">
+          <h2 class="step-heading-h2">第四步：半小时搓出“样板间”，死抓假数据（它做，你验收）</h2>
+        </div>
+        <div class="step-inner-content">
+          <p>理清逻辑后，让 AI 动手。核心认知：<strong>样板间看着能住，但水电先不通；只通主卧那一盏灯。</strong></p>
+          <div class="prompt-terminal-box">
+            <div class="ptb-header">
+              <span>实操 Prompt（可直接复制）：</span>
+              <button class="ptb-copy-btn" onclick="navigator.clipboard.writeText(this.closest('.prompt-terminal-box').querySelector('.ptb-code').innerText); this.innerText='已复制！'; setTimeout(()=>this.innerText='复制', 2000);">复制</button>
+            </div>
+            <div class="ptb-code">“按我们刚才聊好的逻辑，帮我做一个纯单文件 HTML/JS 网页原型，下载后双击即可在浏览器运行。
+严格遵循以下规则：
+1. 只把最核心的那一个闭环功能做成真实可用的（比如：录音→转文字→提词滚动）；
+2. 涉及登录、注册、微信支付、VIP 购买、云端同步等非核心功能，点一下只弹窗提示‘演示功能’，严禁写复杂后端逻辑；
+3. 需要展示数据的地方，全部写死几条高质量的假数据占位；
+4. 做完后，请在末尾给我列一张清单：哪些是真能用的、哪些是纯演示的。”</div>
+          </div>
+          <p><strong>你的验收标准：</strong></p>
+          <ul class="bullet-list-custom">
+            <li>双击打开能不能直接点？</li>
+            <li>走完核心流程顺不顺？</li>
+            <li>体验对不对？</li>
+          </ul>
+          <p>如果不对，不要笼统地说“不好看”或“重做”，而是告诉它：<em>“把提词滚动的速度调慢点，字号改大，其他不动。”</em></p>
+        </div>
+      </section>
+
+      <!-- 总结红线 -->
+      <!-- 千万不要这么做 / 总结避坑红线 -->
+      <section class="danger-summary-box" id="sec-summary">
+        <div class="danger-header">
+          <span class="danger-badge-icon">🚫</span>
+          <h2 class="danger-title">千万不要这么做：必须刻在脑门上的两条避坑红线</h2>
+        </div>
+        <ol class="num-list-custom danger-list">
+          <li><strong>红线一：原型一旦跑通，立刻踩刹车！</strong><br />不要在原型阶段觉得“哎呀再加上多主题切换吧”、“再加个用户等级吧”。每多加一个边角料，都是在为一个尚未验证的市场设想浪费生命。</li>
+          <li><strong>红线二：你是产品经理，AI 只是外包打工人。</strong><br />AI 会很热心地给你推荐“要不要加个向量数据库”、“要不要上微服务”。记住：<strong>它负责提供技术选项，你负责挥刀砍掉一切非核心欲望。</strong></li>
+        </ol>
+        <p class="danger-footer-takeaway">完成这 4 步，你手里就有了一个<strong>随时能发给朋友试用、能用来录屏发朋友圈测反馈、能指导下一步真正写代码</strong>的“活原型”。</p>
+      </section>
+
+      <!-- 常见问题 FAQ (+号展开，-号收起) -->
+      <section class="faq-section-wrap" id="sec-faq">
+        <h2 class="faq-heading-h2">第 1 步常见问题答疑</h2>
+        
+        <details class="faq-accordion-item" open>
+          <summary>我完全不懂编程，AI 给我的单文件 HTML 怎么在手机或电脑上看？</summary>
+          <div class="faq-accordion-body">
+            让 AI 把代码保存为一个以 <code>.html</code> 结尾的文件（例如 <code>index.html</code>）。电脑上直接用任何浏览器（Chrome、Edge、Safari）双击就能跑；如果想在手机上看，可以用微信把文件发给自己，点击右上角选择“在浏览器中打开”，几秒钟就能在真机上体验。
+          </div>
+        </details>
+
+        <details class="faq-accordion-item">
+          <summary>为什么非要降维到网页，我直接做微信小程序或者 App 不行吗？</summary>
+          <div class="faq-accordion-body">
+            第一步的核心是“极速验证业务流程与获得体感”。做 App 需要安装 Xcode/Android Studio 开发环境、配证书、装模拟器，很容易直接劝退；小程序要注册账号、配域名和过审。单文件 HTML 零门槛、免安装，先用它把需求点透，后续随时能让 AI 把逻辑迁移到小程序或 App。
+          </div>
+        </details>
+
+        <details class="faq-accordion-item">
+          <summary>原型里的登录、用户中心和支付，真的连一点都不用做吗？</summary>
+          <div class="faq-accordion-body">
+            真的连一行后端代码都不用写！在原型阶段，这些非核心功能只需要在按钮上加一段简单的弹窗脚本（例如点击弹出“演示功能，暂未开放”）。你的所有精力必须 100% 聚焦在核心业务闭环上，等产品验证有人要了，再去第 7 步接真实收款。
+          </div>
+        </details>
+
+        <details class="faq-accordion-item">
+          <summary>AI 追问我的问题我答不上来，或者觉得自己想法还不完善怎么办？</summary>
+          <div class="faq-accordion-body">
+            答不上来恰恰说明这个提问帮你避开了巨大的坑！遇到答不上来的极端场景，直接大白话告诉 AI：“第一版先不管这种极端情况，默认按最理想流程走”或者“你作为资深产品经理，按行业惯例帮我给一个最省事的默认处理方案”。
+          </div>
+        </details>
+
+        <details class="faq-accordion-item">
+          <summary>原型跑通之后，我该怎么拿着它去验证市场？</summary>
+          <div class="faq-accordion-body">
+            把网页打开录制一段 30 秒的操作演示视频，或者直接把 HTML 发给 3~5 位你第一步定义的精准目标用户，问他们一句话：“如果这个工具现在就能用，能解决你的麻烦吗？你愿意为此付费吗？”得到真实反馈后，再信心满满地进入第 2 步选底子。
+          </div>
+        </details>
+      </section>
+
+
+      </article>
+</PillarLayout>

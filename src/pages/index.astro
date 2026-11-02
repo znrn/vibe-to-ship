@@ -1,25 +1,3022 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-import Hero from '../components/home/Hero.astro';
-import WhoFor from '../components/home/WhoFor.astro';
-import Roadmap from '../components/home/Roadmap.astro';
-import Articles from '../components/home/Articles.astro';
-import Works from '../components/home/Works.astro';
-import Camp from '../components/home/Camp.astro';
-import About from '../components/home/About.astro';
-import Faq from '../components/home/Faq.astro';
-import { getArticles } from '../lib/articles';
+// 首页（2026-11-02 由 v3 提案转正；改版前的首页备份在 backup/2026-11-02-home-before-v3/index.astro）
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import { SITE, AUDIENCE, CAMP, WHAT_IS } from '../data/site';
+import { FLOW_STEPS, flowUrl } from '../data/flow';
+import { getArticles, articleUrl, formatDate } from '../lib/articles';
 
 const articles = await getArticles();
+const recentArticles = articles.slice(0, 6);
+const canonical = new URL('/', Astro.site);
+
+// 9 步交付流程统一科技矢量图标字典 (替代零散的通用系统 Emoji，与上方 5 项对比、4 大人群设计语言严格对齐)
+const STEP_ICONS: Record<string, string> = {
+  idea: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>`,
+  base: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>`,
+  accounts: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>`,
+  build: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>`,
+  deploy: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>`,
+  domain: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
+  payment: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>`,
+  review: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>`,
+  grow: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>`,
+};
+
+// 9 步标题优化（更具动作感与交付目标感）
+const STEP_TITLES_A1: Record<string, string> = {
+  idea: '定位与选品：切中真实付费痛点',
+  base: '技术选型：开源改造还是 AI 从零生成',
+};
+
+const STEP_TITLES_A2: Record<string, string> = {
+  idea: '需求切片：定义最小可收费版本 (MVP)',
+  base: '架构基底：选择开源脚手架或直接生成',
+};
+
+// 精选实战交付真实作品数据（不展示收入，专注展示形态、研发耗时、交付关键与技术栈）
+const SHOWCASE_PROJECTS = [
+  {
+    type: 'mp',
+    typeLabel: '微信小程序',
+    title: '本地商户极速核销小程序',
+    sub: '实体获客 · 扫码核销与积分裂变',
+    tag: '微信生态 · 免资质卡审',
+    desc: '面向本地餐饮与烘焙商户的扫码验券小程序。避开企业资质繁琐审核，利用个人开发者轻量合规方案，从零提示词到真机提审 48 小时搞定。',
+    buildTime: '周末 48 小时',
+    highlights: ['微信开发者工具本地真机调通', '个人主体免敏感类目合规过审', '云函数免后端运维架构'],
+    demoUrl: '#',
+    tech: 'UniApp + 微信云开发'
+  },
+  {
+    type: 'web',
+    typeLabel: '商业网站 / Web SaaS',
+    title: '垂直行业出海微型工具站',
+    sub: '独立域名 · 出海支付与变现闭环',
+    tag: '海外 Web · 独立域名秒开',
+    desc: '面向海外创作者的图片矢量化工具。集成 Stripe 订阅制国际信用卡付款、Google 一键登录与全球 CDN 加速，不写一行代码跑通美元收付款。',
+    buildTime: '3 天极速交付',
+    highlights: ['Claude Code 全程驱动写前端后端', 'Stripe 订阅收款与 Webhook 沙盒', 'Cloudflare 边缘全球免维护部署'],
+    demoUrl: '#',
+    tech: 'Astro + Tailwind + Stripe'
+  },
+  {
+    type: 'app',
+    typeLabel: '跨平台 App (iOS / Android)',
+    title: '个人效率记账与资产管理 App',
+    sub: '双端真机 · 原生性能与离线存储',
+    tag: '移动客户端 · 本地真机运行',
+    desc: '支持手机端快捷记账与月度报表生成的纯客户端 App。借助现代轻量跨平台框架，在 Mac 上用 AI 直接指挥编译出 iOS / Android 安装包。',
+    buildTime: '4 天双端编译通过',
+    highlights: ['Capacitor / Flutter 极简跨端壳', '手机实机签名与本地无网数据存储', '手把手过 Apple 开发者账号审核'],
+    demoUrl: '#',
+    tech: 'Flutter / Capacitor + SQLite'
+  }
+];
 ---
 
-<BaseLayout>
-  <Hero />
-  <WhoFor />
-  <Roadmap />
-  <Articles articles={articles} />
-  <Works />
-  <Camp />
-  <About />
-  <Faq />
-</BaseLayout>
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{SITE.homeTitle} - {SITE.name}</title>
+    <meta name="description" content={SITE.description} />
+    <meta name="author" content={SITE.author.name} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate" type="application/rss+xml" title={SITE.name} href="/rss.xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={SITE.homeTitle} />
+    <meta property="og:description" content={SITE.description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:locale" content="zh_CN" />
+    <style>
+      :root {
+        --bg: #f8fafc;
+        --surface: #ffffff;
+        --surface-hover: #f1f5f9;
+        --card: #ffffff;
+        --line: #e2e8f0;
+        --line-light: #cbd5e1;
+        --ink: #0f172a;
+        --muted: #64748b;
+        --emerald: #059669;
+        --emerald-glow: #ecfdf5;
+        --accent: #0284c7;
+        --amber: #d97706;
+        --radius: 16px;
+        --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06);
+        --shadow-md: 0 10px 25px -5px rgb(0 0 0 / 0.06), 0 8px 10px -6px rgb(0 0 0 / 0.04);
+        --shadow-lg: 0 20px 30px -10px rgb(0 0 0 / 0.08);
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        background: var(--bg);
+        color: var(--ink);
+        font: 15.5px/1.75 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", sans-serif;
+        -webkit-font-smoothing: antialiased;
+        overflow-x: hidden;
+      }
+      a { color: inherit; text-decoration: none; }
+      .container { max-width: 1160px; margin: 0 auto; padding: 0 24px; }
+
+
+      /* Hero 核心区域 */
+      .hero {
+        position: relative;
+        padding: 60px 0 36px;
+        text-align: center;
+      }
+      .hero::before {
+        content: "";
+        position: absolute;
+        top: -60px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 600px;
+        height: 350px;
+        background: radial-gradient(circle, rgba(5, 150, 105, 0.08) 0%, rgba(2, 132, 199, 0.04) 50%, transparent 70%);
+        pointer-events: none;
+        z-index: 0;
+      }
+      .hero-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--emerald);
+        background: var(--emerald-glow);
+        border: 1px solid #86efac;
+        padding: 5px 14px;
+        border-radius: 999px;
+        margin-bottom: 24px;
+      }
+      .hero h1 {
+        font-size: clamp(34px, 5.2vw, 54px);
+        font-weight: 850;
+        line-height: 1.25;
+        letter-spacing: -1px;
+        margin-bottom: 22px;
+      }
+      .hero h1 span.gradient-text {
+        background: linear-gradient(135deg, #059669 0%, #0284c7 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      .hero-sub {
+        font-size: 18px;
+        color: var(--muted);
+        max-width: 660px;
+        margin: 0 auto 34px;
+        line-height: 1.7;
+      }
+      .hero-actions {
+        display: flex;
+        justify-content: center;
+        gap: 14px;
+        flex-wrap: wrap;
+        margin-bottom: 48px;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 15px;
+        font-weight: 600;
+        padding: 12px 24px;
+        border-radius: 10px;
+        transition: 0.2s;
+        cursor: pointer;
+      }
+      .btn-primary {
+        background: var(--emerald);
+        color: #ffffff;
+        box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+      }
+      .btn-primary:hover { filter: brightness(1.15); transform: translateY(-2px); }
+      .btn-ghost {
+        background: var(--surface);
+        color: var(--ink);
+        border: 1px solid var(--line);
+      }
+      .btn-ghost:hover { border-color: var(--line-light); background: var(--surface-hover); }
+
+      /* 对比看板 (Before vs After) - 现代卡片并列与质感升级 */
+      .vs-container {
+        position: relative;
+        max-width: 1080px;
+        margin: 10px auto 72px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+      }
+      .vs-badge-floating {
+        position: absolute;
+        top: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #0f172a;
+        color: #f8fafc;
+        font-size: 11.5px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        padding: 4px 14px;
+        border-radius: 999px;
+        border: 1px solid #334155;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        z-index: 10;
+      }
+      .vs-divider {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 5;
+        pointer-events: none;
+      }
+      .vs-circle {
+        display: grid;
+        place-items: center;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: #ffffff;
+        border: 2px solid #e2e8f0;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+        font-size: 13px;
+        font-weight: 900;
+        color: #64748b;
+        letter-spacing: -0.5px;
+      }
+      .vs-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        padding: 34px 30px;
+        text-align: left;
+        box-shadow: 0 10px 25px -5px rgba(0,0,0,0.04), 0 8px 10px -6px rgba(0,0,0,0.02);
+        transition: transform 0.2s, box-shadow 0.2s;
+        position: relative;
+        overflow: hidden;
+      }
+      .vs-card:hover {
+        transform: translateY(-2px);
+      }
+      .vs-left {
+        background: linear-gradient(180deg, #ffffff 0%, #fffafa 100%);
+        border: 1.5px solid #fca5a5;
+        box-shadow: 0 16px 32px -8px rgba(239, 68, 68, 0.08);
+      }
+      .vs-right {
+        background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%);
+        border: 1.5px solid #86efac;
+        box-shadow: 0 16px 32px -8px rgba(16, 185, 129, 0.12);
+      }
+      .vs-card-top {
+        margin-bottom: 20px;
+      }
+      .vs-icon-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: 6px;
+        margin-bottom: 12px;
+      }
+      .vs-icon-tag.error {
+        background: #fef2f2;
+        color: #ef4444;
+      }
+      .vs-icon-tag.success {
+        background: #dcfce7;
+        color: #059669;
+      }
+      .vs-title {
+        font-size: 20px;
+        font-weight: 800;
+        color: #0f172a;
+        letter-spacing: -0.4px;
+        line-height: 1.4;
+      }
+      .vs-tag-cloud {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 24px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #f1f5f9;
+      }
+      .vs-tag-cloud span {
+        font-size: 12px;
+        padding: 4px 10px;
+        border-radius: 6px;
+        background: #f1f5f9;
+        color: #64748b;
+        font-weight: 500;
+      }
+      .vs-tag-cloud.success-tags span {
+        background: #dcfce7;
+        color: #065f46;
+        font-weight: 600;
+      }
+      .vs-features {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        font-size: 14.5px;
+        line-height: 1.65;
+      }
+      .vs-features li {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        color: #475569;
+      }
+      .vs-features li b {
+        color: #0f172a;
+      }
+      .cross {
+        display: grid;
+        place-items: center;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #fee2e2;
+        color: #ef4444;
+        font-size: 11px;
+        font-weight: 900;
+        flex-shrink: 0;
+        margin-top: 3px;
+      }
+      .check {
+        display: grid;
+        place-items: center;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #059669;
+        color: #ffffff;
+        font-size: 11px;
+        font-weight: 900;
+        flex-shrink: 0;
+        margin-top: 3px;
+        box-shadow: 0 2px 6px rgba(5, 150, 105, 0.3);
+      }
+      @media (max-width: 860px) {
+        .vs-container { grid-template-columns: 1fr; gap: 30px; }
+        .vs-divider { display: none; }
+      }
+
+      /* 页面核心分段通用规范（留白呼吸感适度优化） */
+      section.sec { padding: 48px 0; border-top: 1px solid var(--line); }
+      .sec-header {
+        text-align: center;
+        max-width: 620px;
+        margin: 0 auto 32px;
+      }
+      .sec-tag { font-size: 13px; color: var(--emerald); font-weight: 700; text-transform: uppercase; margin-bottom: 8px; display: block; }
+      .sec-title { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 10px; }
+      .sec-desc { font-size: 15px; color: var(--muted); }
+
+      .audience-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+      }
+      .audience-card {
+        box-shadow: var(--shadow-sm);
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 24px;
+        transition: 0.2s;
+      }
+      .audience-card:hover { border-color: var(--line-light); transform: translateY(-3px); }
+      .card-icon { font-size: 28px; margin-bottom: 14px; }
+      .card-role { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+      .card-pain { font-size: 13.5px; color: var(--muted); margin-bottom: 14px; line-height: 1.6; }
+      .card-want { font-size: 13.5px; color: var(--emerald); font-weight: 600; line-height: 1.6; }
+
+      /* 9 步交付流程 (Roadmap) */
+      .flow-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+      }
+      .flow-box {
+        box-shadow: var(--shadow-sm);
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        transition: 0.2s;
+      }
+      .flow-box:hover { border-color: var(--emerald); }
+      .flow-num { font-size: 12px; font-weight: 800; color: var(--emerald); margin-bottom: 6px; }
+      .flow-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+      .flow-desc { font-size: 13px; color: var(--muted); margin-bottom: 14px; flex: 1; }
+      .flow-meta { font-size: 12px; color: var(--emerald); font-weight: 600; }
+
+      /* 线下 48 小时实战营高光卡片 (Camp Highlight) */
+      .camp-banner {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #f8fafc;
+        border: 1px solid rgba(16, 185, 129, 0.35);
+        border-radius: var(--radius);
+        padding: 48px;
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr;
+        gap: 36px;
+        align-items: center;
+        margin: 20px 0;
+        box-shadow: var(--shadow-lg);
+      }
+      .camp-title { font-size: 32px; font-weight: 850; line-height: 1.25; margin-bottom: 14px; }
+      .camp-desc { font-size: 16px; color: var(--muted); margin-bottom: 24px; line-height: 1.7; }
+      .promises-list { list-style: none; margin-bottom: 28px; }
+      .promises-list li { margin-bottom: 10px; display: flex; align-items: center; gap: 10px; font-size: 14.5px; }
+      .promises-list li span { color: var(--emerald); font-weight: bold; }
+      .camp-box-right {
+        color: var(--ink); box-shadow: var(--shadow-md);
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 28px;
+        text-align: center;
+      }
+      .camp-badge { font-size: 12px; font-weight: 700; color: var(--amber); background: rgba(245, 158, 11, 0.15); padding: 4px 10px; border-radius: 999px; display: inline-block; margin-bottom: 14px; }
+      .camp-price { font-size: 38px; font-weight: 900; color: var(--ink); margin-bottom: 6px; }
+      .camp-note { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+
+      /* 文章列表 */
+      .article-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+      .article-card {
+        box-shadow: var(--shadow-sm);
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 18px 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: 0.2s;
+      }
+      .article-card:hover { border-color: var(--line-light); transform: translateY(-2px); }
+      .article-title { font-size: 15.5px; font-weight: 600; margin-bottom: 6px; line-height: 1.45; }
+      .article-desc { font-size: 13px; color: var(--muted); margin-bottom: 12px; line-height: 1.6; }
+      .article-meta { font-size: 12px; color: var(--muted); display: flex; justify-content: space-between; }
+
+      /* ── 文章列表全新 方案 A：工程师实战排错手册 (知识库精读卡片流) ── */
+      .art-grid-a {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+        margin-top: 14px;
+      }
+      .art-card-a {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 24px 22px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        text-decoration: none;
+        color: inherit;
+        position: relative;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+      }
+      .art-card-a:hover {
+        transform: translateY(-3px);
+        border-color: #059669;
+        box-shadow: 0 14px 28px -6px rgba(5, 150, 105, 0.12);
+      }
+      .art-badge-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+      }
+      .art-tag-stage {
+        font-size: 11px;
+        font-weight: 750;
+        color: #047857;
+        background: #ecfdf5;
+        border: 1px solid #a7f3d0;
+        padding: 2px 8px;
+        border-radius: 6px;
+        letter-spacing: 0.3px;
+      }
+      .art-time {
+        font-size: 12px;
+        color: #94a3b8;
+        font-weight: 500;
+      }
+      .art-title-a {
+        font-size: 16px;
+        font-weight: 800;
+        color: #0f172a;
+        margin-bottom: 10px;
+        line-height: 1.45;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      .art-desc-a {
+        font-size: 13px;
+        color: #64748b;
+        line-height: 1.6;
+        margin-bottom: 18px;
+        flex: 1;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      .art-footer-a {
+        border-top: 1px dashed #e2e8f0;
+        padding-top: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 12.5px;
+        font-weight: 700;
+        color: #059669;
+      }
+      .art-read-arrow {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: #ecfdf5;
+        color: #059669;
+        display: grid;
+        place-items: center;
+        font-size: 11px;
+        transition: 0.2s;
+      }
+      .art-card-a:hover .art-read-arrow {
+        background: #059669;
+        color: #ffffff;
+      }
+
+      /* ── 作品展示 方案 C：全形态竖版三柱大卡 (涵盖：微信小程序 / Web商业网站 / iOS与安卓App) ── */
+      .showcase-grid-c {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+        margin-top: 14px;
+      }
+      .showcase-card-c {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        position: relative;
+      }
+      .showcase-card-c:hover {
+        transform: translateY(-5px);
+        border-color: #059669;
+        box-shadow: 0 16px 36px -8px rgba(5, 150, 105, 0.16);
+      }
+      .sc-c-header {
+        margin-bottom: 14px;
+      }
+      .sc-c-type-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+      }
+      .sc-c-badge {
+        font-size: 11.5px;
+        font-weight: 850;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        padding: 4px 12px;
+        border-radius: 999px;
+      }
+      .sc-c-badge.mp { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+      .sc-c-badge.web { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+      .sc-c-badge.app { background: #faf5ff; color: #7e22ce; border: 1px solid #e9d5ff; }
+      .sc-c-device-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        display: grid;
+        place-items: center;
+        color: #0f172a;
+      }
+
+      /* 真实仿真截图/模型视窗展示区 (Mockup Preview) - 统一定高保证视觉完全平齐 */
+      .sc-mockup-wrapper {
+        width: 100%;
+        height: 250px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 12px;
+        margin-bottom: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+      }
+
+      /* 小程序形态模拟机身 */
+      .mock-mp-phone {
+        width: 170px;
+        height: 226px;
+        background: #ffffff;
+        border: 2px solid #0f172a;
+        border-radius: 20px;
+        box-shadow: 0 10px 20px -5px rgba(0,0,0,0.12);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+      .mock-mp-capsule-bar {
+        background: #f1f5f9;
+        padding: 5px 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #e2e8f0;
+        flex-shrink: 0;
+      }
+      .mock-mp-capsule {
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 12px;
+        padding: 2px 6px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .mock-mp-capsule-dot { width: 4px; height: 4px; background: #0f172a; border-radius: 50%; }
+      .mock-mp-capsule-circle { width: 6px; height: 6px; border: 1.2px solid #0f172a; border-radius: 50%; }
+      .mock-mp-screen {
+        padding: 8px 10px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        flex: 1;
+        background: #fafafa;
+      }
+      .mock-mp-hero-banner {
+        background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+        border-radius: 6px;
+        padding: 8px;
+        color: #ffffff;
+      }
+      .mock-mp-ticket-box {
+        background: #ffffff;
+        border: 1px dashed #cbd5e1;
+        border-radius: 6px;
+        padding: 6px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+      }
+      .mock-qr-sample {
+        width: 44px;
+        height: 44px;
+        background: repeating-conic-gradient(#0f172a 0% 25%, #ffffff 0% 50%) 50% / 10px 10px;
+        border-radius: 4px;
+        border: 1.5px solid #e2e8f0;
+      }
+      .mock-mp-btn {
+        background: #059669;
+        color: #ffffff;
+        border-radius: 6px;
+        font-size: 10px;
+        font-weight: 700;
+        text-align: center;
+        padding: 4px 0;
+      }
+
+      /* 商业网站形态模拟浏览器：高度固定与机身保持 226px 严格平齐 */
+      .mock-web-browser {
+        width: 100%;
+        max-width: 250px;
+        height: 226px;
+        background: #ffffff;
+        border: 1.5px solid #cbd5e1;
+        border-radius: 12px;
+        box-shadow: 0 10px 20px -5px rgba(0,0,0,0.1);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+      .mock-web-bar {
+        background: #f1f5f9;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 6px 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-shrink: 0;
+      }
+      .mock-web-dots { display: flex; gap: 4px; }
+      .mock-web-dot { width: 6px; height: 6px; border-radius: 50%; }
+      .mock-web-dot.r { background: #f87171; }
+      .mock-web-dot.y { background: #fbbf24; }
+      .mock-web-dot.g { background: #34d399; }
+      .mock-web-input {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 4px;
+        font-size: 9px;
+        font-family: monospace;
+        color: #64748b;
+        padding: 2px 6px;
+        flex: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .mock-web-content {
+        padding: 10px;
+        background: #ffffff;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        flex: 1;
+      }
+      .mock-web-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #f1f5f9;
+        padding-bottom: 5px;
+      }
+      .mock-web-hero-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 8px;
+      }
+      .mock-web-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+      }
+      .mock-web-pill {
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        border-radius: 4px;
+        padding: 5px 2px;
+        text-align: center;
+        font-size: 9.5px;
+        font-weight: 700;
+        color: #1d4ed8;
+      }
+
+      /* 跨平台 App 原生手机模型：高度固定 226px */
+      .mock-app-phone {
+        width: 170px;
+        height: 226px;
+        background: #ffffff;
+        border: 2px solid #1e293b;
+        border-radius: 20px;
+        box-shadow: 0 10px 20px -5px rgba(0,0,0,0.12);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+      .mock-app-island-bar {
+        background: #0f172a;
+        padding: 4px 0;
+        display: flex;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+      .mock-app-island {
+        width: 40px;
+        height: 5px;
+        background: #334155;
+        border-radius: 10px;
+      }
+      .mock-app-screen {
+        padding: 8px 10px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        flex: 1;
+        background: #fcfaff;
+      }
+      .mock-app-chart-box {
+        background: #ffffff;
+        border: 1px solid #e9d5ff;
+        border-radius: 6px;
+        padding: 6px 8px;
+      }
+      .mock-app-bars {
+        display: flex;
+        align-items: flex-end;
+        gap: 4px;
+        height: 36px;
+        padding-top: 4px;
+      }
+      .mock-app-bar-col {
+        flex: 1;
+        background: #c084fc;
+        border-radius: 2px;
+      }
+      .mock-app-item {
+        background: #ffffff;
+        border: 1px solid #f3e8ff;
+        border-radius: 6px;
+        padding: 5px 8px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .mock-app-dock {
+        background: #f8fafc;
+        border-top: 1px solid #e2e8f0;
+        padding: 5px 12px;
+        display: flex;
+        justify-content: space-around;
+        flex-shrink: 0;
+      }
+      .mock-dock-dot { width: 12px; height: 12px; border-radius: 3px; background: #cbd5e1; }
+      .mock-dock-dot.active { background: #7e22ce; }
+
+      .sc-c-title {
+        font-size: 18px;
+        font-weight: 850;
+        color: #0f172a;
+        margin-bottom: 4px;
+        line-height: 1.35;
+      }
+      .sc-c-sub {
+        font-size: 12.5px;
+        color: #64748b;
+        font-weight: 600;
+      }
+      .sc-c-desc-box {
+        background: #f8fafc;
+        border: 1px solid #f1f5f9;
+        border-radius: 10px;
+        padding: 12px 14px;
+        font-size: 13px;
+        color: #475569;
+        line-height: 1.6;
+        margin: 14px 0;
+      }
+      .sc-c-checklist {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 20px;
+      }
+      .sc-c-checklist li {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        font-size: 12.5px;
+        color: #334155;
+        line-height: 1.5;
+      }
+      .sc-c-checklist li span {
+        color: #059669;
+        font-weight: 800;
+        font-size: 13px;
+        flex-shrink: 0;
+      }
+      .sc-c-footer {
+        border-top: 1px dashed #e2e8f0;
+        padding-top: 14px;
+      }
+      .sc-c-meta-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 12px;
+        margin-bottom: 6px;
+      }
+      .sc-c-meta-row .label { color: #94a3b8; }
+      .sc-c-meta-row .val { color: #0f172a; font-weight: 700; }
+      .sc-c-btn {
+        display: block;
+        text-align: center;
+        margin-top: 10px;
+        font-size: 12.5px;
+        font-weight: 750;
+        color: #059669;
+        background: #ecfdf5;
+        border: 1px solid #a7f3d0;
+        padding: 8px 0;
+        border-radius: 8px;
+        transition: 0.2s;
+        text-decoration: none;
+      }
+      .showcase-card-c:hover .sc-c-btn {
+        background: #059669;
+        color: #ffffff;
+      }
+        color: #ffffff;
+      }
+
+      @media (max-width: 960px) {
+        .showcase-grid-c { grid-template-columns: 1fr; }
+      }
+
+      @media (max-width: 860px) {
+        .showcase-grid-a, .showcase-grid-b { grid-template-columns: 1fr; }
+      }
+
+      /* ── 文章列表全新 方案 B：高紧凑技术避坑清单 (Compact FAQ / Dev Log Stream) ── */
+      .art-list-b {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        max-width: 1040px;
+        margin: 14px auto 0;
+      }
+      .art-row-b {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 18px 22px;
+        display: grid;
+        grid-template-columns: 120px 1fr 140px;
+        align-items: center;
+        gap: 20px;
+        text-decoration: none;
+        color: inherit;
+        transition: all 0.2s;
+      }
+      .art-row-b:hover {
+        border-color: #059669;
+        background: #fcfdfc;
+        transform: translateX(4px);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+      }
+      .art-row-left {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .art-stage-pill-b {
+        font-size: 11px;
+        font-weight: 750;
+        color: #0f172a;
+        background: #f1f5f9;
+        padding: 2px 8px;
+        border-radius: 4px;
+        display: inline-block;
+        width: fit-content;
+      }
+      .art-date-b {
+        font-size: 11.5px;
+        color: #94a3b8;
+      }
+      .art-row-mid {
+        min-width: 0;
+      }
+      .art-title-b {
+        font-size: 15.5px;
+        font-weight: 750;
+        color: #0f172a;
+        margin-bottom: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .art-desc-b {
+        font-size: 12.5px;
+        color: #64748b;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .art-row-right {
+        text-align: right;
+      }
+      .art-btn-b {
+        font-size: 12px;
+        font-weight: 700;
+        color: #059669;
+        background: #ecfdf5;
+        border: 1px solid #a7f3d0;
+        padding: 5px 12px;
+        border-radius: 999px;
+        transition: 0.2s;
+      }
+      .art-row-b:hover .art-btn-b {
+        background: #059669;
+        color: #ffffff;
+      }
+
+      @media (max-width: 900px) {
+        .art-grid-a { grid-template-columns: 1fr; }
+        .art-row-b { grid-template-columns: 1fr; gap: 8px; }
+        .art-row-right { text-align: left; margin-top: 6px; }
+      }
+
+      @media (max-width: 860px) {
+        .contrast-card { grid-template-columns: 1fr; }
+        .audience-grid, .flow-grid, .article-list { grid-template-columns: 1fr; }
+        .camp-banner { grid-template-columns: 1fr; padding: 28px 20px; }
+      }
+          /* 窗户纸步骤层叠列表样式 */
+      .paper-layers-box {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 14px;
+      }
+      .paper-layers-box.success-box {
+        grid-template-columns: 1fr;
+        background: #f0fdf4;
+        border-color: #bbf7d0;
+      }
+      .layer-item {
+        font-size: 12.5px;
+        color: #475569;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: #ffffff;
+        padding: 7px 10px;
+        border-radius: 6px;
+        border: 1px solid #f1f5f9;
+        font-weight: 500;
+      }
+      .layer-item.ok {
+        background: #ffffff;
+        border-color: #dcfce7;
+        color: #065f46;
+        font-size: 13px;
+        padding: 8px 12px;
+        line-height: 1.5;
+      }
+      .l-num {
+        font-size: 10.5px;
+        font-weight: 800;
+        color: #94a3b8;
+        background: #f1f5f9;
+        padding: 1px 5px;
+        border-radius: 4px;
+      }
+      .l-check {
+        color: #059669;
+        font-weight: 900;
+        font-size: 14px;
+        flex-shrink: 0;
+      }
+          /* 一一对应横向排版样式 (Row by Row Before vs After) */
+      .row-compare-container {
+        max-width: 1040px;
+        margin: 20px auto 72px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        padding: 12px;
+        box-shadow: 0 12px 30px -10px rgba(0,0,0,0.06);
+      }
+      .rc-header {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        padding: 16px 20px;
+        border-bottom: 2px solid #f1f5f9;
+      }
+      .rc-col-head {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .rc-col-head strong { font-size: 16px; display: block; color: #0f172a; }
+      .rc-col-head p { font-size: 13px; color: #64748b; margin-top: 2px; }
+      .before-head .rc-icon {
+        width: 32px; height: 32px; border-radius: 8px; background: #fee2e2; color: #ef4444;
+        display: grid; place-items: center; font-weight: 900; font-size: 15px; flex-shrink: 0;
+      }
+      .after-head .rc-icon {
+        width: 32px; height: 32px; border-radius: 8px; background: #dcfce7; color: #059669;
+        display: grid; place-items: center; font-weight: 900; font-size: 15px; flex-shrink: 0;
+      }
+      .rc-row {
+        display: grid;
+        grid-template-columns: 1fr 40px 1fr;
+        align-items: center;
+        gap: 12px;
+        padding: 18px 16px;
+        border-bottom: 1px solid #f1f5f9;
+        transition: background 0.15s;
+      }
+      .rc-row:last-child { border-bottom: none; }
+      .rc-row:hover { background: #fafcff; }
+      .rc-cell {
+        padding: 14px 18px;
+        border-radius: 12px;
+        text-align: left;
+      }
+      .before-cell {
+        background: #fffafa;
+        border: 1px solid #fee2e2;
+      }
+      .after-cell {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+      }
+      .rc-step-badge {
+        font-size: 11px;
+        font-weight: 700;
+        color: #ef4444;
+        background: #fee2e2;
+        padding: 2px 8px;
+        border-radius: 4px;
+        display: inline-block;
+        margin-bottom: 6px;
+      }
+      .rc-step-badge.green {
+        color: #065f46;
+        background: #bbf7d0;
+      }
+      .rc-main-title {
+        font-size: 15px;
+        font-weight: 750;
+        color: #0f172a;
+        margin-bottom: 4px;
+      }
+      .after-cell .rc-main-title {
+        color: #065f46;
+      }
+      .rc-desc {
+        font-size: 13px;
+        color: #64748b;
+        line-height: 1.55;
+      }
+      .after-cell .rc-desc {
+        color: #335343;
+      }
+      .rc-arrow-badge {
+        display: grid;
+        place-items: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #f1f5f9;
+        color: #059669;
+        font-weight: 800;
+        font-size: 14px;
+        margin: 0 auto;
+      }
+      @media (max-width: 860px) {
+        .rc-header { grid-template-columns: 1fr; }
+        .rc-row { grid-template-columns: 1fr; gap: 8px; }
+        .rc-arrow-badge { transform: rotate(90deg); margin: 4px auto; }
+      }
+          .paper-layers-box.error-box {
+        grid-template-columns: 1fr;
+        background: #fff5f5;
+        border-color: #fecaca;
+      }
+      .layer-item.err {
+        background: #ffffff;
+        border-color: #fee2e2;
+        color: #991b1b;
+        font-size: 13px;
+        padding: 8px 12px;
+        line-height: 1.5;
+      }
+      .l-cross {
+        color: #ef4444;
+        font-weight: 900;
+        font-size: 13px;
+        flex-shrink: 0;
+      }
+          .layer-item {
+        font-size: 13.5px;
+        color: #64748b;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        background: #ffffff;
+        padding: 10px 14px;
+        border-radius: 8px;
+        border: 1px solid #f1f5f9;
+        line-height: 1.6;
+      }
+      .layer-item.err {
+        background: #ffffff;
+        border-color: #fee2e2;
+        color: #475569;
+      }
+      .layer-item.ok {
+        background: #ffffff;
+        border-color: #dcfce7;
+        color: #475569;
+      }
+      .item-title {
+        color: #0f172a;
+        font-size: 14.5px;
+        font-weight: 750;
+        letter-spacing: -0.2px;
+      }
+      .item-title.green {
+        color: #064e3b;
+      }
+      .l-cross {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #fee2e2;
+        color: #ef4444;
+        display: grid;
+        place-items: center;
+        font-size: 10px;
+        font-weight: 900;
+        flex-shrink: 0;
+        margin-top: 3px;
+      }
+      .l-check {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #059669;
+        color: #ffffff;
+        display: grid;
+        place-items: center;
+        font-size: 10px;
+        font-weight: 900;
+        flex-shrink: 0;
+        margin-top: 3px;
+        box-shadow: 0 2px 4px rgba(5, 150, 105, 0.25);
+      }
+          /* 第 3 版去框极简清单样式 (Borderless List) */
+      .borderless-list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        margin: 0;
+        padding: 0;
+      }
+      .borderless-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        font-size: 14px;
+        color: #475569;
+        line-height: 1.65;
+      }
+      .bl-title {
+        color: #0f172a;
+        font-size: 14.5px;
+        font-weight: 750;
+        letter-spacing: -0.2px;
+      }
+      .bl-title.green {
+        color: #064e3b;
+      }
+      .l-cross-pure {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #fee2e2;
+        color: #ef4444;
+        display: grid;
+        place-items: center;
+        font-size: 11px;
+        font-weight: 900;
+        flex-shrink: 0;
+        margin-top: 2px;
+      }
+      .l-check-pure {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #059669;
+        color: #ffffff;
+        display: grid;
+        place-items: center;
+        font-size: 11px;
+        font-weight: 900;
+        flex-shrink: 0;
+        margin-top: 2px;
+        box-shadow: 0 2px 5px rgba(5, 150, 105, 0.25);
+      }
+      .bl-summary-box {
+        margin-top: 24px;
+        padding: 12px 14px;
+        border-radius: 8px;
+        font-size: 13px;
+        line-height: 1.6;
+      }
+      .bl-summary-box.err-sum {
+        background: #fff5f5;
+        color: #991b1b;
+        border: 1px dashed #fecaca;
+      }
+      .bl-summary-box.ok-sum {
+        background: #f0fdf4;
+        color: #065f46;
+        border: 1px dashed #bbf7d0;
+      }
+          /* 方案 A 样式：立体卡片 + 徽章 + 痛点引用 + 产出标签 (支持 4 列网格) */
+      .aud-grid-a {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-top: 10px;
+      }
+      .aud-card-a {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 18px;
+        padding: 24px 20px;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04);
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+      .aud-card-a:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.08);
+      }
+      .aud-card-a.highlight-border {
+        border: 1.5px solid #86efac;
+        box-shadow: 0 12px 28px -6px rgba(16, 185, 129, 0.12);
+      }
+      .aud-header-a {
+        margin-bottom: 16px;
+      }
+      .aud-role-badge {
+        font-size: 11px;
+        font-weight: 700;
+        padding: 3px 9px;
+        border-radius: 6px;
+        display: inline-block;
+        margin-bottom: 8px;
+      }
+      .aud-role-badge.ops { background: #fef3c7; color: #b45309; }
+      .aud-role-badge.founder { background: #dcfce7; color: #047857; }
+      .aud-role-badge.pm { background: #eff6ff; color: #1d4ed8; }
+      .aud-role-badge.dev { background: #f3e8ff; color: #7e22ce; }
+      .aud-title-a {
+        font-size: 17.5px;
+        font-weight: 800;
+        color: #0f172a;
+        margin-bottom: 4px;
+        line-height: 1.3;
+      }
+      .aud-sub-a {
+        font-size: 12px;
+        color: #64748b;
+        display: block;
+        line-height: 1.4;
+      }
+      .aud-tags-who {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin-top: 8px;
+      }
+      .aud-tag-pill {
+        font-size: 11px;
+        color: #475569;
+        background: #f1f5f9;
+        padding: 2px 7px;
+        border-radius: 4px;
+        font-weight: 500;
+      }
+      .aud-pain-box {
+        background: #fff5f5;
+        border-left: 3px solid #f87171;
+        border-radius: 0 8px 8px 0;
+        padding: 10px 12px;
+        font-size: 13px;
+        color: #7f1d1d;
+        line-height: 1.55;
+        margin-bottom: 16px;
+        position: relative;
+      }
+      .aud-quote-mark {
+        font-family: Georgia, serif;
+        font-size: 20px;
+        line-height: 1;
+        color: #fca5a5;
+        display: inline-block;
+        margin-right: 2px;
+      }
+      .aud-gain-box {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        margin-bottom: 16px;
+        flex: 1;
+      }
+      .aud-check-icon {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #059669;
+        color: #ffffff;
+        display: grid;
+        place-items: center;
+        font-size: 10px;
+        font-weight: 900;
+        flex-shrink: 0;
+        margin-top: 2px;
+      }
+      .aud-gain-title {
+        font-size: 13.5px;
+        font-weight: 750;
+        color: #065f46;
+        display: block;
+        margin-bottom: 4px;
+        line-height: 1.35;
+      }
+      .aud-gain-desc {
+        font-size: 12.5px;
+        color: #475569;
+        line-height: 1.55;
+      }
+      .aud-footer-tag {
+        border-top: 1px dashed #e2e8f0;
+        padding-top: 12px;
+        font-size: 11.5px;
+        color: #64748b;
+        line-height: 1.5;
+      }
+      .aud-footer-tag .tag-label { font-weight: 600; color: #94a3b8; display: block; margin-bottom: 2px; }
+      .aud-footer-tag .tag-val { color: #0f172a; font-weight: 600; }
+
+      /* 方案 B 样式：横向科技排版 */
+      .aud-list-b {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+      .aud-row-b {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 22px 26px;
+        display: grid;
+        grid-template-columns: 240px 1fr 1fr;
+        align-items: center;
+        gap: 28px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+        transition: 0.2s;
+      }
+      .aud-row-b:hover {
+        border-color: #cbd5e1;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+      }
+      .aud-row-b.highlight-row {
+        background: #fcfdfc;
+        border: 1.5px solid #86efac;
+      }
+      .row-left-b {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .row-icon-b {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        background: #f1f5f9;
+        color: #475569;
+        display: grid;
+        place-items: center;
+        flex-shrink: 0;
+      }
+      .row-icon-b.accent-icon {
+        background: #dcfce7;
+        color: #059669;
+      }
+      .row-title-b { font-size: 16.5px; font-weight: 800; color: #0f172a; margin-bottom: 2px; }
+      .row-sub-b { font-size: 12px; color: #64748b; display: block; }
+      .row-label-pain { font-size: 11px; font-weight: 700; color: #ef4444; margin-bottom: 4px; text-transform: uppercase; }
+      .row-text-pain { font-size: 13.5px; color: #64748b; line-height: 1.55; }
+      .row-label-gain { font-size: 11px; font-weight: 700; color: #059669; margin-bottom: 4px; text-transform: uppercase; }
+      .row-text-gain { font-size: 13.5px; color: #0f172a; font-weight: 500; line-height: 1.55; }
+
+      @media (max-width: 1080px) {
+        .aud-grid-a { grid-template-columns: repeat(2, 1fr); }
+      }
+      @media (max-width: 680px) {
+        .aud-grid-a { grid-template-columns: 1fr; }
+        .aud-row-b { grid-template-columns: 1fr; gap: 14px; }
+      }
+
+      /* ── 9 步交付流程 统一视觉设计语言 (Phase & Tech Icon System) ── */
+      .pipeline-phase-group {
+        margin-bottom: 36px;
+      }
+      /* 强化版阶段横幅：加重突出 PHASE 阶段编号与主线目标，去掉内嵌重叠信息 */
+      .phase-badge-bar {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 20px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 14px 22px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+      }
+      .phase-pill {
+        font-size: 13.5px;
+        font-weight: 900;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        padding: 6px 16px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        flex-shrink: 0;
+      }
+      .phase-pill.p1 {
+        background: #1e40af;
+        color: #ffffff;
+        box-shadow: 0 2px 6px rgba(30, 64, 175, 0.3);
+      }
+      .phase-pill.p2 {
+        background: #047857;
+        color: #ffffff;
+        box-shadow: 0 2px 6px rgba(4, 120, 87, 0.3);
+      }
+      .phase-pill.p3 {
+        background: #6b21a8;
+        color: #ffffff;
+        box-shadow: 0 2px 6px rgba(107, 33, 168, 0.3);
+      }
+      .phase-title-text {
+        font-size: 17.5px;
+        font-weight: 850;
+        color: #0f172a;
+        letter-spacing: -0.2px;
+      }
+      .phase-desc-text {
+        font-size: 14px;
+        color: #475569;
+        margin-left: 8px;
+      }
+      .pipeline-grid-a {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+      }
+
+      /* 方案 A-1 (强化步骤徽章 + 阶段立体卡片) */
+      .pipe-card-a {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 24px 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: relative;
+        text-decoration: none;
+        color: inherit;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+      }
+      .pipe-card-a:hover {
+        transform: translateY(-3px);
+        border-color: #10b981;
+        box-shadow: 0 12px 28px -6px rgba(16, 185, 129, 0.14);
+      }
+      .pipe-card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 14px;
+      }
+      /* 精炼干净的 STEP 徽章 */
+      .pipe-step-badge-wrap {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .pipe-step-big-num {
+        font-size: 12.5px;
+        font-weight: 900;
+        letter-spacing: 0.5px;
+        padding: 4px 10px;
+        border-radius: 6px;
+        display: inline-block;
+      }
+      .pipe-step-big-num.p1 {
+        background: #eff6ff;
+        color: #1d4ed8;
+        border: 1px solid #bfdbfe;
+      }
+      .pipe-step-big-num.p2 {
+        background: #ecfdf5;
+        color: #047857;
+        border: 1px solid #a7f3d0;
+      }
+      .pipe-step-big-num.p3 {
+        background: #faf5ff;
+        color: #7e22ce;
+        border: 1px solid #e9d5ff;
+      }
+
+      /* 统一的矢量几何科技图标盒子 (和4大人群、5项对比语言严格统一) */
+      .tech-icon-box {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        color: #0f172a;
+        display: grid;
+        place-items: center;
+        transition: 0.2s;
+      }
+      .pipe-card-a:hover .tech-icon-box {
+        background: #ecfdf5;
+        border-color: #a7f3d0;
+        color: #059669;
+      }
+      .tech-icon-box.p1 { color: #2563eb; background: #eff6ff; border-color: #dbeafe; }
+      .tech-icon-box.p2 { color: #059669; background: #ecfdf5; border-color: #d1fae5; }
+      .tech-icon-box.p3 { color: #7c3aed; background: #f5f3ff; border-color: #ede9fe; }
+
+      .pipe-card-title {
+        font-size: 16.5px;
+        font-weight: 800;
+        color: #0f172a;
+        margin-bottom: 8px;
+        line-height: 1.35;
+      }
+      .pipe-card-desc {
+        font-size: 13px;
+        color: #64748b;
+        line-height: 1.6;
+        margin-bottom: 14px;
+        flex: 1;
+      }
+      .pipe-stuck-box {
+        background: #fff5f5;
+        border-left: 3px solid #f87171;
+        padding: 8px 12px;
+        font-size: 12px;
+        color: #991b1b;
+        border-radius: 0 6px 6px 0;
+        margin-bottom: 14px;
+        line-height: 1.5;
+      }
+      .pipe-card-action {
+        font-size: 12.5px;
+        font-weight: 700;
+        color: #059669;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-top: 1px dashed #e2e8f0;
+        padding-top: 12px;
+      }
+
+      /* ── 新版方案 A-统一主绿版 (V3 主色调纯净统一流) ── */
+      .phase-badge-bar.unified {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        padding: 15px 24px;
+        box-shadow: 0 4px 14px -2px rgba(0, 0, 0, 0.04);
+      }
+      .phase-pill.uni-green {
+        background: #0f172a;
+        color: #ffffff;
+        border: none;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, 0.25);
+        font-size: 14px;
+        padding: 7px 18px;
+        letter-spacing: 0.8px;
+      }
+      .phase-badge-bar.unified .phase-title-text {
+        font-size: 18px;
+        font-weight: 850;
+        color: #0f172a;
+      }
+      .phase-badge-bar.unified .phase-desc-text {
+        font-size: 14px;
+        color: #475569;
+        font-weight: 500;
+      }
+      .pipe-card-a.uni {
+        border-color: #e2e8f0;
+      }
+      .pipe-card-a.uni:hover {
+        border-color: #059669;
+        box-shadow: 0 12px 28px -6px rgba(5, 150, 105, 0.12);
+      }
+      .pipe-step-big-num.uni-step {
+        background: #ecfdf5;
+        color: #047857;
+        border: 1px solid #a7f3d0;
+      }
+      /* 统一的矢量几何科技图标盒子 (放大至 44px，图标加深高质感) */
+      .tech-icon-box.uni-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: #f8fafc;
+        border: 1px solid #cbd5e1;
+        color: #0f172a;
+        display: grid;
+        place-items: center;
+        transition: 0.2s;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      }
+      .pipe-card-a2:hover .tech-icon-box.uni-icon,
+      .pipe-card-a.uni:hover .tech-icon-box.uni-icon {
+        background: #ecfdf5;
+        border-color: #10b981;
+        color: #059669;
+        transform: scale(1.05);
+      }
+
+      /* ── 新版方案 A-深色高精科技灰版 (Slate Tech Clean) ── */
+      .phase-badge-bar.slate {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+      }
+      .phase-pill.slate-pill {
+        background: #f1f5f9;
+        color: #0f172a;
+        border: 1px solid #cbd5e1;
+        font-weight: 850;
+      }
+      .pipe-card-a.slate-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+      }
+      .pipe-card-a.slate-card:hover {
+        border-color: #0f172a;
+        box-shadow: 0 12px 28px -6px rgba(15, 23, 42, 0.1);
+      }
+      .pipe-step-big-num.slate-step {
+        background: #0f172a;
+        color: #ffffff;
+        border: none;
+        box-shadow: 0 2px 4px rgba(15, 23, 42, 0.18);
+      }
+      .tech-icon-box.slate-icon {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        color: #475569;
+      }
+      .pipe-card-a.slate-card:hover .tech-icon-box.slate-icon {
+        background: #f1f5f9;
+        border-color: #0f172a;
+        color: #0f172a;
+      }
+      .pipe-card-action.slate-action {
+        color: #0f172a;
+      }
+
+      /* 方案 A-2 (去掉阶段标签 · 放大纯粹大数字 STEP) */
+      .pipe-card-a2 {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 18px;
+        padding: 24px 22px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        text-decoration: none;
+        color: inherit;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        position: relative;
+        overflow: hidden;
+      }
+      .pipe-card-a2:hover {
+        transform: translateY(-3px);
+        border-color: #059669;
+        box-shadow: 0 14px 30px -4px rgba(5, 150, 105, 0.12);
+      }
+      .a2-top-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+      }
+      .a2-step-indicator {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      /* 放大加粗的纯粹步骤大数字 */
+      .a2-step-main {
+        font-size: 32px;
+        font-weight: 900;
+        letter-spacing: -1px;
+        line-height: 1;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      }
+      .a2-step-main.uni {
+        color: #059669;
+      }
+      .a2-step-prefix {
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.8px;
+        color: #94a3b8;
+        text-transform: uppercase;
+        margin-right: 2px;
+      }
+
+      /* ── 9 步交付流程 方案 B：极客贯通时间轴路线 (Roadmap Stepper) ── */
+      .timeline-container-b {
+        max-width: 980px;
+        margin: 0 auto;
+        position: relative;
+      }
+      .timeline-container-b::before {
+        content: '';
+        position: absolute;
+        top: 24px;
+        bottom: 24px;
+        left: 31px;
+        width: 2px;
+        background: linear-gradient(180deg, #10b981 0%, #3b82f6 50%, #8b5cf6 100%);
+        z-index: 1;
+      }
+      .timeline-step-b {
+        position: relative;
+        display: flex;
+        align-items: flex-start;
+        gap: 24px;
+        margin-bottom: 24px;
+        z-index: 2;
+      }
+      .tl-node-b {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: #ffffff;
+        border: 2px solid #10b981;
+        box-shadow: 0 4px 14px rgba(16, 185, 129, 0.2);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        margin-top: 4px;
+      }
+      .tl-node-b .tl-num {
+        font-size: 11px;
+        font-weight: 800;
+        color: #059669;
+        line-height: 1;
+      }
+      .tl-node-b .tl-ico {
+        font-size: 20px;
+        margin-top: 2px;
+      }
+      .tl-content-b {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 22px 24px;
+        flex: 1;
+        display: grid;
+        grid-template-columns: 260px 1fr 180px;
+        gap: 20px;
+        align-items: center;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.03);
+        transition: 0.2s;
+        text-decoration: none;
+        color: inherit;
+      }
+      .tl-content-b:hover {
+        border-color: #10b981;
+        transform: translateX(4px);
+        box-shadow: 0 8px 24px rgba(16, 185, 129, 0.12);
+      }
+      .tl-step-name {
+        font-size: 16.5px;
+        font-weight: 800;
+        color: #0f172a;
+        margin-bottom: 4px;
+      }
+      .tl-step-desc {
+        font-size: 12.5px;
+        color: #64748b;
+        line-height: 1.5;
+      }
+      .tl-stuck-wrap {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        padding: 10px 14px;
+        border-radius: 10px;
+      }
+      .tl-stuck-label {
+        font-size: 11px;
+        font-weight: 700;
+        color: #ef4444;
+        margin-bottom: 3px;
+      }
+      .tl-stuck-text {
+        font-size: 12.5px;
+        color: #475569;
+        line-height: 1.5;
+      }
+      .tl-action-wrap {
+        text-align: right;
+      }
+      .tl-btn-pill {
+        display: inline-block;
+        font-size: 12.5px;
+        font-weight: 700;
+        color: #059669;
+        background: #ecfdf5;
+        border: 1px solid #a7f3d0;
+        padding: 6px 14px;
+        border-radius: 999px;
+        transition: 0.2s;
+      }
+      .tl-content-b:hover .tl-btn-pill {
+        background: #059669;
+        color: #ffffff;
+      }
+      @media (max-width: 900px) {
+        .pipeline-grid-a { grid-template-columns: 1fr; }
+        .timeline-container-b::before { left: 23px; }
+        .tl-node-b { width: 48px; height: 48px; }
+        .tl-node-b .tl-num { font-size: 10px; }
+        .tl-node-b .tl-ico { font-size: 15px; }
+        .tl-content-b { grid-template-columns: 1fr; gap: 12px; }
+        .tl-action-wrap { text-align: left; }
+      }
+      /* ── 「关于我」模块样式 (About Me) ── */
+      .about-box {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 40px;
+        align-items: center;
+      }
+      .about-profile {
+        text-align: center;
+        border-right: 1px solid #f1f5f9;
+        padding-right: 32px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .about-avatar-wrap {
+        position: relative;
+        margin-bottom: 16px;
+      }
+      .about-avatar {
+        width: 104px;
+        height: 104px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+        display: grid;
+        place-items: center;
+        color: #ffffff;
+        font-size: 38px;
+        font-weight: 850;
+        box-shadow: 0 10px 24px -4px rgba(5, 150, 105, 0.35);
+        border: 4px solid #ffffff;
+      }
+      .about-online-badge {
+        position: absolute;
+        bottom: 4px;
+        right: 4px;
+        background: #10b981;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        border: 2.5px solid #ffffff;
+      }
+      .about-name {
+        font-size: 22px;
+        font-weight: 850;
+        color: #0f172a;
+        margin-bottom: 4px;
+      }
+      .about-role-tag {
+        font-size: 12.5px;
+        font-weight: 700;
+        color: #059669;
+        background: #ecfdf5;
+        padding: 3px 12px;
+        border-radius: 999px;
+        border: 1px solid #a7f3d0;
+        margin-bottom: 16px;
+      }
+      .about-badges-mini {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        width: 100%;
+      }
+      .about-mini-item {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 12px;
+        color: #475569;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .about-mini-item strong { color: #0f172a; }
+
+      .about-content {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+      .about-headline {
+        font-size: 22px;
+        font-weight: 850;
+        color: #0f172a;
+        line-height: 1.4;
+      }
+      .about-headline span {
+        color: #059669;
+        border-bottom: 2px solid #a7f3d0;
+      }
+      .about-story {
+        font-size: 14.5px;
+        color: #475569;
+        line-height: 1.75;
+      }
+      .about-pillars {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-top: 6px;
+      }
+      .about-pillar-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 16px;
+        transition: 0.2s;
+      }
+      .about-pillar-card:hover {
+        border-color: #cbd5e1;
+        background: #ffffff;
+        transform: translateY(-2px);
+      }
+      .pillar-icon { font-size: 22px; margin-bottom: 8px; }
+      .pillar-title { font-size: 14px; font-weight: 800; color: #0f172a; margin-bottom: 4px; }
+      .pillar-desc { font-size: 12px; color: #64748b; line-height: 1.55; }
+
+      .about-contact-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #f1f5f9;
+        border-radius: 12px;
+        padding: 14px 20px;
+        margin-top: 10px;
+      }
+      .contact-text {
+        font-size: 13px;
+        font-weight: 600;
+        color: #334155;
+      }
+      .contact-actions {
+        display: flex;
+        gap: 10px;
+      }
+      .contact-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12.5px;
+        font-weight: 700;
+        color: #0f172a;
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        padding: 6px 14px;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: 0.2s;
+      }
+      .contact-btn:hover {
+        border-color: #059669;
+        color: #059669;
+      }
+      .contact-btn.primary {
+        background: #059669;
+        color: #ffffff;
+        border-color: #059669;
+      }
+      .contact-btn.primary:hover {
+        background: #047857;
+      }
+
+      /* ── 「常见困惑 FAQ」模块样式 ── */
+      .faq-wrap-v3 {
+        max-width: 880px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+      .faq-item-v3 {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        overflow: hidden;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+      }
+      .faq-item-v3[open] {
+        border-color: #059669;
+        box-shadow: 0 8px 24px -4px rgba(5, 150, 105, 0.12);
+      }
+      .faq-summary-v3 {
+        padding: 20px 24px;
+        font-size: 16px;
+        font-weight: 800;
+        color: #0f172a;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        user-select: none;
+        list-style: none;
+      }
+      .faq-summary-v3::-webkit-details-marker { display: none; }
+      .faq-q-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .faq-q-badge {
+        width: 26px;
+        height: 26px;
+        border-radius: 8px;
+        background: #f1f5f9;
+        color: #64748b;
+        font-size: 13px;
+        font-weight: 850;
+        display: grid;
+        place-items: center;
+        flex-shrink: 0;
+      }
+      .faq-item-v3[open] .faq-q-badge {
+        background: #ecfdf5;
+        color: #059669;
+      }
+      .faq-chevron {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        display: grid;
+        place-items: center;
+        color: #64748b;
+        font-size: 14px;
+        transition: transform 0.2s;
+        flex-shrink: 0;
+      }
+      .faq-item-v3[open] .faq-chevron {
+        transform: rotate(180deg);
+        background: #ecfdf5;
+        border-color: #a7f3d0;
+        color: #059669;
+      }
+      .faq-body-v3 {
+        padding: 0 24px 22px 62px;
+        font-size: 14px;
+        color: #475569;
+        line-height: 1.8;
+        border-top: 1px dashed #f1f5f9;
+        padding-top: 14px;
+      }
+      .faq-body-v3 strong {
+        color: #0f172a;
+      }
+      .faq-callout-pill {
+        display: inline-block;
+        background: #f8fafc;
+        border-left: 3px solid #059669;
+        padding: 8px 12px;
+        border-radius: 0 6px 6px 0;
+        margin-top: 8px;
+        font-size: 13px;
+        color: #334155;
+      }
+
+      @media (max-width: 900px) {
+        .about-box { grid-template-columns: 1fr; padding: 24px; gap: 24px; }
+        .about-profile { border-right: none; border-bottom: 1px solid #f1f5f9; padding-right: 0; padding-bottom: 24px; }
+        .about-pillars { grid-template-columns: 1fr; }
+        .about-contact-bar { flex-direction: column; gap: 12px; align-items: flex-start; }
+        .faq-body-v3 { padding-left: 24px; }
+      }
+    </style>
+  </head>
+  <body>
+    <SiteHeader />
+
+    <!-- Hero 核心 -->
+    <main>
+      <section class="hero container">
+        <div class="hero-tag">
+          <span style="font-size: 16px;">⚡</span>
+          <span>一人公司 · 绝不教空泛语法 · 只管把产品推上线</span>
+        </div>
+        <h1>不会写代码，<span class="gradient-text">也能靠 AI</span><br />把产品做到公网上线并收到钱</h1>
+        <p class="hero-sub">
+          你用大白话说业务需求，代码交给 AI 写。最难的其实是账号订阅、域名解析、服务器配置与合规审核——这里带你完整跑通从需求到收钱的闭环。
+        </p>
+        <div class="hero-actions" style="display: flex; justify-content: center; align-items: center; gap: 16px; margin-bottom: 48px; flex-wrap: wrap;">
+          <!-- 选定方案 1：精制矢量路线图指南针图标 + 现代高质感按钮 -->
+          <a href="/#flow" class="btn btn-primary" style="padding: 13px 26px; font-size: 15.5px; border-radius: 12px; display: inline-flex; align-items: center; gap: 9px; box-shadow: 0 4px 18px rgba(5, 150, 105, 0.28);">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill="currentColor" fill-opacity="0.25"></polygon>
+            </svg>
+            <span>查看 9 步通关指南</span>
+            <span style="font-weight: 800; margin-left: 2px;">➔</span>
+          </a>
+
+          <!-- GitHub 开源手册按钮 (并列平衡) -->
+          <a href="https://github.com" target="_blank" rel="noopener" class="btn btn-ghost" style="padding: 13px 24px; font-size: 15.5px; border-radius: 12px; background: #ffffff; border-color: #cbd5e1; display: inline-flex; align-items: center; gap: 9px;">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #0f172a; flex-shrink: 0;">
+              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+            </svg>
+            <span>GitHub 开源手册 (免费自学)</span>
+          </a>
+        </div>
+
+        <!-- 核心对比看板：5 项核心维度彻底对照 -->
+        <div class="sec-header" style="margin: 64px auto 36px;">
+          <span class="sec-tag">COGNITIVE SHIFT</span>
+          <h2 class="sec-title">从层层大山到一句话上线：5 项核心维度彻底对照</h2>
+          <p class="sec-desc">你不需要重学一遍计算机科学，只需要把你的业务认知转化为可交付的软件</p>
+        </div>
+
+        <div class="vs-container" id="contrast">
+          <div class="vs-badge-floating" style="background: #047857; border-color: #34d399;">认知进阶：带你逐层捅破窗户纸</div>
+
+          <!-- 左侧：传统技术老路（去框纯净清单） -->
+          <div class="vs-card vs-left">
+            <div class="vs-card-top" style="margin-bottom: 24px;">
+              <div class="vs-icon-tag error">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                传统开发：全链路都是重度技术大山
+              </div>
+              <h3 class="vs-title">从头学到尾，每一道关卡都是劝退陷阱</h3>
+              <p style="font-size: 13.5px; color: #dc2626; font-weight: 600; margin-top: 8px;">过去做任何一个产品，必须独自翻越 5 座不可逾越的大山：</p>
+            </div>
+            
+            <ul class="borderless-list">
+              <li>
+                <span class="l-cross-pure">✕</span>
+                <div>
+                  <strong class="bl-title">代码语法死记硬背</strong>：苦啃 JS/Python/SQL 语法，漏个分号查半天，几个月做不出一个能用的页面。
+                </div>
+              </li>
+              <li>
+                <span class="l-cross-pure">✕</span>
+                <div>
+                  <strong class="bl-title">账号与网络环境受阻</strong>：卡在网络受限、美区 ID 注册、海外卡充值转圈，还没开始写代码账号先被封。
+                </div>
+              </li>
+              <li>
+                <span class="l-cross-pure">✕</span>
+                <div>
+                  <strong class="bl-title">服务器与终端黑框</strong>：Linux 权限、反向代理、环境依赖冲突，本地电脑能跑，一到云服务器就全线崩溃。
+                </div>
+              </li>
+              <li>
+                <span class="l-cross-pure">✕</span>
+                <div>
+                  <strong class="bl-title">域名与 SSL 红色警告</strong>：DNS 解析不通、证书不会配置，浏览器弹出“不安全”拦截，小程序通信被拒。
+                </div>
+              </li>
+              <li>
+                <span class="l-cross-pure">✕</span>
+                <div>
+                  <strong class="bl-title">合规备案与审核死循环</strong>：ICP 反复被驳回、类目资质不符，看不懂平台审核规则，盲目重提导致被卡几个月。
+                </div>
+              </li>
+            </ul>
+
+            <div class="bl-summary-box err-sum">
+              <b>✕ 全链路断点太多</b>：任意一项都是大山，新手在任何环节都有可能彻底放弃，被迫成为全栈工程师。
+            </div>
+          </div>
+
+          <!-- 中间 VS 徽章 -->
+          <div class="vs-divider">
+            <span class="vs-circle" style="color: #059669; border-color: #10b981;">VS</span>
+          </div>
+
+          <!-- 右侧：AI 交付营解法（去框纯净清单） -->
+          <div class="vs-card vs-right">
+            <div class="vs-card-top" style="margin-bottom: 24px;">
+              <div class="vs-icon-tag success">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                冬瓜 AI 交付营：一句话说对，层层窗户纸全捅破
+              </div>
+              <h3 class="vs-title">一句话让 AI 敲代码，难在“怎么跟 AI 说”</h3>
+              <p style="font-size: 13.5px; color: #047857; font-weight: 600; margin-top: 8px;">现在代码变成了薄纸，线下 48 小时带你现场逐层穿透：</p>
+            </div>
+
+            <ul class="borderless-list">
+              <li>
+                <span class="l-check-pure">✓</span>
+                <div>
+                  <strong class="bl-title green">自然语言零失真指挥</strong>：不背一行代码语法，教你用大白话下出精准业务指令，AI 秒级产出前后端代码。
+                </div>
+              </li>
+              <li>
+                <span class="l-check-pure">✓</span>
+                <div>
+                  <strong class="bl-title green">账号与网络手把手带通</strong>：现场搞定纯净网络、美区 ID 与 Claude/Codex 正规充值，工具稳稳就位、长效可用。
+                </div>
+              </li>
+              <li>
+                <span class="l-check-pure">✓</span>
+                <div>
+                  <strong class="bl-title green">现代轻量部署免黑框</strong>：避开复杂 Linux 终端运维，轻量云架构三步生成公网安全链接，手机随时随地秒开。
+                </div>
+              </li>
+              <li>
+                <span class="l-check-pure">✓</span>
+                <div>
+                  <strong class="bl-title green">域名解析与 SSL 秒挂锁</strong>：手把手教你配置自动化免费证书与域名解析，消除不安全警告，小程序通信畅通。
+                </div>
+              </li>
+              <li>
+                <span class="l-check-pure">✓</span>
+                <div>
+                  <strong class="bl-title green">合规命名与类目一次过</strong>：独家避坑命名库加零卡审类目清单，把驳回拆解清晰，避开雷区、稳妥过审上线。
+                </div>
+              </li>
+            </ul>
+
+            <div class="bl-summary-box ok-sum">
+              <b>✓ 窗户纸没人带，自己要耗半年</b>：掌握指挥 AI 的总架构能力，一个人就是一家敏捷的软件交付公司。
+            </div>
+          </div>
+        </div>
+</section>
+
+      <!-- 方案 A：四大人群精准对号入座 · 立体卡片 + 细分身份标签 + 痛点引用 + 交付破局 + 具象首作推荐 -->
+      <section class="sec" id="audience-plan-a" style="background: #fafcff; border-bottom: 1px solid #e2e8f0;">
+        <div class="container">
+          <div class="sec-header">
+            <span class="sec-tag">WHO IS THIS FOR</span>
+            <h2 class="sec-title">专为这四类想把业务做成软件的人捅破窗户纸</h2>
+            <p class="sec-desc">你不需要懂计算机底层原理，只需要带着你真实沉淀的业务想法与客户需求</p>
+          </div>
+
+          <div class="aud-grid-a">
+            <!-- 卡片 1：业务运营 / 市场 / 自由职业 / 咨询 -->
+            <div class="aud-card-a">
+              <div class="aud-header-a">
+                <div class="aud-role-badge ops">01 · 懂业务懂私域</div>
+                <h3 class="aud-title-a">业务运营 / 顾问 / 操盘手</h3>
+                <span class="aud-sub-a">受够了提技术需求，自己动手做业务武器</span>
+                <div class="aud-tags-who">
+                  <span class="aud-tag-pill">私域主理人</span>
+                  <span class="aud-tag-pill">市场营销</span>
+                  <span class="aud-tag-pill">咨询顾问</span>
+                  <span class="aud-tag-pill">独立操盘</span>
+                </div>
+              </div>
+              <div class="aud-pain-box">
+                <span class="aud-quote-mark">“</span>
+                手里业务线索一堆，苦于提内部需求永远被排在技术末尾；想做个私域小工具或副业，死在“完全不会写代码”的自卑里。
+              </div>
+              <div class="aud-gain-box">
+                <span class="aud-check-icon">➔</span>
+                <div>
+                  <strong class="aud-gain-title">从被动求排期到超级个体</strong>
+                  <p class="aud-gain-desc">掌握自然语言指挥AI的能力，亲手把活动获客页、私域核销小程序上线，一个人抵一个外包技术团队。</p>
+                </div>
+              </div>
+              <div class="aud-footer-tag">
+                <span class="tag-label">最适合首发：</span>
+                <span class="tag-val">微信私域核销小程序 / 线索抓取与清洗工具 / 获客计算器</span>
+              </div>
+            </div>
+
+            <!-- 卡片 2：个体老板 / 商业创业者 / 一人公司 -->
+            <div class="aud-card-a highlight-border">
+              <div class="aud-header-a">
+                <div class="aud-role-badge founder">02 · 直奔商业变现</div>
+                <h3 class="aud-title-a">创业者 / 个体老板 / 投资人</h3>
+                <span class="aud-sub-a">省去数万外包冤枉钱，极速验证真实付费</span>
+                <div class="aud-tags-who">
+                  <span class="aud-tag-pill">实体老板转型</span>
+                  <span class="aud-tag-pill">一人公司</span>
+                  <span class="aud-tag-pill">出海创业者</span>
+                  <span class="aud-tag-pill">连续创业者</span>
+                </div>
+              </div>
+              <div class="aud-pain-box">
+                <span class="aud-quote-mark">“</span>
+                找外包开价动辄3~5万，一拖就是两三个月，还不确定市场买不买单；想试的商业点子太多，根本试不起。
+              </div>
+              <div class="aud-gain-box">
+                <span class="aud-check-icon">➔</span>
+                <div>
+                  <strong class="aud-gain-title">百元成本 48 小时跑通收款</strong>
+                  <p class="aud-gain-desc">一台轻量云服务器和域名只要120元，用AI周末两天上线商业化MVP，现场测通真实收款，验证付费意愿。</p>
+                </div>
+              </div>
+              <div class="aud-footer-tag">
+                <span class="tag-label">最适合首发：</span>
+                <span class="tag-val">海外微型 SaaS / 行业垂直付费工具箱 / 知识付费独立站</span>
+              </div>
+            </div>
+
+            <!-- 卡片 3：产品经理 / UI 设计师 -->
+            <div class="aud-card-a">
+              <div class="aud-header-a">
+                <div class="aud-role-badge pm">03 · 懂产品懂交互</div>
+                <h3 class="aud-title-a">产品经理 (PM) / 设计师</h3>
+                <span class="aud-sub-a">告别被研发支配，拿公网真实版本说话</span>
+                <div class="aud-tags-who">
+                  <span class="aud-tag-pill">资深PM</span>
+                  <span class="aud-tag-pill">UI/UX 设计师</span>
+                  <span class="aud-tag-pill">交互设计师</span>
+                  <span class="aud-tag-pill">敏捷项目经理</span>
+                </div>
+              </div>
+              <div class="aud-pain-box">
+                <span class="aud-quote-mark">“</span>
+                想法只能画在墨刀/Axure原型图里，写了40页PRD，技术评审研发一句“做不了/成本太高”就直接打回，沟通全是失真。
+              </div>
+              <div class="aud-gain-box">
+                <span class="aud-check-icon">➔</span>
+                <div>
+                  <strong class="aud-gain-title">拿公网可点击的真家伙降维碾压</strong>
+                  <p class="aud-gain-desc">不碰底层语法，直接做出别人手机能打开、能点击的公网高保真版本，用真实上线版本彻底拉齐团队共识。</p>
+                </div>
+              </div>
+              <div class="aud-footer-tag">
+                <span class="tag-label">最适合首发：</span>
+                <span class="tag-val">内部自动化审批工具 / 复杂业务高保真可交互原型</span>
+              </div>
+            </div>
+
+            <!-- 卡片 4：想做独立产品的传统开发者 / 转型技术人 -->
+            <div class="aud-card-a">
+              <div class="aud-header-a">
+                <div class="aud-role-badge dev">04 · 突破大厂螺丝钉</div>
+                <h3 class="aud-title-a">传统程序员 / 技术转型者</h3>
+                <span class="aud-sub-a">补齐商业全链路，从代码螺丝钉到主理人</span>
+                <div class="aud-tags-who">
+                  <span class="aud-tag-pill">后端转独立</span>
+                  <span class="aud-tag-pill">前端转全栈</span>
+                  <span class="aud-tag-pill">运维/测试</span>
+                  <span class="aud-tag-pill">传统IT开发</span>
+                </div>
+              </div>
+              <div class="aud-pain-box">
+                <span class="aud-quote-mark">“</span>
+                写了几年业务代码，但脱离大厂基建，一遇到海外Stripe支付、微信审核类目、真实服务器合规与获客就全瞎了。
+              </div>
+              <div class="aud-gain-box">
+                <span class="aud-check-icon">➔</span>
+                <div>
+                  <strong class="aud-gain-title">贯通端到端一人交付闭环</strong>
+                  <p class="aud-gain-desc">告别写死逻辑的增删改查苦力，掌握AI协同架构设计，把账号网络、合规类目、冷启动商业化最后一公里彻底跑通。</p>
+                </div>
+              </div>
+              <div class="aud-footer-tag">
+                <span class="tag-label">最适合首发：</span>
+                <span class="tag-val">海外出海工具 / 开发者提效插件 / API 商业变现网关</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 9 步交付流程：超大步骤纯净数字版 (定稿采用) ── -->
+      <section class="sec" id="flow" style="background: #ffffff; border-bottom: 1px solid #e2e8f0;">
+        <div class="container">
+          <div class="sec-header">
+            <span class="sec-tag">DELIVERY PIPELINE</span>
+            <h2 class="sec-title">非程序员独立开发 9 步通关流水线</h2>
+            <p class="sec-desc">每一步都拆清楚：你来决定什么、交给 AI 做什么、哪些卡点线下带你现场穿透</p>
+          </div>
+
+          <!-- 阶段 1 -->
+          <div class="pipeline-phase-group">
+            <div class="phase-badge-bar unified">
+              <span class="phase-pill uni-green">PHASE 01</span>
+              <div>
+                <span class="phase-title-text">阶段一：筹备与架构设计</span>
+                <span class="phase-desc-text">—— 把模糊点子收敛为可执行工程，完成开发账号与环境就位</span>
+              </div>
+            </div>
+            <div class="pipeline-grid-a">
+              {FLOW_STEPS.slice(0, 3).map((step) => (
+                <a href={flowUrl(step.slug)} class="pipe-card-a2">
+                  <div>
+                    <div class="a2-top-bar">
+                      <div class="a2-step-indicator">
+                        <span class="a2-step-prefix">STEP</span>
+                        <span class="a2-step-main uni">0{step.step}</span>
+                      </div>
+                      <div class="tech-icon-box uni-icon" set:html={STEP_ICONS[step.slug] || ''} />
+                    </div>
+                    <h3 style="font-size: 17px; font-weight: 800; color: #0f172a; margin-bottom: 8px; line-height: 1.35;">
+                      {STEP_TITLES_A1[step.slug] || step.name}
+                    </h3>
+                    <p style="font-size: 13px; color: #64748b; line-height: 1.6; margin-bottom: 14px;">{step.desc}</p>
+                    <div style="font-size: 12px; color: #991b1b; background: #fff5f5; border-left: 3px solid #f87171; padding: 8px 12px; border-radius: 0 6px 6px 0; margin-bottom: 14px; line-height: 1.5;">
+                      <strong>🚨 典型卡点：</strong>{step.stuck}
+                    </div>
+                  </div>
+                  <div style="font-size: 12.5px; color: #059669; font-weight: 700; display: flex; justify-content: space-between; border-top: 1px dashed #e2e8f0; padding-top: 12px;">
+                    <span>查看第 0{step.step} 步通关指南</span>
+                    <span>➔</span>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+
+          <!-- 阶段 2 -->
+          <div class="pipeline-phase-group">
+            <div class="phase-badge-bar unified">
+              <span class="phase-pill uni-green">PHASE 02</span>
+              <div>
+                <span class="phase-title-text">阶段二：AI 协同构建与云端部署</span>
+                <span class="phase-desc-text">—— 从本地白开水到公网安全穿透，做出别人手机能秒开的真家伙</span>
+              </div>
+            </div>
+            <div class="pipeline-grid-a">
+              {FLOW_STEPS.slice(3, 6).map((step) => (
+                <a href={flowUrl(step.slug)} class="pipe-card-a2">
+                  <div>
+                    <div class="a2-top-bar">
+                      <div class="a2-step-indicator">
+                        <span class="a2-step-prefix">STEP</span>
+                        <span class="a2-step-main uni">0{step.step}</span>
+                      </div>
+                      <div class="tech-icon-box uni-icon" set:html={STEP_ICONS[step.slug] || ''} />
+                    </div>
+                    <h3 style="font-size: 17px; font-weight: 800; color: #0f172a; margin-bottom: 8px; line-height: 1.35;">
+                      {STEP_TITLES_A1[step.slug] || step.name}
+                    </h3>
+                    <p style="font-size: 13px; color: #64748b; line-height: 1.6; margin-bottom: 14px;">{step.desc}</p>
+                    <div style="font-size: 12px; color: #991b1b; background: #fff5f5; border-left: 3px solid #f87171; padding: 8px 12px; border-radius: 0 6px 6px 0; margin-bottom: 14px; line-height: 1.5;">
+                      <strong>🚨 典型卡点：</strong>{step.stuck}
+                    </div>
+                  </div>
+                  <div style="font-size: 12.5px; color: #059669; font-weight: 700; display: flex; justify-content: space-between; border-top: 1px dashed #e2e8f0; padding-top: 12px;">
+                    <span>查看第 0{step.step} 步通关指南</span>
+                    <span>➔</span>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+
+          <!-- 阶段 3 -->
+          <div class="pipeline-phase-group" style="margin-bottom: 0;">
+            <div class="phase-badge-bar unified">
+              <span class="phase-pill uni-green">PHASE 03</span>
+              <div>
+                <span class="phase-title-text">阶段三：商业变现与审核自增长</span>
+                <span class="phase-desc-text">—— 现场跑通真实收款进账，完成上架合规与长期自主迭代</span>
+              </div>
+            </div>
+            <div class="pipeline-grid-a">
+              {FLOW_STEPS.slice(6, 9).map((step) => (
+                <a href={flowUrl(step.slug)} class="pipe-card-a2">
+                  <div>
+                    <div class="a2-top-bar">
+                      <div class="a2-step-indicator">
+                        <span class="a2-step-prefix">STEP</span>
+                        <span class="a2-step-main uni">0{step.step}</span>
+                      </div>
+                      <div class="tech-icon-box uni-icon" set:html={STEP_ICONS[step.slug] || ''} />
+                    </div>
+                    <h3 style="font-size: 17px; font-weight: 800; color: #0f172a; margin-bottom: 8px; line-height: 1.35;">
+                      {STEP_TITLES_A1[step.slug] || step.name}
+                    </h3>
+                    <p style="font-size: 13px; color: #64748b; line-height: 1.6; margin-bottom: 14px;">{step.desc}</p>
+                    <div style="font-size: 12px; color: #991b1b; background: #fff5f5; border-left: 3px solid #f87171; padding: 8px 12px; border-radius: 0 6px 6px 0; margin-bottom: 14px; line-height: 1.5;">
+                      <strong>🚨 典型卡点：</strong>{step.stuck}
+                    </div>
+                  </div>
+                  <div style="font-size: 12.5px; color: #059669; font-weight: 700; display: flex; justify-content: space-between; border-top: 1px dashed #e2e8f0; padding-top: 12px;">
+                    <span>查看第 0{step.step} 步通关指南</span>
+                    <span>➔</span>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 实战作品交付证明：全形态终端实战作品 (Showcase) ── -->
+      <section class="sec" id="showcase" style="background: #ffffff; border-bottom: 1px solid #e2e8f0;">
+        <div class="container">
+          <div class="sec-header">
+            <span class="sec-tag">SHIPPED PRODUCTS · 全终端覆盖</span>
+            <h2 class="sec-title">覆盖全终端形态：不仅能做，更能真实上线</h2>
+            <p class="sec-desc">不碰枯燥底层代码，借助 AI 跨越环境与平台差异，亲手把软件交付到用户终端</p>
+          </div>
+
+          <div class="showcase-grid-c">
+            {SHOWCASE_PROJECTS.map((item) => (
+              <div class="showcase-card-c">
+                <div>
+                  <div class="sc-c-type-bar">
+                    <span class={`sc-c-badge ${item.type}`}>
+                      {item.typeLabel}
+                    </span>
+                    <div class="sc-c-device-icon">
+                      {item.type === 'mp' && (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                          <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                        </svg>
+                      )}
+                      {item.type === 'web' && (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <line x1="2" y1="12" x2="22" y2="12"></line>
+                          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                        </svg>
+                      )}
+                      {item.type === 'app' && (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <rect x="4" y="2" width="16" height="20" rx="3"></rect>
+                          <path d="M11 4h2"></path>
+                          <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                        </svg>
+                      )}
+                    </div>
+                  </div>
+
+                  <!-- 仿真设备与界面截图/模型视窗 -->
+                  <div class="sc-mockup-wrapper">
+                    {item.type === 'mp' && (
+                      <div class="mock-mp-phone">
+                        <div class="mock-mp-capsule-bar">
+                          <span style="font-size: 8.5px; font-weight: 700; color: #0f172a;">商户核销</span>
+                          <div class="mock-mp-capsule">
+                            <span class="mock-mp-capsule-dot"></span>
+                            <span class="mock-mp-capsule-circle"></span>
+                          </div>
+                        </div>
+                        <div class="mock-mp-screen">
+                          <div class="mock-mp-hero-banner">
+                            <div style="font-size: 11px; font-weight: 800;">会员权益 & 验券</div>
+                            <div style="font-size: 8.5px; opacity: 0.9; margin-top: 2px;">实时同步收银台</div>
+                          </div>
+                          <div class="mock-mp-ticket-box">
+                            <div class="mock-qr-sample"></div>
+                            <span style="font-size: 8px; color: #64748b; font-family: monospace;">扫码自动核销</span>
+                          </div>
+                          <div class="mock-mp-btn">确认结账完成</div>
+                        </div>
+                      </div>
+                    )}
+
+                    {item.type === 'web' && (
+                      <div class="mock-web-browser">
+                        <div class="mock-web-bar">
+                          <div class="mock-web-dots">
+                            <span class="mock-web-dot r"></span>
+                            <span class="mock-web-dot y"></span>
+                            <span class="mock-web-dot g"></span>
+                          </div>
+                          <div class="mock-web-input">https://vectorcraft.io/pricing</div>
+                        </div>
+                        <div class="mock-web-content">
+                          <div class="mock-web-nav">
+                            <span style="font-size: 10px; font-weight: 850; color: #1e293b;">VectorCraft</span>
+                            <span style="font-size: 8px; color: #2563eb; font-weight: 700; background: #dbeafe; padding: 2px 6px; border-radius: 4px;">PRO Tier</span>
+                          </div>
+                          <div class="mock-web-hero-card">
+                            <div style="font-size: 9.5px; font-weight: 800; color: #0f172a; margin-bottom: 2px;">SVG Auto Converter</div>
+                            <div style="font-size: 8px; color: #64748b;">Cloudflare Edge CDN · 秒级极速转换</div>
+                          </div>
+                          <div class="mock-web-grid">
+                            <div class="mock-web-pill">Stripe 信用卡</div>
+                            <div class="mock-web-pill">Google 授权</div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {item.type === 'app' && (
+                      <div class="mock-app-phone">
+                        <div class="mock-app-island-bar">
+                          <div class="mock-app-island"></div>
+                        </div>
+                        <div class="mock-app-screen">
+                          <div style="display: flex; justify-content: space-between; align-items: center; padding: 2px 0;">
+                            <span style="font-size: 10px; font-weight: 800; color: #0f172a;">资产看板</span>
+                            <span style="font-size: 8px; color: #7e22ce; font-weight: 700;">iOS 17 原生</span>
+                          </div>
+                          <div class="mock-app-chart-box">
+                            <span style="font-size: 8px; color: #64748b;">本月收支动态 (真机 SQLite)</span>
+                            <div class="mock-app-bars">
+                              <div class="mock-app-bar-col" style="height: 45%;"></div>
+                              <div class="mock-app-bar-col" style="height: 70%;"></div>
+                              <div class="mock-app-bar-col" style="height: 35%;"></div>
+                              <div class="mock-app-bar-col" style="height: 90%; background: #7e22ce;"></div>
+                              <div class="mock-app-bar-col" style="height: 60%;"></div>
+                            </div>
+                          </div>
+                          <div class="mock-app-item">
+                            <span style="font-size: 8.5px; font-weight: 700; color: #1e293b;">App Store 审核</span>
+                            <span style="font-size: 8px; color: #16a34a; font-weight: 700;">Ready for Sale ✓</span>
+                          </div>
+                        </div>
+                        <div class="mock-app-dock">
+                          <div class="mock-dock-dot active"></div>
+                          <div class="mock-dock-dot"></div>
+                          <div class="mock-dock-dot"></div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <h3 class="sc-c-title">{item.title}</h3>
+                  <div class="sc-c-sub">{item.sub}</div>
+
+                  <div class="sc-c-desc-box">
+                    {item.desc}
+                  </div>
+
+                  <ul class="sc-c-checklist">
+                    {item.highlights.map((hl) => (
+                      <li>
+                        <span>✓</span>
+                        <div>{hl}</div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div class="sc-c-footer">
+                  <div class="sc-c-meta-row">
+                    <span class="label">交付耗时</span>
+                    <span class="val">{item.buildTime}</span>
+                  </div>
+                  <div class="sc-c-meta-row">
+                    <span class="label">底层技术栈</span>
+                    <span class="val">{item.tech}</span>
+                  </div>
+                  <a href={item.demoUrl} class="sc-c-btn">查看形态上线与排雷复盘 ➔</a>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 首页文章集合：方案 A · 知识库精读卡片流 (定稿采用) ── -->
+      <section class="sec" id="articles" style="background: #ffffff; border-bottom: 1px solid #e2e8f0;">
+        <div class="container">
+          <div class="sec-header">
+            <span class="sec-tag">HANDBOOK & KNOWLEDGE</span>
+            <h2 class="sec-title">一线真机实战排错手册</h2>
+            <p class="sec-desc">非程序员的第一手解药：不讲语法教条，只解具体问题与避坑指南</p>
+          </div>
+
+          <div class="art-grid-a">
+            {recentArticles.map((art) => (
+              <a href={articleUrl(art)} class="art-card-a">
+                <div>
+                  <div class="art-badge-top">
+                    <span class="art-tag-stage">{art.data.stage ? `流程 · ${art.data.stage}` : '实战手记'}</span>
+                    <span class="art-time">{formatDate(art.data.date)}</span>
+                  </div>
+                  <h3 class="art-title-a">{art.data.title}</h3>
+                  <p class="art-desc-a">{art.data.description}</p>
+                </div>
+                <div class="art-footer-a">
+                  <span>阅读全文指南</span>
+                  <span class="art-read-arrow">➔</span>
+                </div>
+              </a>
+            ))}
+          </div>
+
+          <div style="text-align: center; margin-top: 36px;">
+            <a href="/articles/" class="btn btn-ghost" style="border-radius: 999px; padding: 12px 28px;">
+              查看知识库全部 {articles.length} 篇实战长文 ➔
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 「关于我」模块：真实非程序员实战背书 ── -->
+      <section class="sec" id="about" style="background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
+        <div class="container">
+          <div class="sec-header">
+            <span class="sec-tag">BUILDER & PRACTITIONER</span>
+            <h2 class="sec-title">关于冬瓜：一个非程序员的上线实战手记</h2>
+            <p class="sec-desc">不做纸上谈兵的理论派，只做亲手把产品推到公网真机上收钱的排雷人</p>
+          </div>
+
+          <div class="about-box">
+            <div class="about-profile">
+              <div class="about-avatar-wrap">
+                <div class="about-avatar">冬</div>
+                <div class="about-online-badge" title="实战排雷中"></div>
+              </div>
+              <h3 class="about-name">冬瓜</h3>
+              <span class="about-role-tag">一人公司实践者 · AI 独立开发</span>
+
+              <div class="about-badges-mini">
+                <div class="about-mini-item">
+                  <span>技术背景</span>
+                  <strong>0 行底层代码</strong>
+                </div>
+                <div class="about-mini-item">
+                  <span>上线产品</span>
+                  <strong>5+ 款公网运行</strong>
+                </div>
+                <div class="about-mini-item">
+                  <span>经验来源</span>
+                  <strong>真机踩坑排雷</strong>
+                </div>
+              </div>
+            </div>
+
+            <div class="about-content">
+              <div class="about-headline">
+                “我和你一样不是计算机科班，<br />
+                我做过的每一个产品，<span>代码全都交由 AI 编写。</span>”
+              </div>
+              <p class="about-story">
+                很多人以为做软件必须先花一年半载啃语法、背框架，或者花好几万请外包。在 AI 时代，这些规则被彻底改写了——<strong>写代码交由 AI，我们负责想清楚业务、做定夺、打通公网与合规，并在真实世界里收到第一笔钱。</strong>
+              </p>
+              <p class="about-story">
+                从第一台海外服务器配置被封，到国内 ICP 备案被反复驳回；从小程序类目敏感卡审，到 Stripe 支付沙盒联调……我把非程序员在“最后一公里”所踩过的每一个雷，完整沉淀成了这套开源交付手册。
+              </p>
+
+              <div class="about-pillars">
+                <div class="about-pillar-card">
+                  <div class="pillar-icon">🛠️</div>
+                  <div class="pillar-title">100% 真实真机交付</div>
+                  <div class="pillar-desc">拒绝只在本地 localhost 跑 Demo，所有指南只以“真机能开、公网能收钱”为验收标准。</div>
+                </div>
+                <div class="about-pillar-card">
+                  <div class="pillar-icon">📖</div>
+                  <div class="pillar-title">开源避坑完全公开</div>
+                  <div class="pillar-desc">不搞信息差割韭菜，核心通关流程与真实配置脚本持续在 GitHub 与知识库公开发布。</div>
+                </div>
+                <div class="about-pillar-card">
+                  <div class="pillar-icon">🤝</div>
+                  <div class="pillar-title">手把手逐个排雷</div>
+                  <div class="pillar-desc">通过小班制 48 小时线下实训与社群，在关键的账号、支付、部署与过审节点陪你现场打通。</div>
+                </div>
+              </div>
+
+              <div class="about-contact-bar">
+                <span class="contact-text">交流与探讨一人公司 / AI 独立开发：</span>
+                <div class="contact-actions">
+                  <a href="/camp/" class="contact-btn primary">48 小时线下实训详情 ➔</a>
+                  <a href="https://github.com" target="_blank" rel="noopener" class="contact-btn">GitHub 仓库</a>
+                  <a href="#faq" class="contact-btn">查看常见答疑</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 「常见困惑 FAQ」模块：解开学员关键心魔 ── -->
+      <section class="sec" id="faq" style="background: #ffffff; border-bottom: 1px solid #e2e8f0;">
+        <div class="container">
+          <div class="sec-header">
+            <span class="sec-tag">FREQUENTLY ASKED QUESTIONS</span>
+            <h2 class="sec-title">新手常被卡住的关键困惑</h2>
+            <p class="sec-desc">关于门槛、资质、收款与交付的真实解答，把问号变成确定的可执行步骤</p>
+          </div>
+
+          <div class="faq-wrap-v3">
+            <details class="faq-item-v3" open>
+              <summary class="faq-summary-v3">
+                <div class="faq-q-left">
+                  <span class="faq-q-badge">Q1</span>
+                  <span>我完全不会写代码、连命令行都没摸过，真的能亲手做出来吗？</span>
+                </div>
+                <span class="faq-chevron">▼</span>
+              </summary>
+              <div class="faq-body-v3">
+                <strong>能，并且一秒都不需要你重学计算机科学。</strong><br />
+                现在的 AI（如 Claude Code、Cursor、Codex 等）已经完全具备编写高质量前端、后端与数据库脚本的能力。你在这个协作闭环中的角色是<strong>“指挥官与业务把关者”</strong>：你用大白话把产品要解决的痛点切细、让 AI 逐块构建、遇到报错直接复制给它排查。你只需负责验收真机效果与做关键决策。
+                <div class="faq-callout-pill">💡 手册与实战营会手把手教你如何搭建最顺畅的终端与 AI 协作环境，抹平所有工具畏惧感。</div>
+              </div>
+            </details>
+
+            <details class="faq-item-v3">
+              <summary class="faq-summary-v3">
+                <div class="faq-q-left">
+                  <span class="faq-q-badge">Q2</span>
+                  <span>我没有企业营业执照，个人身份能合法合规收到钱吗？</span>
+                </div>
+                <span class="faq-chevron">▼</span>
+              </summary>
+              <div class="faq-body-v3">
+                <strong>完全可以，且这是所有一人公司验证商业价值的标准推荐路径。</strong><br />
+                在产品刚上线初期，千万不要为了收几十块钱先花时间去办营业执照和对公账户。你可以通过：
+                <ol style="margin-left: 20px; margin-top: 6px;">
+                  <li>国内通过“小报童”、“微信赞赏码/个人商户签约”等第三方免资质合规工具完成冷启动付费验证；</li>
+                  <li>出海产品可通过 Stripe、Lemon Squeezy 等聚合商户以合规个人身份接入海外信用卡支付；</li>
+                  <li>待月收入稳定、确需规模化扩张后，再办理个体工商户营业执照接入正式微信支付商户号。</li>
+                </ol>
+              </div>
+            </details>
+
+            <details class="faq-item-v3">
+              <summary class="faq-summary-v3">
+                <div class="faq-q-left">
+                  <span class="faq-q-badge">Q3</span>
+                  <span>网站和小程序上线需要备案吗？流程会很繁琐漫长吗？</span>
+                </div>
+                <span class="faq-chevron">▼</span>
+              </summary>
+              <div class="faq-body-v3">
+                <strong>分平台和服务器部署区域：</strong><br />
+                <ul>
+                  <li><strong>海外 Web 商业站 / 出海产品：</strong>使用海外轻量服务器（如 Cloudflare Pages、Vercel、AWS 硅谷节点），<strong>买完域名解析后几分钟内即可秒级上线公网</strong>，完全不需要国内 ICP 备案。</li>
+                  <li><strong>国内服务器 Web 网站：</strong>需要进行工信部 ICP 备案，通常需要 1~2 周时间；</li>
+                  <li><strong>微信小程序：</strong>微信对个人主体审核通常 1~3 天，核心避坑在于<strong>绝不要误选需要前置资质审批的敏感服务类目</strong>，只要选对类目（如工具、生活信息类），提审通常极速通过。</li>
+                </ul>
+              </div>
+            </details>
+
+            <details class="faq-item-v3">
+              <summary class="faq-summary-v3">
+                <div class="faq-q-left">
+                  <span class="faq-q-badge">Q4</span>
+                  <span>手册里的 9 步指南都开源免费，为什么还要开设 48 小时线下实训？</span>
+                </div>
+                <span class="faq-chevron">▼</span>
+              </summary>
+              <div class="faq-body-v3">
+                <strong>手册给你的是“完整地图”，而 48 小时线下实训卖给你的是“100% 确定性的交付结果”。</strong><br />
+                自己看手册完全能做，但新手往往容易在冷僻的报错（如 SSH 密钥格式错误、域名 DNS 没生效、跨域报错 CORS、微信支付回调签名失败）上卡死好几天并中途放弃。线下实训是脱产周末两天，主讲加助教在现场逐个屏幕排雷，<strong>确保每个人在离开教室时，手机上都有一个带 HTTPS、带收款通道、公网可运行的真家伙。</strong>
+              </div>
+            </details>
+
+            <details class="faq-item-v3">
+              <summary class="faq-summary-v3">
+                <div class="faq-q-left">
+                  <span class="faq-q-badge">Q5</span>
+                  <span>产品上线之后怎么维护更新？代码全由 AI 写，后续会变成屎山吗？</span>
+                </div>
+                <span class="faq-chevron">▼</span>
+              </summary>
+              <div class="faq-body-v3">
+                <strong>掌握科学的“模块切片”和 Git 快照习惯，根本不会变成屎山。</strong><br />
+                新手之所以怕代码混乱，是因为一次性让 AI 改了几十个文件。本套方法论最核心的原则就是：<strong>“一次只让 AI 做一件事，每做完一步自己真机点一遍，验证通过立即用 Git 打上版本快照”</strong>。无论后续想增加功能还是重构，AI 都能基于清晰的上下文快速拓展，哪怕改崩了也能 1 秒钟无损回退。
+              </div>
+            </details>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <SiteFooter />
+  </body>
+</html>

@@ -10,7 +10,10 @@ import { flowUrl, type FlowStep } from '../../data/flow';
 import { getArticles, flowArticleOf } from '../../lib/articles';
 
 export function getStaticPaths() {
-  return ROADMAP.map((s) => ({ params: { slug: s.slug }, props: { step: s } }));
+  // 已经有静态支柱页（同目录下的 <slug>.astro）的步骤，由那个页面负责，这里不再生成。
+  // getStaticPaths 会被单独提取执行，所以这段只能写在函数里面。
+  const pillarPages = new Set(Object.keys(import.meta.glob('./*.astro')).map((f) => f.replace(/^\.\//, '').replace(/\.astro$/, '')));
+  return ROADMAP.filter((s) => !pillarPages.has(s.slug)).map((s) => ({ params: { slug: s.slug }, props: { step: s } }));
 }
 
 const { step } = Astro.props as { step: FlowStep };

@@ -1,10 +1,10 @@
 ---
-// 文章页的完整布局：问题页（/articles/<id>/）和流程页（/flow/<步骤>/）共用。
-// 问题页：首屏给答案 → 侧栏告诉他在流程第几步 → 文末给出口。
-// 流程页：同样的结构，额外列出这一步常见的问题页，并给出上一步 / 下一步。
+// 文章页的完整布局：问题页（/articles/<id>/），以及还没有静态支柱页的流程页（/flow/<步骤>/）兜底。
+// 版式与支柱页一致（PillarLayout 三栏）：
+//   顶部结论卡（先说结论 + 照做步骤 + 所属步骤/形态/日期）→ 正文 → 人和 AI 的分工 → FAQ → 来源 → 文末出口。
+//   左侧栏是 9 步流程（高亮本文所在的一步）+ 这一步的其他问题页；右侧是本页目录。
 import { getEntry, render } from 'astro:content';
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import RoadmapPosition from './RoadmapPosition.astro';
+import PillarLayout from '../../layouts/PillarLayout.astro';
 import ArticleExit from './ArticleExit.astro';
 import ArticleFaq from './ArticleFaq.astro';
 import ArticleSources from './ArticleSources.astro';
@@ -14,7 +14,7 @@ import RoleTag from './RoleTag.astro';
 import ArticleList from '../ArticleList.astro';
 import { SITE, ROADMAP, platformOf, topicOf } from '../../data/site';
 import { flowUrl } from '../../data/flow';
-import { articleUrl, formatDate, stageOfArticle, type Article } from '../../lib/articles';
+import { getArticles, articleUrl, formatDate, stageOfArticle, type Article } from '../../lib/articles';
 import { markdownUrl } from '../../lib/markdown';
 
 interface Props {
@@ -25,13 +25,14 @@ interface Props {
 const { article, questions = [] } = Astro.props;
 const { data } = article;
 const isFlow = data.kind === 'flow';
-const { Content } = await render(article);
+const { Content, headings } = await render(article);
 const next = data.next ? await getEntry(data.next) : undefined;
 const step = stageOfArticle(article);
 const url = new URL(articleUrl(article), Astro.site).href;
 const mdUrl = new URL(markdownUrl(article), Astro.site).href;
-const prevStep = ROADMAP.find((s) => s.step === step.step - 1);
-const nextStep = ROADMAP.find((s) => s.step === step.step + 1);
+const left = ROADMAP.length - step.step;
+// 同一步的其他问题页，放在左侧栏
+const siblings = (await getArticles()).filter((a) => a.data.stage === data.stage && a.data.kind !== 'flow' && a.id !== article.id);
 // 排障表里链到的问题页
 const troubleshoot = await Promise.all(
   data.troubleshoot.map(async (t) => {
@@ -39,6 +40,21 @@ const troubleshoot = await Promise.all(
     return { ...t, href: linked && !linked.data.draft ? articleUrl(linked) : undefined };
   }),
 );
+const hasWorkflow =
+  (data.handoff && (data.handoff.prepare.length > 0 || data.handoff.prompts.length > 0)) ||
+  data.humanOnly.length > 0 ||
+  data.verify.length > 0 ||
+  troubleshoot.length > 0 ||
+  data.boundaries.length > 0;
+const workflowId = data.handoff && (data.handoff.prepare.length > 0 || data.handoff.prompts.length > 0)
+  ? 'handoff'
+  : data.humanOnly.length > 0
+    ? 'human-only'
+    : data.verify.length > 0
+      ? 'verify'
+      : troubleshoot.length > 0
+        ? 'troubleshoot'
+        : 'boundaries';
 
 const crumbs = isFlow
   ? [
@@ -51,6 +67,17 @@ const crumbs = isFlow
       { name: `第 ${step.step} 步 · ${step.name}`, href: flowUrl(step.slug) },
       { name: data.title, href: articleUrl(article) },
     ];
+
+// 右侧目录：结论 → 正文二级标题 → 分工 → FAQ → 来源
+const h2s = headings.filter((h) => h.depth === 2);
+const toc = [
+  { id: 'sec-header-conclusion', label: '先说结论', kind: 'conclusion' as const },
+  ...h2s.map((h, i) => ({ id: h.slug, label: h.text, num: String(i + 1).padStart(2, '0') })),
+  ...(hasWorkflow ? [{ id: workflowId, label: '人和 AI 的分工', kind: 'warn' as const }] : []),
+  ...(isFlow ? [{ id: 'questions', label: '这一步常见的问题' }] : []),
+  ...(data.faq.length > 0 ? [{ id: 'faq', label: '常见问题 FAQ', kind: 'faq' as const }] : []),
+  ...(data.sources.length > 0 ? [{ id: 'sources', label: '参考来源' }] : []),
+];
 
 const jsonLd: object[] = [
   {
@@ -90,187 +117,123 @@ if (data.faq.length > 0) {
 }
 ---
 
-
-<BaseLayout title={data.title} description={data.description} ogType="article">
+<PillarLayout slug={data.stage} mode={isFlow ? 'flow' : 'article'} title={data.title} description={data.description} toc={toc} crumbs={crumbs} jsonLd={jsonLd}>
   <Fragment slot="head">
     <meta property="article:published_time" content={data.date.toISOString()} />
     <meta property="article:author" content={SITE.author.name} />
-    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
     <link rel="alternate" type="text/markdown" href={markdownUrl(article)} title="纯文本版（给 AI 读）" />
   </Fragment>
 
-  <div class="wrap layout">
-    <article class="main">
-      <nav class="crumbs" aria-label="面包屑">
-        {crumbs.slice(0, -1).map((c) => <><a href={c.href}>{c.name}</a><span>/</span></>)}
-      </nav>
-      {isFlow && <p class="flow-badge">{step.icon} 上线流程 · 第 {step.step} 步 / 共 {ROADMAP.length} 步</p>}
-      <h1>{data.title}</h1>
-
-      <div class="answer" id="answer">
-        <p class="answer-label">结论</p>
-        <p class="answer-text">{data.answer}</p>
-        {
-          data.steps.length > 0 && (
-            <ol class="answer-steps">
-              {data.steps.map((s) =>
-                typeof s === 'string' ? <li>{s}</li> : <li><RoleTag who={s.who} /> {s.text}</li>,
-              )}
-            </ol>
-          )
-        }
+  <Fragment slot="sidebar">
+    <p class="sb-note">
+      {isFlow ? <>这是第 {step.step} 步的完整流程。</> : <>这篇在<b>第 {step.step} 步</b>，解决「{data.keyword}」。</>}
+      {left > 0 ? <>走完这一步，后面还有 <b>{left} 步</b>。</> : <>这是最后一步，但前面每一步都得走通。</>}
+    </p>
+    {siblings.length > 0 && (
+      <div class="sb-related">
+        <div class="sb-phase-title">这一步的其他问题</div>
+        {siblings.slice(0, 8).map((a) => <a href={articleUrl(a)}>{a.data.title}</a>)}
       </div>
+    )}
+  </Fragment>
 
-      <div class="meta">
+  <header class="header-card" id="sec-header-conclusion">
+    <div class="header-meta-row">
+      <div class="header-pill-group">
+        <span class="phase-pill-dark">{isFlow ? `第 ${step.step} 步 · 完整流程` : `问题页 · 第 ${step.step} 步`}</span>
+        <span class="step-pill-emerald">{step.icon} {step.name}</span>
         {data.sample && <span class="sample-tag">示例文章</span>}
-        <a href={flowUrl(step.slug)}>{step.icon} 第 {step.step} 步 · {step.name}</a>
-        {data.platforms.map((p) => <a class="chip" href={`/platforms/${p}/`}>{platformOf(p).name}</a>)}
-        {data.topics.map((t) => <a class="chip" href={`/topics/${t}/`}>#{topicOf(t).name}</a>)}
-        <span>作者 {SITE.author.name}</span>
-        <time datetime={data.date.toISOString()}>{formatDate(data.date)}</time>
-        {data.updated && <span>更新于 <time datetime={data.updated.toISOString()}>{formatDate(data.updated)}</time></span>}
       </div>
-
-      {
-        !isFlow && (
-          <a class="in-flow" href={flowUrl(step.slug)}>
-            这篇属于上线流程第 {step.step} 步「{step.name}」<b>看这一步的完整流程 →</b>
-          </a>
-        )
-      }
-
-      <div class="prose">
-        <Content />
+      <div class="header-status-indicator">
+        <span class="status-dot-pulse"></span>
+        <span>
+          作者 {SITE.author.name} · <time datetime={data.date.toISOString()}>{formatDate(data.date)}</time>
+          {data.updated && <> · 更新于 <time datetime={data.updated.toISOString()}>{formatDate(data.updated)}</time></>}
+        </span>
       </div>
-
-      <ArticleWorkflow
-        handoff={data.handoff}
-        humanOnly={data.humanOnly}
-        verify={data.verify}
-        troubleshoot={troubleshoot}
-        boundaries={data.boundaries}
-      />
-
-      {
-        isFlow && (
-          <section class="flow-questions" id="questions">
-            <h2>这一步常见的问题</h2>
-            {questions.length > 0 ? (
-              <ArticleList articles={questions} showDesc />
-            ) : (
-              <p class="empty">这一步的问题页还在写。</p>
-            )}
-          </section>
-        )
-      }
-
-      <ArticleFaq items={data.faq} />
-
-      {data.aiRun && <AiRunCard url={mdUrl} task={data.keyword} />}
-
-      <ArticleSources sources={data.sources} reviewed={data.reviewed} />
-
-      {
-        isFlow ? (
-          <nav class="flow-nav" aria-label="上一步和下一步">
-            {prevStep ? (
-              <a href={flowUrl(prevStep.slug)}><small>← 上一步 · 第 {prevStep.step} 步</small>{prevStep.name}</a>
-            ) : <span />}
-            {nextStep ? (
-              <a class="next" href={flowUrl(nextStep.slug)}><small>下一步 · 第 {nextStep.step} 步 →</small>{nextStep.name}</a>
-            ) : <span />}
-          </nav>
-        ) : null
-      }
-
-      <ArticleExit step={step.step} stuckNext={data.stuckNext} next={next} />
-    </article>
-
-    <div class="side">
-      <RoadmapPosition current={step.step} />
     </div>
-  </div>
-</BaseLayout>
 
-<script>
-  // 提示词卡、排障表、「交给 AI 执行」卡片的复制按钮
-  document.addEventListener('click', async (e) => {
-    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-copy]');
-    if (!btn) return;
-    const text = btn.dataset.copy ?? '';
-    try {
-      await navigator.clipboard.writeText(text);
-    } catch {
-      const ta = document.createElement('textarea');
-      ta.value = text;
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand('copy');
-      ta.remove();
-    }
-    const old = btn.textContent;
-    btn.textContent = '已复制';
-    btn.classList.add('done');
-    setTimeout(() => {
-      btn.textContent = old;
-      btn.classList.remove('done');
-    }, 1500);
-  });
-</script>
+    <h1 class="header-main-h1">{data.title}</h1>
+
+    <div class="header-conclusion-inner">
+      <div class="hci-badge-pill">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>
+        <span>先说结论 · KEY TAKEAWAY</span>
+      </div>
+      <p class="hci-text">{data.answer}</p>
+      {data.steps.length > 0 && (
+        <ol class="hci-steps">
+          {data.steps.map((s) => (typeof s === 'string' ? <li>{s}</li> : <li><RoleTag who={s.who} /> {s.text}</li>))}
+        </ol>
+      )}
+    </div>
+
+    <div class="header-meta-grid">
+      <div class="meta-tag-card">
+        <div class="meta-tag-icon-box">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+        </div>
+        <div class="meta-tag-content">
+          <span class="meta-tag-label">所属步骤:</span>
+          <span><a href={flowUrl(step.slug)}>第 {step.step} 步 · {step.name}</a></span>
+        </div>
+      </div>
+      <div class="meta-tag-card">
+        <div class="meta-tag-icon-box">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="M2 10h20"></path></svg>
+        </div>
+        <div class="meta-tag-content">
+          <span class="meta-tag-label">适用形态:</span>
+          <span>
+            {data.platforms.map((p) => <a class="meta-chip" href={`/platforms/${p}/`}>{platformOf(p).name}</a>)}
+            {data.topics.map((t) => <a class="meta-chip" href={`/topics/${t}/`}>#{topicOf(t).name}</a>)}
+          </span>
+        </div>
+      </div>
+      <div class="meta-tag-card">
+        <div class="meta-tag-icon-box">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+        </div>
+        <div class="meta-tag-content">
+          <span class="meta-tag-label">{data.reviewed ? '内容核对:' : '文章主词:'}</span>
+          <span>{data.reviewed ? `已对照来源核实 · ${formatDate(data.reviewed)}` : data.keyword}</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <article class="main-article-card">
+    {!isFlow && (
+      <a class="in-flow" href={flowUrl(step.slug)}>
+        这篇属于上线流程第 {step.step} 步「{step.name}」<b>看这一步的完整流程 →</b>
+      </a>
+    )}
+
+    <div class="prose">
+      <Content />
+    </div>
+
+    <ArticleWorkflow handoff={data.handoff} humanOnly={data.humanOnly} verify={data.verify} troubleshoot={troubleshoot} boundaries={data.boundaries} />
+
+    {isFlow && (
+      <section class="flow-questions" id="questions">
+        <h2>这一步常见的问题</h2>
+        {questions.length > 0 ? <ArticleList articles={questions} showDesc /> : <p class="empty">这一步的问题页还在写。</p>}
+      </section>
+    )}
+
+    <ArticleFaq items={data.faq} />
+
+    {data.aiRun && <AiRunCard url={mdUrl} task={data.keyword} />}
+
+    <ArticleSources sources={data.sources} reviewed={data.reviewed} />
+
+    <ArticleExit step={step.step} stuckNext={data.stuckNext} next={next} />
+  </article>
+</PillarLayout>
 
 <style>
-  .layout{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:40px;align-items:start;padding-top:36px;padding-bottom:64px}
-  .main{max-width:720px}
-  .flow-badge{display:inline-block;font-size:13px;font-weight:700;color:var(--accent);background:var(--accent-soft);border-radius:999px;padding:2px 12px;margin-bottom:10px}
-  .in-flow{display:block;margin:4px 0 8px;padding:10px 14px;border:1px dashed color-mix(in srgb,var(--accent) 40%,var(--line));border-radius:12px;font-size:14px;color:var(--muted)}
-  .in-flow b{color:var(--accent);margin-left:6px;white-space:nowrap}
-  .in-flow:hover{border-style:solid}
-  .flow-questions{margin-top:40px}
-  .flow-questions h2{font-size:22px;margin-bottom:12px}
-  .flow-questions .empty{border:1px dashed var(--line);border-radius:12px;padding:14px 18px;color:var(--muted);font-size:14px}
-  .flow-nav{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:40px}
-  .flow-nav a{display:block;border:1px solid var(--line);border-radius:12px;padding:12px 16px;background:var(--surface);font-weight:700}
-  .flow-nav a:hover{border-color:var(--accent);color:var(--accent)}
-  .flow-nav small{display:block;font-size:12.5px;font-weight:500;color:var(--muted);margin-bottom:2px}
-  .flow-nav .next{text-align:right}
-  .side{position:sticky;top:84px}
-  h1{font-size:clamp(26px,4vw,36px);line-height:1.3;letter-spacing:-.3px;font-weight:800}
-
-  .answer{margin-top:20px;background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);border-left:4px solid var(--accent);border-radius:var(--radius);padding:18px 22px}
-  .answer-label{font-size:12.5px;font-weight:800;color:var(--accent);letter-spacing:1px}
-  .answer-text{font-size:17px;font-weight:600;line-height:1.65;margin-top:2px}
-  .answer-steps{margin:10px 0 0;padding-left:1.4em;display:grid;gap:4px;font-size:15px}
-  .answer-steps li::marker{color:var(--accent);font-weight:700}
-
-  .meta a:hover{color:var(--accent)}
-  .meta .chip{border:1px solid var(--line);border-radius:999px;padding:0 9px;line-height:22px}
-  .meta{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;font-size:13px;color:var(--muted);margin:16px 0 8px}
-
-  .prose{font-size:16.5px;line-height:1.85}
-  .prose :global(h2){font-size:22px;margin:36px 0 12px;letter-spacing:-.2px;line-height:1.4}
-  .prose :global(h3){font-size:18px;margin:28px 0 10px}
-  .prose :global(p){margin:14px 0}
-  .prose :global(ul),.prose :global(ol){margin:14px 0;padding-left:1.4em}
-  .prose :global(li){margin:4px 0}
-  .prose :global(li::marker){color:var(--accent)}
-  .prose :global(a){color:var(--accent);text-decoration:underline;text-underline-offset:3px}
-  .prose :global(strong){color:var(--ink)}
-  .prose :global(blockquote){margin:18px 0;padding:12px 18px;border-left:4px solid var(--warm);background:var(--warm-soft);border-radius:0 10px 10px 0;color:var(--ink)}
-  .prose :global(blockquote p){margin:4px 0}
-  .prose :global(code){font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9em;background:var(--soft);border:1px solid var(--line);border-radius:6px;padding:1px 6px}
-  .prose :global(pre){background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow-x:auto;margin:16px 0}
-  .prose :global(pre code){border:0;padding:0;background:none}
-  .prose :global(table){width:100%;border-collapse:collapse;font-size:14.5px;margin:16px 0;display:block;overflow-x:auto}
-  .prose :global(th),.prose :global(td){border:1px solid var(--line);padding:8px 12px;text-align:left}
-  .prose :global(th){background:var(--soft)}
-
-  @media (max-width:900px){
-    .layout{grid-template-columns:minmax(0,1fr);gap:20px;padding-top:20px}
-    .side{position:static;order:-1}
-    .main{max-width:none}
-  }
-  @media (max-width:560px){
-    .answer{padding:16px 16px}
-    .answer-text{font-size:16px}
-  }
+  .flow-questions { margin-top: 40px; }
+  .flow-questions h2 { font-size: 20px; margin-bottom: 12px; }
+  .flow-questions .empty { border: 1px dashed var(--line); border-radius: 12px; padding: 14px 18px; color: var(--muted); font-size: 14px; }
 </style>

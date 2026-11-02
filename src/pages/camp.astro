@@ -1,0 +1,717 @@
+---
+// 48 小时 AI 独立开发实战营独立落地页
+// 访问路径: /camp/
+import { SITE } from '../data/site';
+
+const canonical = new URL('/camp/', Astro.site);
+---
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>48 小时 AI 独立开发线下实战营 · 冬瓜</title><link rel="canonical" href={canonical} />
+  <meta name="description" content="48小时脱产实训，带非技术学员亲手把产品推上公网并跑通商业收款。小班制逐屏排雷，周日傍晚带走能真实进账的线上真家伙。">
+  <meta name="launchpad-group" content="AI 开发培训">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --surface-hover: #f1f5f9;
+      --card: #ffffff;
+      --line: #e2e8f0;
+      --line-light: #cbd5e1;
+      --ink: #0f172a;
+      --muted: #64748b;
+      --emerald: #059669;
+      --emerald-dark: #047857;
+      --emerald-glow: #ecfdf5;
+      --accent: #0284c7;
+      --amber: #d97706;
+      --radius: 16px;
+      --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06);
+      --shadow-md: 0 10px 25px -5px rgb(0 0 0 / 0.06), 0 8px 10px -6px rgb(0 0 0 / 0.04);
+      --shadow-lg: 0 20px 30px -10px rgb(0 0 0 / 0.08);
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; background: var(--bg); color: var(--ink); font-family: -apple-system, BlinkMacSystemFont, 'Plus Jakarta Sans', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; }
+    body { min-height: 100vh; overflow-x: hidden; line-height: 1.65; background: var(--bg); color: var(--ink); }
+    a { color: inherit; text-decoration: none; }
+
+    /* Top Nav */
+    .top-nav {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--line);
+      padding: 14px 24px;
+    }
+    .nav-inner {
+      max-width: 1160px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;
+    }
+    .brand-wrap { display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; }
+    .brand-badge {
+      background: linear-gradient(135deg, #059669, #10b981);
+      color: #fff; font-size: 13px; font-weight: 800; padding: 4px 10px; border-radius: 6px;
+    }
+    .brand-title { font-size: 16px; font-weight: 800; color: var(--ink); letter-spacing: -0.2px; }
+    .nav-links { display: flex; align-items: center; gap: 20px; }
+    .nav-item { color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 600; transition: color 0.2s; }
+    .nav-item:hover { color: var(--emerald); }
+    .nav-btn {
+      background: var(--emerald); color: #ffffff; font-size: 13.5px; font-weight: 700;
+      padding: 8px 18px; border-radius: 999px; text-decoration: none; transition: all 0.2s;
+      box-shadow: 0 2px 10px rgba(5, 150, 105, 0.25);
+    }
+    .nav-btn:hover { background: var(--emerald-dark); transform: translateY(-1px); }
+
+    /* Container */
+    .container { max-width: 1160px; margin: 0 auto; padding: 0 24px; }
+
+    /* Hero */
+    .hero {
+      padding: 72px 0 60px; text-align: center; position: relative;
+    }
+    .hero::before {
+      content: ''; position: absolute; top: -40px; left: 50%; transform: translateX(-50%);
+      width: 700px; height: 380px; background: radial-gradient(circle, rgba(5, 150, 105, 0.08) 0%, rgba(248, 250, 252, 0) 70%);
+      pointer-events: none; z-index: 0;
+    }
+    .hero-content { position: relative; z-index: 1; }
+    .hero-pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--emerald-glow); border: 1px solid rgba(5, 150, 105, 0.25);
+      padding: 6px 16px; border-radius: 999px; font-size: 13px; color: var(--emerald); font-weight: 700; margin-bottom: 24px;
+    }
+    .hero-h1 {
+      font-size: clamp(32px, 4.8vw, 52px); font-weight: 800; line-height: 1.25; letter-spacing: -1px; margin-bottom: 20px; color: var(--ink);
+    }
+    .hero-h1 span.hl {
+      color: var(--emerald);
+      background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero-desc {
+      font-size: clamp(16px, 1.8vw, 18.5px); color: var(--muted); max-width: 820px; margin: 0 auto 36px; line-height: 1.75;
+    }
+    .hero-cta-box { display: flex; justify-content: center; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 40px; }
+    .btn-camp-primary {
+      background: linear-gradient(135deg, #059669, #047857); color: #ffffff; font-size: 16px; font-weight: 800;
+      padding: 14px 32px; border-radius: 12px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+      box-shadow: 0 4px 18px rgba(5, 150, 105, 0.28); transition: all 0.2s;
+    }
+    .btn-camp-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(5, 150, 105, 0.38); background: #047857; }
+    .btn-camp-secondary {
+      background: #ffffff; color: var(--ink); font-size: 15.5px; font-weight: 600;
+      padding: 14px 26px; border-radius: 12px; text-decoration: none; border: 1px solid var(--line-light);
+      display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; box-shadow: var(--shadow-sm);
+    }
+    .btn-camp-secondary:hover { background: #f8fafc; border-color: #94a3b8; }
+    
+    .trust-strip {
+      display: flex; justify-content: center; align-items: center; gap: 32px; flex-wrap: wrap;
+      font-size: 13.5px; color: var(--muted); border-top: 1px solid var(--line);
+      max-width: 900px; margin: 0 auto; padding-top: 24px;
+    }
+    .trust-item { display: flex; align-items: center; gap: 6px; font-weight: 600; }
+    .trust-item svg { color: var(--emerald); }
+
+    /* Section Global */
+    .sec { padding: 80px 0; border-top: 1px solid var(--line); }
+    .sec-alt { background: #ffffff; }
+    .sec-tag { font-size: 12px; font-weight: 800; letter-spacing: 1.5px; color: var(--emerald); text-transform: uppercase; margin-bottom: 8px; display: block; }
+    .sec-title { font-size: clamp(26px, 3.2vw, 36px); font-weight: 800; letter-spacing: -0.5px; margin-bottom: 12px; color: var(--ink); }
+    .sec-desc { font-size: 16px; color: var(--muted); max-width: 680px; margin-bottom: 40px; }
+    .text-center { text-align: center; }
+    .text-center .sec-desc { margin-left: auto; margin-right: auto; }
+
+    /* Contrast Box: Why Offline */
+    .why-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 24px; }
+    @media (max-width: 768px) { .why-grid { grid-template-columns: 1fr; } }
+    .why-card {
+      background: #ffffff; border: 1px solid var(--line); border-radius: var(--radius); padding: 32px; box-shadow: var(--shadow-sm);
+    }
+    .why-card.highlight {
+      border-color: rgba(5, 150, 105, 0.4);
+      background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 100%);
+      box-shadow: 0 8px 30px rgba(5, 150, 105, 0.08);
+    }
+    .why-badge {
+      display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; margin-bottom: 16px;
+    }
+    .why-badge.fail { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
+    .why-badge.win { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+    .why-h3 { font-size: 19px; font-weight: 800; margin-bottom: 14px; color: var(--ink); }
+    .why-list { list-style: none; display: flex; flex-direction: column; gap: 12px; font-size: 14.5px; color: #475569; }
+    .why-list li { display: flex; align-items: flex-start; gap: 10px; }
+    .why-list li strong { color: var(--ink); }
+    .why-list .ico-x { color: #dc2626; font-weight: 900; }
+    .why-list .ico-v { color: var(--emerald); font-weight: 900; }
+
+    /* Promises Table */
+    .promise-card {
+      background: #ffffff; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; margin-top: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+    .promise-grid { display: grid; grid-template-columns: 1fr 1fr; }
+    @media (max-width: 768px) { .promise-grid { grid-template-columns: 1fr; } }
+    .promise-col { padding: 36px; }
+    .promise-col:first-child { border-right: 1px solid var(--line); background: #fcfdfd; }
+    .p-tier-badge {
+      display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 800; padding: 4px 12px; border-radius: 6px; margin-bottom: 14px;
+    }
+    .p-tier-badge.base { background: #dcfce7; color: #047857; }
+    .p-tier-badge.target { background: #dbeafe; color: #1d4ed8; }
+    .promise-h3 { font-size: 21px; font-weight: 800; margin-bottom: 8px; color: var(--ink); }
+    .promise-premise { font-size: 13.5px; color: var(--muted); margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+    .promise-items { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+    .promise-items li { display: flex; gap: 10px; font-size: 14.5px; color: #475569; line-height: 1.55; }
+    .promise-items li strong { color: var(--ink); }
+    .check-mark { color: var(--emerald); font-weight: 800; font-size: 16px; flex-shrink: 0; }
+
+    /* Schedule Timeline */
+    .timeline { display: flex; flex-direction: column; gap: 20px; margin-top: 32px; }
+    .time-card {
+      background: #ffffff; border: 1px solid var(--line); border-radius: 14px; padding: 24px 28px;
+      display: grid; grid-template-columns: 240px 1fr; gap: 28px; align-items: start; box-shadow: var(--shadow-sm);
+    }
+    @media (max-width: 860px) { .time-card { grid-template-columns: 1fr; gap: 16px; } }
+    .time-header-box { border-right: 1px solid var(--line); padding-right: 20px; }
+    @media (max-width: 860px) { .time-header-box { border-right: none; border-bottom: 1px solid var(--line); padding-bottom: 12px; } }
+    .time-phase { font-size: 11px; font-weight: 800; color: var(--emerald); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+    .time-day-title { font-size: 18px; font-weight: 800; color: var(--ink); line-height: 1.35; margin-bottom: 8px; }
+    .time-badge { display: inline-block; font-size: 12px; color: var(--muted); background: #f1f5f9; padding: 3px 8px; border-radius: 4px; font-family: var(--font-mono); }
+    
+    .time-tasks { display: flex; flex-direction: column; gap: 16px; }
+    .task-row { display: grid; grid-template-columns: 95px 1fr; gap: 16px; font-size: 14px; }
+    @media (max-width: 600px) { .task-row { grid-template-columns: 1fr; gap: 4px; } }
+    .task-time { font-family: var(--font-mono); font-size: 12.5px; color: var(--emerald); font-weight: 700; padding-top: 2px; }
+    .task-body strong { color: var(--ink); font-weight: 700; }
+    .task-body p { color: var(--muted); margin-top: 3px; font-size: 13.5px; line-height: 1.55; }
+
+    /* Who Is This For */
+    .audience-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 24px; }
+    @media (max-width: 860px) { .audience-grid { grid-template-columns: 1fr; } }
+    .aud-card {
+      background: #ffffff; border: 1px solid var(--line); border-radius: var(--radius); padding: 26px; box-shadow: var(--shadow-sm);
+    }
+    .aud-ico { font-size: 28px; margin-bottom: 12px; }
+    .aud-role { font-size: 17px; font-weight: 800; color: var(--ink); margin-bottom: 8px; }
+    .aud-pain { font-size: 13px; color: #b91c1c; line-height: 1.5; margin-bottom: 12px; background: #fef2f2; border-left: 3px solid #f87171; padding: 8px 12px; border-radius: 0 6px 6px 0; }
+    .aud-gain { font-size: 13.5px; color: #334155; line-height: 1.55; }
+
+    .not-for-box {
+      margin-top: 28px; background: #fff5f5; border: 1px dashed #fca5a5;
+      border-radius: 12px; padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;
+    }
+    .not-for-text { font-size: 14px; color: #7f1d1d; }
+    .not-for-text strong { color: #dc2626; }
+
+    /* Instructor */
+    .coach-card {
+      background: #ffffff; border: 1px solid var(--line); border-radius: var(--radius); padding: 36px;
+      display: grid; grid-template-columns: 120px 1fr; gap: 32px; align-items: center; box-shadow: var(--shadow-sm);
+    }
+    @media (max-width: 640px) { .coach-card { grid-template-columns: 1fr; text-align: center; } }
+    .coach-avatar {
+      width: 110px; height: 110px; border-radius: 50%; background: linear-gradient(135deg, #059669, #10b981);
+      display: flex; align-items: center; justify-content: center; font-size: 42px; font-weight: 900; color: #fff;
+      box-shadow: 0 6px 20px rgba(5, 150, 105, 0.25); margin: 0 auto;
+    }
+    .coach-name { font-size: 22px; font-weight: 800; color: var(--ink); margin-bottom: 4px; }
+    .coach-tag { font-size: 13.5px; color: var(--emerald); font-weight: 700; margin-bottom: 12px; }
+    .coach-desc { font-size: 14.5px; color: var(--muted); line-height: 1.7; margin-bottom: 16px; }
+    .coach-stats { display: flex; gap: 16px; flex-wrap: wrap; }
+    @media (max-width: 640px) { .coach-stats { justify-content: center; } }
+    .stat-pill { background: #f8fafc; padding: 6px 14px; border-radius: 8px; font-size: 12.5px; border: 1px solid var(--line); color: var(--muted); }
+    .stat-pill strong { color: var(--ink); }
+
+    /* FAQ */
+    .faq-list { display: flex; flex-direction: column; gap: 14px; margin-top: 24px; max-width: 900px; margin-left: auto; margin-right: auto; }
+    .faq-item {
+      background: #ffffff; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow-sm);
+    }
+    .faq-item summary {
+      padding: 18px 22px; font-size: 16px; font-weight: 700; color: var(--ink); cursor: pointer; list-style: none;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .faq-item summary::-webkit-details-marker { display: none; }
+    .faq-item summary::after { content: '+'; font-size: 20px; color: var(--emerald); font-weight: 800; transition: transform 0.2s; }
+    .faq-item[open] summary::after { content: '−'; }
+    .faq-ans { padding: 0 22px 20px; font-size: 14.5px; color: var(--muted); line-height: 1.7; border-top: 1px solid var(--line); padding-top: 14px; }
+    .faq-ans strong { color: var(--ink); }
+
+    /* Pricing & Booking */
+    .price-sec {
+      background: linear-gradient(180deg, var(--bg) 0%, #edf2f7 100%);
+      padding: 80px 0 100px; text-align: center;
+    }
+    .price-box {
+      background: #ffffff; border: 2px solid rgba(5, 150, 105, 0.4);
+      border-radius: 20px; padding: 44px 36px; max-width: 640px; margin: 0 auto; box-shadow: var(--shadow-lg);
+      position: relative;
+    }
+    .price-badge-top {
+      position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+      background: linear-gradient(135deg, #059669, #047857); color: #ffffff;
+      font-size: 12px; font-weight: 800; padding: 4px 18px; border-radius: 999px; text-transform: uppercase;
+      box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);
+    }
+    .price-main { font-size: 46px; font-weight: 900; color: var(--ink); font-family: var(--font-mono); margin: 16px 0 6px; }
+    .price-sub { font-size: 13.5px; color: var(--muted); margin-bottom: 24px; }
+    .price-features {
+      list-style: none; text-align: left; display: flex; flex-direction: column; gap: 12px; margin: 24px 0 32px;
+      padding: 20px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+      font-size: 14.5px; color: #475569;
+    }
+    .price-features li { display: flex; align-items: center; gap: 10px; }
+    .price-features li strong { color: var(--ink); }
+    .price-cta-btn {
+      width: 100%; display: block; background: linear-gradient(135deg, #059669, #047857);
+      color: #ffffff; font-size: 17px; font-weight: 800; padding: 16px; border-radius: 12px;
+      text-decoration: none; transition: all 0.2s; box-shadow: 0 4px 16px rgba(5, 150, 105, 0.28);
+    }
+    .price-cta-btn:hover { background: #047857; transform: translateY(-2px); }
+    .guarantee-note { margin-top: 16px; font-size: 13px; color: var(--emerald-dark); display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 600; }
+
+    /* Footer */
+    footer { border-top: 1px solid var(--line); padding: 40px 0; text-align: center; font-size: 13.5px; color: var(--muted); background: #ffffff; }
+    footer a { color: var(--ink); text-decoration: none; font-weight: 600; }
+    footer a:hover { color: var(--emerald); }
+  </style>
+</head>
+<body>
+
+  <!-- 顶部导航 -->
+  <header class="top-nav">
+    <div class="nav-inner">
+      <a href="/" class="brand-wrap">
+        <span class="brand-badge">实战营</span>
+        <span class="brand-title">冬瓜 AI 独立开发 · 48小时线下脱产实训</span>
+      </a>
+      <nav class="nav-links">
+        <a href="#why" class="nav-item">为什么线下</a>
+        <a href="#promises" class="nav-item">交付承诺</a>
+        <a href="#schedule" class="nav-item">48小时课程表</a>
+        <a href="#pricing" class="nav-item">开营与费用</a>
+        <a href="#faq" class="nav-item">答疑</a>
+        <a href="#pricing" class="nav-btn">立即预约席位</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- 首屏 Hero -->
+  <section class="hero">
+    <div class="container hero-content">
+      <div class="hero-pill">
+        <span>⚡ 线下脱产小班实训</span>
+        <span>·</span>
+        <span>首期限量 6~10 人</span>
+        <span>·</span>
+        <span>主讲+助教现场逐屏排雷</span>
+      </div>
+      <h1 class="hero-h1">
+        48 小时脱产实训：<br>
+        带你亲手把第一个产品<span class="hl">推上公网并收到钱</span>
+      </h1>
+      <p class="hero-desc">
+        不讲空洞理论，不背代码语法。两天周末时间，在现场手把手把你的业务认知打造成公网运行的软件。离开教室时，手机上必须有一个带绿色 HTTPS、带真实收款通道的真家伙。
+      </p>
+
+      <div class="hero-cta-box">
+        <a href="#pricing" class="btn-camp-primary">
+          <span>预约首期种子席位 (限量 10 人)</span>
+          <span>➔</span>
+        </a>
+        <a href="/#flow" class="btn-camp-secondary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+          <span>先看开源手册自学 (完全免费)</span>
+        </a>
+      </div>
+
+      <div class="trust-strip">
+        <div class="trust-item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          <span>保底交付：未上线全额退款保障</span>
+        </div>
+        <div class="trust-item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          <span>极小班制：主讲 + 助教逐个屏幕排查</span>
+        </div>
+        <div class="trust-item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          <span>真实收钱：微信支付 / 聚合免资质收款</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 为什么需要 48 小时线下营？（痛点反差） -->
+  <section class="sec sec-alt" id="why">
+    <div class="container">
+      <div class="text-center">
+        <span class="sec-tag">WHY OFFLINE CAMP</span>
+        <h2 class="sec-title">手册全部开源免费，为什么还要开设 48 小时线下营？</h2>
+        <p class="sec-desc">
+          写代码已经是一层窗户纸，真正的劝退陷阱在“最后一公里”。线上自学缺的不是教程，而是遇到冷僻报错时有人在现场 3 分钟帮你拍死。
+        </p>
+      </div>
+
+      <div class="why-grid">
+        <div class="why-card">
+          <span class="why-badge fail">线上独自摸索 · 容易陷入恶性循环</span>
+          <h3 class="why-h3">耗费数周时间，最终败给莫名其妙的报错</h3>
+          <ul class="why-list">
+            <li><span class="ico-x">✕</span> <div><strong>SSH 密钥与终端受阻</strong>：权限被拒、格式不对，卡在连接服务器第一步一整天。</div></li>
+            <li><span class="ico-x">✕</span> <div><strong>DNS 与反向代理崩溃</strong>：域名解析没生效、Nginx 报错 502 Bad Gateway，不知道找谁问。</div></li>
+            <li><span class="ico-x">✕</span> <div><strong>支付回调与跨域排查</strong>：沙盒签名失败、跨域 CORS 红字一片，AI 怎么改都报错。</div></li>
+            <li><span class="ico-x">✕</span> <div><strong>热情被反复消耗</strong>：从“跃跃欲试”到“彻底放弃”，半途而废在各种控制台设置里。</div></li>
+          </ul>
+        </div>
+
+        <div class="why-card highlight">
+          <span class="why-badge win">48 小时脱产实训 · 100% 确定性交付</span>
+          <h3 class="why-h3">周五带着想法来，周日傍晚拿着真家伙回家</h3>
+          <ul class="why-list">
+            <li><span class="ico-v">✓</span> <div><strong>现场肉眼排雷</strong>：主讲与助教站在你电脑后，把卡你 3 天的问题在 3 分钟内掐死。</div></li>
+            <li><span class="ico-v">✓</span> <div><strong>脱产高压沉浸</strong>：抛开日常琐事干扰，48 小时内把精力 100% 聚焦在你的核心业务闭环上。</div></li>
+            <li><span class="ico-v">✓</span> <div><strong>保底公网亮锁</strong>：不满足于 localhost 演示，结业时手机必须能访问你的公网域名（带 HTTPS）。</div></li>
+            <li><span class="ico-v">✓</span> <div><strong>终身同行社群</strong>：结识第一批认同一人公司理念的同行者，长期互助、切磋与流量支持。</div></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 两档交付承诺对照 -->
+  <section class="sec" id="promises">
+    <div class="container">
+      <div class="text-center">
+        <span class="sec-tag">DELIVERY COMMITMENT</span>
+        <h2 class="sec-title">清晰诚恳的交付承诺：我们绝不画虚妄的大饼</h2>
+        <p class="sec-desc">
+          我们不吹嘘“学完月入十万”，我们只承诺物理世界里确定的工程交付。根据你的课前准备进度，分为保底档与目标档。
+        </p>
+      </div>
+
+      <div class="promise-card">
+        <div class="promise-grid">
+          <div class="promise-col">
+            <span class="p-tier-badge base">保底档 · 人人必达 (对外签约宣传标准)</span>
+            <h3 class="promise-h3">周日结业时一定带走的交付物</h3>
+            <p class="promise-premise"><strong>前提条件：</strong>零基础、无任何营业执照、只要带笔记本电脑出席。</p>
+            <ul class="promise-items">
+              <li>
+                <span class="check-mark">✓</span>
+                <div><strong>公网域名与 HTTPS 绿锁</strong>：拥有属于自己的独立域名，公网任何人手机打开秒级访问。</div>
+              </li>
+              <li>
+                <span class="check-mark">✓</span>
+                <div><strong>完整闭环业务原型</strong>：大白话驱动 AI 生成的前后端，核心功能可用、测试数据完整呈现。</div>
+              </li>
+              <li>
+                <span class="check-mark">✓</span>
+                <div><strong>真实商业收款通道跑通</strong>：现场接入免资质第三方收款平台（或支付沙盒联调），现场真实扫码收到第一笔钱。</div>
+              </li>
+              <li>
+                <span class="check-mark">✓</span>
+                <div><strong>后续自主更新能力</strong>：掌握 Git 快照与模块化迭代法，后续改动再也不怕把代码改崩。</div>
+              </li>
+            </ul>
+          </div>
+
+          <div class="promise-col">
+            <span class="p-tier-badge target">目标档 · 资质齐全学员进阶</span>
+            <h3 class="promise-h3">开营前办妥资质可达成的上限</h3>
+            <p class="promise-premise"><strong>前提条件：</strong>开营前 3 周按准备清单办妥个体户执照、商户号与 ICP 备案。</p>
+            <ul class="promise-items">
+              <li>
+                <span class="check-mark">✓</span>
+                <div><strong>自有微信支付直连商户号</strong>：款项直接打入你的个人银行卡，0 中间商手续费。</div>
+              </li>
+              <li>
+                <span class="check-mark">✓</span>
+                <div><strong>国内合规服务器与备案域名</strong>：部署在国内云厂商高速服务器，国内访问超低延迟。</div>
+              </li>
+              <li>
+                <span class="check-mark">✓</span>
+                <div><strong>微信小程序现场提交官方审核</strong>：避开敏感类目卡审，周日下午现场完成提审，课后跟踪直至上线。</div>
+              </li>
+              <li>
+                <span class="check-mark">✓</span>
+                <div><strong>出海 Stripe 美元收款</strong>：出海形态学员现场跑通国际信用卡订阅与 Webhook 自动化。</div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 48 小时硬核交付课程表 -->
+  <section class="sec sec-alt" id="schedule">
+    <div class="container">
+      <div class="text-center">
+        <span class="sec-tag">SCHEDULE & TIMELINE</span>
+        <h2 class="sec-title">严密的 48 小时交付时间轴：每一步都有产出</h2>
+        <p class="sec-desc">
+          从开营前 21 天线上准备，到周末 2 天高密度脱产冲刺。我们把不可预测的软件工程切片成流水线式的确定动作。
+        </p>
+      </div>
+
+      <div class="timeline">
+        <!-- 课前准备 -->
+        <div class="time-card">
+          <div class="time-header-box">
+            <div class="time-phase">PRE-CAMP</div>
+            <div class="time-day-title">开营前 21 天起<br>资质与账号线上准备</div>
+            <span class="time-badge">线上跟进 · 助教一对一</span>
+          </div>
+          <div class="time-tasks">
+            <div class="task-row">
+              <div class="task-time">T-21 天</div>
+              <div class="task-body">
+                <strong>发放《资质与工具链准备清单》</strong>
+                <p>想走目标档的学员开始代办个体户执照、注册域名、提交国内 ICP 备案（备案一般需 1~2 周）。</p>
+              </div>
+            </div>
+            <div class="task-row">
+              <div class="task-time">T-14 天</div>
+              <div class="task-body">
+                <strong>申请微信商户号 / 小程序账号 & AI 工具订阅</strong>
+                <p>协助开通 Claude Code / Codex 等主力开发工具订阅，确保网络和环境顺畅可用。</p>
+              </div>
+            </div>
+            <div class="task-row">
+              <div class="task-time">T-7 天</div>
+              <div class="task-body">
+                <strong>线上 1 小时预备会议：需求切片</strong>
+                <p>助教一对一指导装好本地运行环境，确认每人写好一页纸「我要做什么 MVP」，避免现场发散。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Day 1 -->
+        <div class="time-card">
+          <div class="time-header-box">
+            <div class="time-phase">DAY 01 · 周六</div>
+            <div class="time-day-title">工具链对齐与<br>自然语言驱动开发</div>
+            <span class="time-badge">09:30 - 18:30 · 线下集训</span>
+          </div>
+          <div class="time-tasks">
+            <div class="task-row">
+              <div class="task-time">09:30 - 12:30</div>
+              <div class="task-body">
+                <strong>模块一：工具链对齐与极简 MVP 需求锁定</strong>
+                <p>检查环境就绪度，统一每人的 AI 智能体开发主链路；大刀阔斧做减法，砍掉非核心功能，锁定首版核心交付面。</p>
+              </div>
+            </div>
+            <div class="task-row">
+              <div class="task-time">12:30 - 14:00</div>
+              <div class="task-body">
+                <strong>商务午餐与学员需求破冰</strong>
+                <p>学员间深度交流各自行业背景与商业构想，主讲一对一给出形态与变现建议。</p>
+              </div>
+            </div>
+            <div class="task-row">
+              <div class="task-time">14:00 - 18:30</div>
+              <div class="task-body">
+                <strong>模块二：大白话驱动前后端生成与本地真机运行</strong>
+                <p>严禁手写底层代码！掌握“提需求 → 找底子 → 模块切片 → Git快照”的标准四步法。18:00 前所有人本地环境跑通真机页面。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Day 2 -->
+        <div class="time-card">
+          <div class="time-header-box">
+            <div class="time-phase">DAY 02 · 周日</div>
+            <div class="time-day-title">公网穿透部署与<br>支付合规商业上线</div>
+            <span class="time-badge">09:30 - 18:30 · 线下集训</span>
+          </div>
+          <div class="time-tasks">
+            <div class="task-row">
+              <div class="task-time">09:30 - 12:30</div>
+              <div class="task-body">
+                <strong>模块三：轻量云服务器穿透与 SSL 安全挂锁</strong>
+                <p>现场配置轻量云服务器、DNSPod 域名集中解析与反向代理，所有人手机上看到公网绿色小锁 HTTPS 正常访问。</p>
+              </div>
+            </div>
+            <div class="task-row">
+              <div class="task-time">14:00 - 17:00</div>
+              <div class="task-body">
+                <strong>模块四：商业收款通路接入与平台合规提审</strong>
+                <p>接微信支付/免资质商业收款，真机现场扫码验证；小程序项目现场核对类目提交审核，避开所有被拒大坑。</p>
+              </div>
+            </div>
+            <div class="task-row">
+              <div class="task-time">17:00 - 18:30</div>
+              <div class="task-body">
+                <strong>模块五：学员产品现场路演与结业证书颁发</strong>
+                <p>每位学员上台演示自己的公网产品，现场首笔扫码支付留念；加入冬瓜独立开发者终身校友群。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 适合谁 vs 劝退声明 -->
+  <section class="sec" id="audience">
+    <div class="container">
+      <div class="text-center">
+        <span class="sec-tag">AUDIENCE & FIT</span>
+        <h2 class="sec-title">严选生源：我们最适合与哪些伙伴同行？</h2>
+        <p class="sec-desc">
+          我们珍惜每一个席位，也尊重每一位学员的时间。确保我们互相契合，才能打出最好的交付结果。
+        </p>
+      </div>
+
+      <div class="audience-grid">
+        <div class="aud-card">
+          <div class="aud-ico">🧩</div>
+          <div class="aud-role">业务骨干 / 产品经理</div>
+          <div class="aud-pain">痛点：有想法只能画原型，研发说排期满了做不了，沟通反复失真。</div>
+          <div class="aud-gain">收获：亲手把方案做成能点的真实线上产品，拿着真实可用数据去说服老板或验证市场。</div>
+        </div>
+
+        <div class="aud-card">
+          <div class="aud-ico">🚀</div>
+          <div class="aud-role">创业者 / 个体老板</div>
+          <div class="aud-pain">痛点：外包报价动辄数万且拖延几个月，还不确定有没有人买单。</div>
+          <div class="aud-gain">收获：两天跑通极简可收费版本，在极低试错成本下验证真实用户的付费意愿。</div>
+        </div>
+
+        <div class="aud-card">
+          <div class="aud-ico">📣</div>
+          <div class="aud-role">非技术超级个体 / 自由职业者</div>
+          <div class="aud-pain">痛点：运营、设计想法丰富，想做个独立出海或副业工具，卡在不会写代码。</div>
+          <div class="aud-gain">收获：彻底捅破技术窗户纸，掌握终身受用的一人公司数字化交付手艺。</div>
+        </div>
+      </div>
+
+      <div class="not-for-box">
+        <div class="not-for-text">
+          <strong>🚫 明确劝退人群：</strong>
+          想深入学习底层语言与编译原理的学者、期望“学完立刻一夜暴富”的投机者、完全不想动脑只想找廉价外包代工的人。
+        </div>
+        <a href="/#flow" style="color: var(--emerald-dark); font-size: 13.5px; text-decoration: none; font-weight: 700; white-space: nowrap;">查看自学建议 ➔</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 主讲人背书 -->
+  <section class="sec sec-alt" id="coach">
+    <div class="container">
+      <div class="coach-card">
+        <div class="coach-avatar">冬</div>
+        <div>
+          <div class="coach-name">冬瓜</div>
+          <div class="coach-tag">非程序员的一人公司实践者 · AI 独立开发全栈排雷人</div>
+          <p class="coach-desc">
+            和你一样不是计算机科班出身，做过的每一个产品代码全都交由 AI 编写。经历过海外服务器被封、国内 ICP 备案反复驳回、小程序敏感类目卡审、Stripe 支付沙盒联调等所有痛点。<br>
+            不讲空泛理论，只做亲手把产品推到公网上收钱的排雷人。
+          </p>
+          <div class="coach-stats">
+            <div class="stat-pill">底层代码：<strong>0 行手写</strong></div>
+            <div class="stat-pill">公网运行产品：<strong>5+ 款真机交付</strong></div>
+            <div class="stat-pill">指导理念：<strong>开源免费，实训卖确定性</strong></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 常见答疑 FAQ -->
+  <section class="sec" id="faq">
+    <div class="container">
+      <div class="text-center">
+        <span class="sec-tag">FAQ</span>
+        <h2 class="sec-title">学员常见问题解答</h2>
+        <p class="sec-desc">关于门槛、设备、收款与售后支持的坦诚回答</p>
+      </div>
+
+      <div class="faq-list">
+        <details class="faq-item" open>
+          <summary>我真的完全零代码基础、连终端都没打开过，真能做出来吗？</summary>
+          <div class="faq-ans">
+            <strong>100% 可以。</strong> 如今写代码的活已经完全由 Claude Code、Codex 等 AI 智能体代劳。你在现场的核心任务是<strong>“业务梳理与验收”</strong>：用大白话把需求拆细、按标准步骤驱动 AI、在真机上点按验收。现场主讲和助教会随时站在你旁边指导终端输入，抹平任何工具陌生感。
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>我没有营业执照，周日现场能真实收到钱吗？</summary>
+          <div class="faq-ans">
+            <strong>完全可以。</strong> 我们为你准备了成熟的个人免资质收款方案（如小报童、第三方聚合结算或沙盒演示通道）。一人公司起步期最关键的是验证“有人愿意为此付费”，而不是为了收 20 块钱先花一个月去办对公账户。等你业务月流水稳定后，再按指南升级为正式企业商户。
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>如果现场两天因为特殊原因没做出来，怎么办？</summary>
+          <div class="faq-ans">
+            <strong>有兜底保障。</strong> 只要你按照课前要求准时出席并参与全部环节，如果在周日傍晚依然未能达成「保底交付标准」（公网 HTTPS 访问 + 基础收款/沙盒闭环），你可以<strong>免费复训下一期，或选择全额无条件退款</strong>。我们用 100% 的确定性对你的信任负责。
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>实训营结束后，产品需要更新维护怎么办？</summary>
+          <div class="faq-ans">
+            <strong>包含 30 天线上答疑与终身校友群支持。</strong> 在实训营中我们会重点传授“Git 版本快照习惯”与“微模块切片法”，教你自己怎么在家里指挥 AI 继续迭代而不崩盘。遇到卡点随时在校友群与答疑通道中提问。
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>需要携带什么设备出席？</summary>
+          <div class="faq-ans">
+            自备一台日常笔记本电脑（Mac 或 Windows 均可，建议内存 8G 以上，系统版本尽量更新）。现场会提供高速稳定 Wi-Fi、电源插座及午餐咖啡。
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- 定价与报名席位预约 -->
+  <section class="price-sec" id="pricing">
+    <div class="container">
+      <div class="price-box">
+        <span class="price-badge-top">第 01 期 · 种子学员内测营</span>
+        <h2 style="font-size: 24px; font-weight: 800; color: var(--ink); margin-top: 10px;">48 小时脱产实训交付席位</h2>
+        <div class="price-main">¥ 待定 <span style="font-size: 16px; color: var(--muted); font-weight: normal;">/ 位 (首期种子特惠)</span></div>
+        <div class="price-sub">本期仅开放 6~10 个极小班席位 · 按报名审核顺序锁定</div>
+
+        <ul class="price-features">
+          <li><span class="check-mark">✓</span> <div><strong>周末 2 天全天脱产高强度实操</strong>（含双日商务午餐与茶歇）</div></li>
+          <li><span class="check-mark">✓</span> <div><strong>主讲冬瓜 + 专职助教全场驻点</strong>（平均 1 位老师指导 3~4 人）</div></li>
+          <li><span class="check-mark">✓</span> <div><strong>T-21 天课前一对一资质与账号筹备指导</strong></div></li>
+          <li><span class="check-mark">✓</span> <div><strong>结业保底达成公网独立域名 + HTTPS + 商业收款闭环</strong></div></li>
+          <li><span class="check-mark">✓</span> <div><strong>课后 30 天深度项目答疑与冬瓜一人公司终身校友会</strong></div></li>
+        </ul>
+
+        <a href="#" class="price-cta-btn" onclick="alert('首期种子营席位正在进行生源匹配。请加冬瓜微信沟通需求与开营时间：备注【48小时实训】'); return false;">
+          加冬瓜微信 · 预约首期席位 ➔
+        </a>
+
+        <div class="guarantee-note">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          <span>保底交付承诺：未达到保底交付标准支持全额退款</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 页脚 -->
+  <footer>
+    <div class="container">
+      <p style="margin-bottom: 8px; font-weight: 600; color: var(--ink);">冬瓜 AI 独立开发实战站 · 一人公司上线全流程</p>
+      <p style="color: var(--muted);">开源手册自学完全免费 · 实战营提供 100% 确定性线下交付</p>
+    </div>
+  </footer>
+
+</body>
+</html>

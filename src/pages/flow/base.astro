@@ -1,0 +1,228 @@
+---
+// 第 2 步 · base：/flow/base/。版式、侧栏、目录、上一步下一步都在 PillarLayout 里，这里只写正文。
+import PillarLayout from '../../layouts/PillarLayout.astro';
+
+const toc = [
+  {"id": "sec-header-conclusion", "label": "先说结论", "kind": "conclusion"},
+  {"id": "sec-part1", "label": "核心决断表", "num": "01"},
+  {"id": "sec-part2", "label": "如果选“二开”", "num": "02"},
+  {"id": "sec-part3", "label": "如果选“从零写”", "num": "03"},
+  {"id": "sec-part4", "label": "总结", "num": "04"},
+  {"id": "sec-faq", "label": "常见问题 FAQ", "kind": "faq"},
+];
+---
+
+<PillarLayout
+  slug="base"
+  title="第2步：搞定原型后，到底该让 AI 从零手搓代码，还是找开源项目“二次开发”？"
+  description="业务逻辑极度个性、核心流程不超过 3 步的创新小工具，坚决让 AI 从零手搓，死锁极简技术栈；涉及成熟重型业务（如带微信支付与分销的多商户电商、复杂论坛社区），坚决选活跃开源项目二次开发。二开必须牢记「三不原则」：不改核心源码、不用冷门小众"
+  toc={toc}
+>
+      <!-- 顶部 Hero 卡片 -->
+      <header class="header-card" id="sec-header-conclusion">
+        <div class="header-meta-row">
+          <div class="header-pill-group">
+            <span class="phase-pill-dark">一人公司实战体系</span>
+            <span class="step-pill-emerald">第 2 步 · 选底子：二开还是从零写</span>
+          </div>
+          <span class="header-status-indicator">
+            <span class="status-dot-pulse"></span>
+            <span>核心交付：锁定技术栈底座，严防工程返工暴毙</span>
+          </span>
+        </div>
+
+        <h1 class="header-main-h1">
+          搞定原型后，到底该让 AI 从零手搓代码，还是找开源项目<span class="hl">“二次开发”</span>？
+        </h1>
+
+        <!-- 先说结论 -->
+        <div class="header-conclusion-inner">
+          <div class="hci-badge-pill">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+            </svg>
+            <span>先说结论 · KEY TAKEAWAY</span>
+          </div>
+          <p class="hci-text">
+            <strong>业务逻辑极度个性、核心流程不超过 3 步的创新小工具，坚决让 AI 从零手搓，死锁极简技术栈；涉及成熟重型业务（如带微信支付与分销的多商户电商、复杂论坛社区），坚决选活跃开源项目二次开发。</strong>二开必须牢记「三不原则」：不改核心源码、不用冷门小众框架、不贪图大而全的全套功能。
+          </p>
+        </div>
+
+        <!-- 核心三栏指标 (SEO / GEO 结构化信息) -->
+        <div class="header-meta-grid">
+          <div class="meta-tag-card">
+            <div class="meta-tag-icon-box">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+            </div>
+            <div class="meta-tag-content">
+              <span class="meta-tag-label">核心动作:</span>
+              <span>对号入座决断表 + 锁定极简底座</span>
+            </div>
+          </div>
+          <div class="meta-tag-card">
+            <div class="meta-tag-icon-box">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            </div>
+            <div class="meta-tag-content">
+              <span class="meta-tag-label">交付用时:</span>
+              <span>1 天决策与摸底</span>
+            </div>
+          </div>
+          <div class="meta-tag-card">
+            <div class="meta-tag-icon-box">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+            </div>
+            <div class="meta-tag-content">
+              <span class="meta-tag-label">阶段产物:</span>
+              <span>确定项目基线（开源二开或零起框架）</span>
+            </div>
+          </div>
+        </div>
+      </header>
+      <article class="main-article-card">
+        
+      <!-- 导言 方案 A -->
+      <div class="lead-box">
+        <div class="lead-warning-tag">
+          <span>⚠️</span>
+          <span>新手最易踩的坑</span>
+        </div>
+        <p>搞定交互原型之后，很多新手往往凭直觉二选一：要么觉得“改别人代码丢人，必须让 AI 从零全写出来”，要么觉得“开源项目功能越多越划算，直接找个全套系统改”。</p>
+        <p><strong>这两种想法都是新手的“催命符”。</strong></p>
+        <p>到底该从零手搓还是找开源二开？答案不是非黑即白，而是取决于你的<strong>业务形态</strong>和<strong>技术负债成本</strong>。请按照以下决策框架来判断并执行：</p>
+      </div>
+        
+      <!-- Section 1 -->
+      <section class="step-card-wrap" id="sec-part1">
+        <div class="card-top-tag">
+          <h2 class="step-heading-h2">一、 核心决断表：按业务形态“对号入座”</h2>
+        </div>
+        <div class="step-inner-content">
+<div style="overflow-x:auto;margin:18px 0;"><table style="width:100%;border-collapse:collapse;font-size:13.5px;background:#ffffff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">
+  <tr style="font-weight:750;color:#0f172a;"><th style="padding:11px 16px;text-align:left;border:1px solid #e2e8f0;background:#f8fafc;">项目类型</th><th style="padding:11px 16px;text-align:left;border:1px solid #e2e8f0;background:#f8fafc;">推荐路线</th><th style="padding:11px 16px;text-align:left;border:1px solid #e2e8f0;background:#f8fafc;">为什么这么选？</th></tr>
+  <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:10px 16px;color:#334155;border:1px solid #e2e8f0;"><strong>常见成熟业务</strong><br>（商城、博客、预约挂号、多角色后台管理、表单提交）</td><td style="padding:10px 16px;color:#334155;border:1px solid #e2e8f0;"><strong>优先二开</strong></td><td style="padding:10px 16px;color:#334155;border:1px solid #e2e8f0;">别人已经写过十万遍了。用户系统、权限控制、状态流转全都有，从零手搓等于拿砖头重新造轮子，浪费时间且漏洞百出。</td></tr>
+  <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:10px 16px;color:#334155;border:1px solid #e2e8f0;"><strong>轻量垂直小工具</strong><br>（提词器、格式转换器、特定计算器、AI 单功能应用）</td><td style="padding:10px 16px;color:#334155;border:1px solid #e2e8f0;"><strong>从零手搓</strong></td><td style="padding:10px 16px;color:#334155;border:1px solid #e2e8f0;">逻辑极度聚焦，代码量在几百到一千行以内。如果硬套开源后台，80% 的代码都用不上，改造它比重新写还痛苦。</td></tr>
+  <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:10px 16px;color:#334155;border:1px solid #e2e8f0;"><strong>高度独特的创新流程</strong><br>（市面上压根找不到类似业务流程的新产品）</td><td style="padding:10px 16px;color:#334155;border:1px solid #e2e8f0;"><strong>从零手搓</strong></td><td style="padding:10px 16px;color:#334155;border:1px solid #e2e8f0;">开源项目往往把业务逻辑写死了，强行“削足适履”去改它的数据库和流程，改到最后整个系统都会崩溃。</td></tr>
+</table></div>
+<p><strong>实操提问法</strong>：在第 1 步的对话中把你的原型发给 AI，直接问它：</p>
+<div class="prompt-terminal-box">
+  <div class="ptb-header">
+    <span>实操 Prompt（可直接复制）：</span>
+    <button class="ptb-copy-btn" onclick="navigator.clipboard.writeText(this.closest('.prompt-terminal-box').querySelector('.ptb-code').innerText); this.innerText='已复制！'; setTimeout(()=>this.innerText='复制', 2000);">复制</button>
+  </div>
+  <div class="ptb-code">“根据我们刚才跑通的原型，要把它做成真实产品，你建议是用 GitHub 开源项目二开，还是从零手搓？请用大白话告诉我理由，不要写代码。”</div>
+</div>
+<p><strong>让 AI 给专业建议，但由你对照上表最终拍板。</strong></p>
+        </div>
+      </section>
+      <!-- Section 2 -->
+      <section class="step-card-wrap" id="sec-part2">
+        <div class="card-top-tag">
+          <h2 class="step-heading-h2">二、 如果选“二开”：新手防暴毙的「三不原则」</h2>
+        </div>
+        <div class="step-inner-content">
+<p>很多新手二开死在第一天，不是因为代码不会写，而是因为项目太重，光配环境就报了 80 个错，心态当场爆炸。必须锁死这三条红线：</p>
+<ol class="num-list-custom">
+  <li><strong>宁选“小而美”，绝不碰“全家桶”</strong>
+<ul class="bullet-list-custom">
+  <li><strong>大坑</strong>：看到 GitHub 上几万 Star 的“企业级微服务电商中台”，后台、分销、积分、数据大屏应有尽有。新手碰这个必死无疑！</li>
+  <li><strong>正解</strong>：找几百到一两千 Star、只实现你核心功能的最简项目。<strong>功能越少，配置项越少，AI 读得懂，你改得动。</strong></li>
+</ul></li>
+  <li><strong>看活跃度与“傻瓜程度”</strong>
+<ul class="bullet-list-custom">
+  <li>优先选半年内有更新的项目；</li>
+  <li>文档里必须有清晰的“Quick Start”，最好三行命令（<code>npm install && npm run dev</code> 或 <code>docker compose up</code>）就能在本地跑起来。</li>
+</ul></li>
+  <li><strong>果断止损法则（2 小时定律）</strong>
+<ul class="bullet-list-custom">
+  <li>如果拉下代码后，在 AI 的帮助下折腾报错超过 <strong>2 小时</strong> 依然跑不通本地界面，<strong>立刻放弃换下一个项目</strong>，绝对不要死磕！</li>
+</ul></li>
+</ol>
+        </div>
+      </section>
+      <!-- Section 3 -->
+      <section class="step-card-wrap" id="sec-part3">
+        <div class="card-top-tag">
+          <h2 class="step-heading-h2">三、 如果选“从零写”：用「极简主义」锁死 AI</h2>
+        </div>
+        <div class="step-inner-content">
+<p>AI 有个致命毛病：你让它从零写个待办清单，它能热心地给你设计一套“Spring Cloud + Redis + JWT 鉴权 + 消息队列”的航母级架构。</p>
+<p>如果你决定从零手搓，必须给 AI 套上“紧箍咒”：</p>
+<ol class="num-list-custom">
+  <li><strong>禁止“全栈幻想症”</strong>
+<ul class="bullet-list-custom">
+  <li><strong>严禁</strong>一上来就做账号注册、权限体系、支付系统和复杂数据库。只实现第一步验证好的单点闭环。</li>
+</ul></li>
+  <li><strong>逼 AI 使用最轻量、依赖最少的技术栈</strong>
+<ul class="bullet-list-custom">
+  <li><strong>能用单文件搞定的，绝不建复杂目录</strong>：优先纯 HTML + Tailwind CSS + 原生 JS；</li>
+  <li><strong>需要后端的，选最轻量解法</strong>：比如用 Python 的 FastAPI 或轻量 Node.js，或者直接调用第三方 BaaS（如 Supabase），杜绝笨重的企业级脚手架。</li>
+</ul></li>
+</ol>
+<div class="prompt-terminal-box">
+  <div class="ptb-header">
+    <span>实操约束 Prompt（从零手搓时必发）：</span>
+    <button class="ptb-copy-btn" onclick="navigator.clipboard.writeText(this.closest('.prompt-terminal-box').querySelector('.ptb-code').innerText); this.innerText='已复制！'; setTimeout(()=>this.innerText='复制', 2000);">复制</button>
+  </div>
+  <div class="ptb-code">“我决定从零开始写。请为我制定一份最简技术方案。要求：1. 技术栈必须极其轻量、依赖越少越好；2. 严禁过度设计微服务和复杂鉴权；3. 只围绕我们第一步的原型核心功能展开，列出技术选型清单并说明理由。”</div>
+</div>
+        </div>
+      </section>
+      <!-- Section 4 -->
+      <section class="step-card-wrap" id="sec-part4">
+        <div class="card-top-tag">
+          <h2 class="step-heading-h2">总结：请把这句话刻在屏幕前</h2>
+        </div>
+        <div class="step-inner-content">
+<div class="quote-callout"><strong>“代码不是你的资产，而是你未来的维护负债。”</strong></div>
+<ul class="bullet-list-custom">
+  <li>AI 写的代码越多，上下文遗忘越严重，后面改一个 Bug 就会引发三个新 Bug；</li>
+  <li><strong>能站在别人经过充分测试的轻量开源地基上，绝不自己烧砖；如果必须自己搭，就只搭一间够住的草庐，绝不提前盖摩天大楼。</strong></li>
+</ul>
+<p>在不动一行正式业务代码前，在对话框里先把“底子”挑轻、挑准，你的项目就已经成功了一半。</p>
+        </div>
+      </section>
+        
+        
+      <!-- 常见问题答疑 FAQ -->
+      <section class="faq-section-wrap" id="sec-faq">
+        <h2 class="faq-heading-h2">第 2 步常见问题答疑</h2>
+        
+        <details class="faq-accordion-item" open>
+          <summary>我的点子既有商城那种成熟业务，又有一个独特的新功能，到底该二开还是从零写？</summary>
+          <div class="faq-accordion-body">
+            按「主体业务」判断。如果 80% 的功能是别人做过十万遍的用户、订单、支付、后台，就先找一个<strong>小而美的开源项目二开</strong>，再让 AI 在它的插件或扩展层上加你那个独特功能；如果独特功能本身就是产品的全部，其他只是陪衬，那就从零手搓，把陪衬功能全部砍掉或弹窗占位。
+          </div>
+        </details>
+        
+        <details class="faq-accordion-item">
+          <summary>GitHub 上几万 Star 的项目看起来功能全又靠谱，为什么反而不推荐新手碰？</summary>
+          <div class="faq-accordion-body">
+            Star 多说明做它的人多，不代表你改得动。几万 Star 的「企业级中台」往往几十个模块、上百个配置项，光把本地环境跑起来就可能报几十个错，AI 读不完整个仓库，你也看不懂它改了哪。<strong>优先选几百到一两千 Star、只做你核心功能、半年内有更新、文档里三行命令就能跑起来的项目。</strong>
+          </div>
+        </details>
+        
+        <details class="faq-accordion-item">
+          <summary>开源项目拉下来跑不起来，报错改了一堆还是不行，该坚持还是换？</summary>
+          <div class="faq-accordion-body">
+            执行「2 小时定律」：在 AI 帮助下折腾超过 <strong>2 小时</strong>仍跑不通本地界面，立刻放弃换下一个候选项目。跑不起来通常是项目本身太重或依赖过旧，不是你的问题，死磕只会把第一天的热情全耗光。
+          </div>
+        </details>
+        
+        <details class="faq-accordion-item">
+          <summary>让 AI 从零写，它给我设计了数据库、鉴权、消息队列一整套架构，要不要照做？</summary>
+          <div class="faq-accordion-body">
+            不要。AI 的通病是「全栈幻想症」，你让它写个待办清单它也能给你上微服务。先发文中那段「实操约束 Prompt」，要求技术栈极简、依赖最少、严禁账号权限支付系统；能用单文件 HTML 搞定就不建目录，需要后端就选 FastAPI、轻量 Node 或 Supabase 这类现成服务。<strong>你是产品经理，它给选项，你负责砍。</strong>
+          </div>
+        </details>
+        
+        <details class="faq-accordion-item">
+          <summary>二开别人的项目，能直接改它的核心源码吗？以后升级怎么办？</summary>
+          <div class="faq-accordion-body">
+            牢记「三不原则」里的第一条：<strong>不改核心源码</strong>。你的改动尽量放在配置、主题、插件或新建的独立模块里，原项目的代码保持原样。这样原项目发新版时还能跟着升级修漏洞，AI 也更容易分清哪些是你写的、哪些是别人的，排错时不会把整个系统改崩。
+          </div>
+        </details>
+      </section>
+        
+      </article>
+</PillarLayout>

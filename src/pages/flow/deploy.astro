@@ -1,0 +1,266 @@
+---
+// 第 5 步 · deploy：/flow/deploy/。版式、侧栏、目录、上一步下一步都在 PillarLayout 里，这里只写正文。
+import PillarLayout from '../../layouts/PillarLayout.astro';
+
+const toc = [
+  {"id": "sec-header-conclusion", "label": "先说结论", "kind": "conclusion"},
+  {"id": "sec-part1", "label": "第一步", "num": "01"},
+  {"id": "sec-part2", "label": "第二步", "num": "02"},
+  {"id": "sec-part3", "label": "第三步", "num": "03"},
+  {"id": "sec-part4", "label": "第四步", "num": "04"},
+  {"id": "sec-warning", "label": "避坑红线备忘", "kind": "warn"},
+  {"id": "sec-faq", "label": "常见问题 FAQ", "kind": "faq"},
+];
+---
+
+<PillarLayout
+  slug="deploy"
+  title="第5步：开发完了怎么上线？不用装宝塔、不用记命令，如何让 AI 替你把网站搬上云服务器？"
+  description="彻底摒弃沉重且易留漏洞的可视化面板。轻量应用服务器优先，借助 SSH 密钥建立免密安全通道；把云服务器的终端权限以只读或受限方式交由 AI CLI 自动化搭建 Docker/Nginx 运行环境。部署完成后立即断开 Wi-Fi 用手机 4G"
+  toc={toc}
+>
+      <!-- 顶部 Hero 卡片 -->
+      <header class="header-card" id="sec-header-conclusion">
+        <div class="header-meta-row">
+          <div class="header-pill-group">
+            <span class="phase-pill-dark">一人公司实战体系</span>
+            <span class="step-pill-emerald">第 5 步 · 免装宝塔上云服务器</span>
+          </div>
+          <span class="header-status-indicator">
+            <span class="status-dot-pulse"></span>
+            <span>核心交付：公网 IP 直连访问，无面板纯净生产底座</span>
+          </span>
+        </div>
+
+        <h1 class="header-main-h1">
+          开发完了怎么上线？不用装宝塔、不用记命令，如何让 AI 替你把网站<span class="hl">搬上云服务器</span>？
+        </h1>
+
+        <!-- 先说结论 -->
+        <div class="header-conclusion-inner">
+          <div class="hci-badge-pill">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+            </svg>
+            <span>先说结论 · KEY TAKEAWAY</span>
+          </div>
+          <p class="hci-text">
+            <strong>彻底摒弃沉重且易留漏洞的可视化面板。</strong>轻量应用服务器优先，借助 SSH 密钥建立免密安全通道；把云服务器的终端权限以只读或受限方式交由 AI CLI 自动化搭建 Docker/Nginx 运行环境。部署完成后立即断开 Wi-Fi 用手机 4G/5G 真机回访验收，让 AI 一键输出资产清单备忘录。
+          </p>
+        </div>
+
+        <!-- 核心三栏指标 (SEO / GEO 结构化信息) -->
+        <div class="header-meta-grid">
+          <div class="meta-tag-card">
+            <div class="meta-tag-icon-box">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+            </div>
+            <div class="meta-tag-content">
+              <span class="meta-tag-label">核心动作:</span>
+              <span>SSH密钥免密绑定 + AI无面板脚本化部署</span>
+            </div>
+          </div>
+          <div class="meta-tag-card">
+            <div class="meta-tag-icon-box">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            </div>
+            <div class="meta-tag-content">
+              <span class="meta-tag-label">交付用时:</span>
+              <span>1 天之内</span>
+            </div>
+          </div>
+          <div class="meta-tag-card">
+            <div class="meta-tag-icon-box">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+            </div>
+            <div class="meta-tag-content">
+              <span class="meta-tag-label">阶段产物:</span>
+              <span>公网 IP 可正常访问的云端生产服务</span>
+            </div>
+          </div>
+        </div>
+      </header>
+      <article class="main-article-card">
+        
+      <!-- 导言 方案 A -->
+      <div class="lead-box">
+        <div class="lead-warning-tag">
+          <span>⚠️</span>
+          <span>新手最易踩的坑</span>
+        </div>
+        <p>在 AI 辅助开发的时代，把本地跑通的项目搬上云服务器，核心逻辑已不再是“背诵 Linux 命令”或“依赖宝塔这类可视化面板”，而是建立一套<strong>「人管安全底线与验收，AI 负责命令行实操」</strong>的人机协同模式。</p>
+        <p>只需做好以下 4 个阶段的分工与配合，就能安全、干净地让 AI 帮你完成全套部署：</p>
+      </div>
+        
+      <!-- Section 1 -->
+      <section class="step-card-wrap" id="sec-part1">
+        <div class="card-top-tag">
+          <h2 class="step-heading-h2">第一步：先辨需求再选机（AI 出方案，你来掏钱）</h2>
+        </div>
+        <div class="step-inner-content">
+<p>很多初学者第一反应就是花钱买服务器，其实不一定需要：</p>
+<ol class="num-list-custom">
+  <li><strong>先问 AI 判断必要性：</strong>
+<ul class="bullet-list-custom">
+  <li>如果只是<strong>纯前端静态页</strong>（个人主页、产品介绍、活动展示），直接让 AI 推荐并部署到 <strong>Vercel / Cloudflare Pages / GitHub Pages 等免费托管平台</strong>，一分钱不用花，免去服务器维护烦恼。</li>
+  <li>如果涉及<strong>后端 API、数据库存储</strong>或主要面对<strong>国内网络访问</strong>，才需要买云服务器。</li>
+</ul></li>
+  <li><strong>新手买机选型原则（你来操作）：</strong>
+<ul class="bullet-list-custom">
+  <li><strong>产品类型</strong>：选云厂商的「轻量应用服务器」（比传统 ECS 简单轻量，自带基础防护）。</li>
+  <li><strong>配置规格</strong>：初版选 <strong>2核 2G 内存</strong> 即可，操作系统统一选 <strong>Ubuntu LTS</strong>（社区生态最广，AI 最熟悉、排错能力最强）。</li>
+  <li><strong>避坑提示</strong>：看清续费价格，选择固定带宽包，尽量避开按超额流量计费的套餐。</li>
+</ul></li>
+</ol>
+        </div>
+      </section>
+      <!-- Section 2 -->
+      <section class="step-card-wrap" id="sec-part2">
+        <div class="card-top-tag">
+          <h2 class="step-heading-h2">第二步：配一把安全钥匙，彻底告别密码（AI 生成，你进后台绑定）</h2>
+        </div>
+        <div class="step-inner-content">
+<p>让 AI 操作服务器，绝不能把 root 密码或云厂商登录账号发给 AI。最安全的方案是 <strong>SSH 密钥对</strong>：</p>
+<ol class="num-list-custom">
+  <li><strong>指挥本地 AI 生成钥匙：</strong>
+<div class="prompt-terminal-box">
+  <div class="ptb-header">
+    <span>你可以对本地 AI 说：</span>
+    <button class="ptb-copy-btn" onclick="navigator.clipboard.writeText(this.closest('.prompt-terminal-box').querySelector('.ptb-code').innerText); this.innerText='已复制！'; setTimeout(()=>this.innerText='复制', 2000);">复制</button>
+  </div>
+  <div class="ptb-code">“我要用 SSH 密钥登录新买的 Ubuntu 服务器，不使用密码。帮我在当前电脑生成一对 SSH 密钥（已有则别覆盖），把公钥文本完整发我，私钥妥善保存在本地，不要打印出来。”</div>
+</div></li>
+  <li><strong>你去控制台“挂锁”：</strong>
+<ul class="bullet-list-custom">
+  <li>打开云服务器控制台，进入「密钥对」管理页面，点击导入已有公钥并粘贴。</li>
+  <li>将该密钥对绑定到你的服务器实例并<strong>重启服务器</strong>。</li>
+  <li>绑定后，服务器只认这把钥匙，关闭传统的密码暴力破解漏洞。</li>
+</ul></li>
+</ol>
+        </div>
+      </section>
+      <!-- Section 3 -->
+      <section class="step-card-wrap" id="sec-part3">
+        <div class="card-top-tag">
+          <h2 class="step-heading-h2">第三步：SSH 远程接管，无面板纯净部署（交给 AI 实操）</h2>
+        </div>
+        <div class="step-inner-content">
+<p>无需安装宝塔等占用 200MB+ 内存的臃肿面板，直接让 AI 借助本地工具（如 Claude Code、Codex、Cursor、终端 Agent 等）通过 SSH 登入系统：</p>
+<ol class="num-list-custom">
+  <li><strong>先查探、再动手（先看后做）：</strong>
+<div class="prompt-terminal-box">
+  <div class="ptb-header">
+    <span>你可以对 AI 说：</span>
+    <button class="ptb-copy-btn" onclick="navigator.clipboard.writeText(this.closest('.prompt-terminal-box').querySelector('.ptb-code').innerText); this.innerText='已复制！'; setTimeout(()=>this.innerText='复制', 2000);">复制</button>
+  </div>
+  <div class="ptb-code">“我已经绑定了公钥，服务器公网 IP 是 [你的服务器IP]。请用生成的私钥 SSH 登录 root 账号，先只做检查，不要修改任何文件：告诉我当前系统环境装了什么、还缺什么依赖才能跑起我的项目。”</div>
+</div></li>
+  <li><strong>指挥 AI 自动化部署与反向代理：</strong>
+<div class="prompt-terminal-box">
+  <div class="ptb-header">
+    <span>确认环境后对 AI 说：</span>
+    <button class="ptb-copy-btn" onclick="navigator.clipboard.writeText(this.closest('.prompt-terminal-box').querySelector('.ptb-code').innerText); this.innerText='已复制！'; setTimeout(()=>this.innerText='复制', 2000);">复制</button>
+  </div>
+  <div class="ptb-code">“把本地 [项目目录] 部署到这台服务器，让外部能通过 http://[服务器IP] 访问。要求：
+1. 用 Nginx 做反代；
+2. 配置 PM2/Systemd 守护进程，支持开机自启和崩溃自愈；
+3. 每步操作前告知我目的，做完告诉我如何验证。”</div>
+</div></li>
+  <li><strong>你唯一需要动手的控制台操作（端口放行）：</strong>
+<ul class="bullet-list-custom">
+  <li>AI 如果提示需要外部网络访问权限，去云控制台的「防火墙 / 安全组」中精准放行对应的端口（如最基础的 <code>80</code> 和 <code>443</code> 端口），<strong>切忌为图省事一键关闭防火墙或放行所有端口</strong>。</li>
+</ul></li>
+</ol>
+        </div>
+      </section>
+      <!-- Section 4 -->
+      <section class="step-card-wrap" id="sec-part4">
+        <div class="card-top-tag">
+          <h2 class="step-heading-h2">第四步：断开 Wi-Fi 真机验收，沉淀运维资产（你来验收，AI 归档）</h2>
+        </div>
+        <div class="step-inner-content">
+<p>部署完后不能在本地电脑自嗨，必须做跨网实测：</p>
+<ol class="num-list-custom">
+  <li><strong>真机断网验收：</strong>
+<ul class="bullet-list-custom">
+  <li>拿手机<strong>关掉家中/公司的 Wi-Fi，切换为移动数据流量</strong>。</li>
+  <li>在手机浏览器输入 <code>http://[服务器IP]</code>。只要能打开并顺畅完成注册、提交、刷新（数据不丢失），说明公网和后端全部通畅。</li>
+</ul></li>
+  <li><strong>抗灾耐受测试：</strong>
+<ul class="bullet-list-custom">
+  <li>让 AI 执行一次服务器重启命令，等待 2-3 分钟，再看手机端能否自愈并恢复访问。</li>
+</ul></li>
+  <li><strong>沉淀大白话文档：</strong>
+<div class="prompt-terminal-box">
+  <div class="ptb-header">
+    <span>验收无误后让 AI 归档：</span>
+    <button class="ptb-copy-btn" onclick="navigator.clipboard.writeText(this.closest('.prompt-terminal-box').querySelector('.ptb-code').innerText); this.innerText='已复制！'; setTimeout(()=>this.innerText='复制', 2000);">复制</button>
+  </div>
+  <div class="ptb-code">“把你刚才执行过的所有配置、安装路径和部署命令，整理成一份大白话的《部署说明.md》存入项目根目录，以便后续更新迭代对照，并为当前状态做一次 Git Commit。”</div>
+</div></li>
+</ol>
+        </div>
+      </section>
+        
+      <!-- 避坑红线 -->
+      <section class="danger-summary-box" id="sec-warning">
+        <div class="danger-header">
+          <span class="danger-badge-icon">🚫</span>
+          <h2 class="danger-title">千万不要这么做：本步骤必须守住的避坑红线</h2>
+        </div>
+        <div>
+          
+        <div style="margin-bottom:14px;">
+          <h3 style="font-size:15px;font-weight:750;color:#9a3412;margin-bottom:8px;">💡 核心避坑红线</h3>
+          <div><div style="overflow-x:auto;margin:18px 0;"><table style="width:100%;border-collapse:collapse;font-size:13.5px;background:#ffffff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">
+  <tr style="font-weight:750;color:#0f172a;"><th style="padding:11px 16px;text-align:left;border:1px solid #e2e8f0;background:#f8fafc;">场景</th><th style="padding:11px 16px;text-align:left;border:1px solid #e2e8f0;background:#f8fafc;">错误做法</th><th style="padding:11px 16px;text-align:left;border:1px solid #e2e8f0;background:#f8fafc;">正确做法</th></tr>
+  <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:10px 16px;color:#334155;border:1px solid #e2e8f0;"><strong>云账号安全</strong></td><td style="padding:10px 16px;color:#334155;border:1px solid #e2e8f0;">把云厂商账号/主密码/私钥发进对话框</td><td style="padding:10px 16px;color:#334155;border:1px solid #e2e8f0;">只给 AI 提供服务器 IP，通过本地私钥 SSH 连入，绝不给云厂商主控权</td></tr>
+  <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:10px 16px;color:#334155;border:1px solid #e2e8f0;"><strong>网络防护</strong></td><td style="padding:10px 16px;color:#334155;border:1px solid #e2e8f0;">端口打不开直接关掉防火墙 / 放行 0.0.0.0 全部端口</td><td style="padding:10px 16px;color:#334155;border:1px solid #e2e8f0;">仅按需放行必要的 <code>80/443</code> 或指定业务端口</td></tr>
+  <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:10px 16px;color:#334155;border:1px solid #e2e8f0;"><strong>遇到 502 / 报错</strong></td><td style="padding:10px 16px;color:#334155;border:1px solid #e2e8f0;">慌乱重装系统或盲目执行大段未知脚本</td><td style="padding:10px 16px;color:#334155;border:1px solid #e2e8f0;">告诉 AI：“先别改任何配置，帮我查 Nginx 错误日志和进程状态，讲清原因我确认后再修”</td></tr>
+</table></div></div>
+        </div>
+        </div>
+      </section>
+        
+      <!-- 常见问题答疑 FAQ -->
+      <section class="faq-section-wrap" id="sec-faq">
+        <h2 class="faq-heading-h2">第 5 步常见问题答疑</h2>
+        
+        <details class="faq-accordion-item" open>
+          <summary>我做的只是个人主页或产品介绍页，也要买云服务器吗？</summary>
+          <div class="faq-accordion-body">
+            不用。纯前端静态页（没有后端接口、不存用户数据）直接让 AI 部署到 Vercel、Cloudflare Pages 或 GitHub Pages，一分钱不花，也免去运维烦恼。<strong>只有涉及后端 API、数据库，或者主要面向国内网络访问，才需要买云服务器。</strong>先问 AI 判断必要性，再决定掏不掏钱。
+          </div>
+        </details>
+        
+        <details class="faq-accordion-item">
+          <summary>第一次买服务器，该选什么配置和系统？</summary>
+          <div class="faq-accordion-body">
+            选云厂商的「轻量应用服务器」而不是传统 ECS，初版 <strong>2 核 2G 内存</strong>足够，操作系统统一选 <strong>Ubuntu LTS</strong>，因为它社区资料最多、AI 最熟悉、排错能力最强。下单前看清次年续费价格，选固定带宽包，避开按超额流量计费的套餐。
+          </div>
+        </details>
+        
+        <details class="faq-accordion-item">
+          <summary>让 AI 帮我操作服务器，要把 root 密码或云账号发给它吗？</summary>
+          <div class="faq-accordion-body">
+            绝对不要。正确做法是 SSH 密钥对：让本地 AI 在你电脑上生成一对钥匙，<strong>公钥由你亲自粘到云控制台的「密钥对」页面并绑定到服务器，私钥留在本地</strong>。之后 AI 只需要知道服务器 IP，用本地私钥 SSH 连入即可，云厂商的主控权始终在你手里。
+          </div>
+        </details>
+        
+        <details class="faq-accordion-item">
+          <summary>为什么不装宝塔面板？点点鼠标不是更简单吗？</summary>
+          <div class="faq-accordion-body">
+            宝塔这类面板要常驻 200MB 以上内存，还多开了一个登录入口和一堆历史漏洞，而它能做的事 AI 通过 SSH 都能做，并且做完会告诉你每一步的目的和验证方法。无面板部署更干净、更安全，也更容易沉淀成一份《部署说明.md》，以后更新迭代有据可查。
+          </div>
+        </details>
+        
+        <details class="faq-accordion-item">
+          <summary>AI 说要开放端口，我是不是直接把防火墙关掉最省事？</summary>
+          <div class="faq-accordion-body">
+            千万不要，也不要放行 0.0.0.0 全部端口。去云控制台的「防火墙 / 安全组」里<strong>只放行必要的 80 和 443</strong>，或者 AI 明确告诉你的那个业务端口。部署完记得做真机验收：手机关掉 Wi-Fi 用流量打开 http://[服务器IP]，再让 AI 重启一次服务器，2~3 分钟后能自愈恢复访问才算通过。
+          </div>
+        </details>
+      </section>
+        
+      </article>
+</PillarLayout>

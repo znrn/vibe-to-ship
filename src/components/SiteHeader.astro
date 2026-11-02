@@ -1,0 +1,164 @@
+---
+// 全站共用的顶部悬浮导航（来自首页方案 B）。首页、支柱页、文章页都用这一个，改导航只改这里。
+import { SITE } from '../data/site';
+---
+
+<!-- ═══════════════════════════════════════════════
+     顶部悬浮药丸灵动岛导航 (Wide Floating Island Nav)
+     ═══════════════════════════════════════════════ -->
+<header class="nav-plan-b-wrapper" id="site-nav">
+  <div class="nav-pill-b">
+    <!-- 品牌徽标与定位 -->
+    <a href="/" class="brand-b">
+      <span class="brand-dot-b"></span>
+      <span>冬瓜 AI 独立开发</span>
+      <span class="brand-tag-b">开源自学</span>
+    </a>
+
+    <!-- 核心锚点菜单 -->
+    <nav class="nav-menu-b">
+      <a href="/#contrast">模式转变</a>
+      <a href="/#flow">9 步通关</a>
+      <a href="/#showcase">实战作品</a>
+      <a href="/#articles">排错文库</a>
+      <a href="/#about">关于冬瓜</a>
+      <a href="/#faq">常见答疑</a>
+    </nav>
+
+    <!-- 外部出口与实战营落地页 -->
+    <div class="nav-actions-b">
+      <a href={SITE.github || 'https://github.com'} target="_blank" rel="noopener" class="nav-gh-pill-b" title="GitHub 开源仓库">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+        </svg>
+        <span>GitHub</span>
+      </a>
+      <a href="/camp/" class="nav-camp-pill-b">
+        <span>48小时线下实训 ➔</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<style>
+/* ══════════════════════════════════════════════════════════════
+   导航样式方案 B（正式采纳）：宽幅高质感悬浮药丸灵动岛 (Floating Island Nav)
+   ══════════════════════════════════════════════════════════════ */
+.nav-plan-b-wrapper {
+  position: sticky;
+  top: 18px;
+  z-index: 100;
+  width: 100%;
+  max-width: 1140px;
+  margin: 18px auto -10px;
+  padding: 0 20px;
+}
+.nav-pill-b {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  border-radius: 999px;
+  padding: 8px 12px 8px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 16px 36px -8px rgba(15, 23, 42, 0.08), 0 4px 14px rgba(0, 0, 0, 0.02);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.brand-b {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: #0f172a;
+  font-size: 15.5px;
+  font-weight: 850;
+  letter-spacing: -0.3px;
+}
+.brand-dot-b {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #059669;
+  box-shadow: 0 0 0 3.5px rgba(5, 150, 105, 0.2);
+}
+.brand-tag-b {
+  font-size: 11px;
+  font-weight: 700;
+  color: #059669;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+.nav-menu-b {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  list-style: none;
+}
+.nav-menu-b a {
+  font-size: 14px;
+  font-weight: 650;
+  color: #475569;
+  text-decoration: none;
+  padding: 7px 14px;
+  border-radius: 999px;
+  transition: 0.2s;
+}
+.nav-menu-b a:hover {
+  color: #059669;
+  background: rgba(236, 253, 245, 0.85);
+}
+.nav-actions-b {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.nav-gh-pill-b {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 650;
+  transition: 0.2s;
+  text-decoration: none;
+}
+.nav-gh-pill-b:hover {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+.nav-camp-pill-b {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  font-size: 13.5px;
+  font-weight: 750;
+  color: #ffffff;
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  padding: 0 18px;
+  border-radius: 999px;
+  text-decoration: none;
+  transition: 0.2s;
+  box-shadow: 0 3px 12px rgba(5, 150, 105, 0.3);
+}
+.nav-camp-pill-b:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(5, 150, 105, 0.38);
+}
+
+@media (max-width: 860px) {
+  .nav-menu-b { display: none; }
+  .nav-plan-b-wrapper { padding: 0 12px; }
+}
+</style>

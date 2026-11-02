@@ -1,0 +1,209 @@
+---
+// 第 4 步 · build：/flow/build/。版式、侧栏、目录、上一步下一步都在 PillarLayout 里，这里只写正文。
+import PillarLayout from '../../layouts/PillarLayout.astro';
+
+const toc = [
+  {"id": "sec-header-conclusion", "label": "先说结论", "kind": "conclusion"},
+  {"id": "sec-part1", "label": "先定规划，严禁直接让 AI 写代码", "num": "01"},
+  {"id": "sec-part2", "label": "小步快跑，坚持“一次只做一件事”", "num": "02"},
+  {"id": "sec-part3", "label": "遇到报错，执行标准“5 步排错法”", "num": "03"},
+  {"id": "sec-part4", "label": "建立安全网", "num": "04"},
+  {"id": "sec-faq", "label": "常见问题 FAQ", "kind": "faq"},
+];
+---
+
+<PillarLayout
+  slug="build"
+  title="第4步：不懂写代码，如何用 AI 独立开发软件并不踩坑？"
+  description="非程序员用 AI 编程绝不能直接让 AI 自由发挥。牢记「先定规划再动工、一次只做一件事、遇到报错先看懂、能跑通就立刻 Git Commit 存盘」。出现报错切忌无脑粘贴继续改，严格执行 5 步排错法：隔离报错现场、让 AI 翻译人话、只改"
+  toc={toc}
+>
+      <!-- 顶部 Hero 卡片 -->
+      <header class="header-card" id="sec-header-conclusion">
+        <div class="header-meta-row">
+          <div class="header-pill-group">
+            <span class="phase-pill-dark">一人公司实战体系</span>
+            <span class="step-pill-emerald">第 4 步 · 自然语言开发与排错</span>
+          </div>
+          <span class="header-status-indicator">
+            <span class="status-dot-pulse"></span>
+            <span>核心交付：小步快跑交付完整业务功能闭环</span>
+          </span>
+        </div>
+
+        <h1 class="header-main-h1">
+          不懂写代码，如何用 AI 独立开发软件并<span class="hl">不踩坑</span>？
+        </h1>
+
+        <!-- 先说结论 -->
+        <div class="header-conclusion-inner">
+          <div class="hci-badge-pill">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+            </svg>
+            <span>先说结论 · KEY TAKEAWAY</span>
+          </div>
+          <p class="hci-text">
+            <strong>非程序员用 AI 编程绝不能直接让 AI 自由发挥。</strong>牢记「先定规划再动工、一次只做一件事、遇到报错先看懂、能跑通就立刻 Git Commit 存盘」。出现报错切忌无脑粘贴继续改，严格执行 5 步排错法：隔离报错现场、让 AI 翻译人话、只改单一变量、不行果断回滚退守安全区。
+          </p>
+        </div>
+
+        <!-- 核心三栏指标 (SEO / GEO 结构化信息) -->
+        <div class="header-meta-grid">
+          <div class="meta-tag-card">
+            <div class="meta-tag-icon-box">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+            </div>
+            <div class="meta-tag-content">
+              <span class="meta-tag-label">核心动作:</span>
+              <span>人做产品经理 + AI 写代码 + 5步排错法</span>
+            </div>
+          </div>
+          <div class="meta-tag-card">
+            <div class="meta-tag-icon-box">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            </div>
+            <div class="meta-tag-content">
+              <span class="meta-tag-label">交付用时:</span>
+              <span>3 ~ 5 天迭代</span>
+            </div>
+          </div>
+          <div class="meta-tag-card">
+            <div class="meta-tag-icon-box">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+            </div>
+            <div class="meta-tag-content">
+              <span class="meta-tag-label">阶段产物:</span>
+              <span>本地可完整交互测试的可用系统</span>
+            </div>
+          </div>
+        </div>
+      </header>
+      <article class="main-article-card">
+        
+      <!-- 导言 方案 A -->
+      <div class="lead-box">
+        <div class="lead-warning-tag">
+          <span>⚠️</span>
+          <span>新手最易踩的坑</span>
+        </div>
+        <p>对于不懂写代码的零基础新手，用 AI 开发软件最容易踩的坑就是<strong>“一上来就让 AI 写完整代码”</strong>以及<strong>“报错后盲目修导致越改越乱”</strong>。</p>
+        <p>想要避开这些陷阱，核心逻辑是<strong>角色转变</strong>：<strong>把代码全权交给 AI（如 Claude Code 或 Codex），你退居“产品经理 + 验收人”的角色，只负责“说清需求、动手检查、关键拍板”</strong>。</p>
+        <p>具体落地可以分为以下 4 个关键步骤：</p>
+      </div>
+        
+      <!-- Section 1 -->
+      <section class="step-card-wrap" id="sec-part1">
+        <div class="card-top-tag">
+          <h2 class="step-heading-h2">一、先定规划，严禁直接让 AI 写代码</h2>
+        </div>
+        <div class="step-inner-content">
+<ul class="bullet-list-custom">
+  <li><strong>踩坑点</strong>：一句话“帮我做个记账软件”，AI 会生成一堆复杂且跑不通的代码。</li>
+  <li><strong>正确做法</strong>：</li>
+</ul>
+<ol class="num-list-custom">
+  <li>新建一个空白文件夹，用大白话向 AI 交代三件事：<strong>给谁用、解决什么痛点、第一版只保留哪一个核心功能</strong>（砍掉登录、注册、支付、后台等无关枝节）。</li>
+  <li>命令 AI <strong>“先不要写代码”</strong>，先生成两份文档：《需求.md》与《开发计划.md》，把任务拆解成细碎的小步骤。</li>
+  <li>人工过一遍计划，砍掉非必需步骤，确认逻辑没问题后再批准 AI 动工。</li>
+</ol>
+        </div>
+      </section>
+      <!-- Section 2 -->
+      <section class="step-card-wrap" id="sec-part2">
+        <div class="card-top-tag">
+          <h2 class="step-heading-h2">二、小步快跑，坚持“一次只做一件事”</h2>
+        </div>
+        <div class="step-inner-content">
+<ul class="bullet-list-custom">
+  <li><strong>踩坑点</strong>：一次性让 AI 做完几个功能，出了 Bug 根本无法定位是哪一步改崩的。</li>
+  <li><strong>正确做法</strong>：</li>
+</ul>
+<ol class="num-list-custom">
+  <li>严格对照计划，<strong>一次只指令 AI 推进一个细分功能</strong>。</li>
+  <li>每步写完，要求 AI 提供<strong>验收指南</strong>（改了哪、本地怎么运行、怎么看效果）。</li>
+  <li><strong>必须亲自点击验收</strong>：页面按钮点开有没有反应、刷新后数据在不在、手机浏览器排版乱不乱，别仅凭 AI 说“已搞定”就信以为真。</li>
+</ol>
+        </div>
+      </section>
+      <!-- Section 3 -->
+      <section class="step-card-wrap" id="sec-part3">
+        <div class="card-top-tag">
+          <h2 class="step-heading-h2">三、遇到报错，执行标准“5 步排错法”</h2>
+        </div>
+        <div class="step-inner-content">
+<ul class="bullet-list-custom">
+  <li><strong>踩坑点</strong>：只截半截英文截图，或直接催促“报错了赶紧修”，导致 AI 瞎猜乱改破坏原有逻辑。</li>
+  <li><strong>正确做法</strong>：</li>
+</ul>
+<ol class="num-list-custom">
+  <li><strong>截全报错</strong>：从第一行红字复制到最后一行，优先发完整文字而非半截截图。</li>
+  <li><strong>说清现场</strong>：用三段式交代清楚——“我做了 A 操作，期望得到 B 结果，实际出现了 C 现象”。</li>
+  <li><strong>一次只修一个</strong>：有多个报错时，只挑当前首个修，修完验证后再看下一个。</li>
+  <li><strong>先问原因再动手</strong>：先命令 AI“用大白话解释为什么错，打算怎么改”，你看懂思路后再允许它动代码。</li>
+  <li><strong>改乱果断放弃</strong>：连续修了 3~4 轮依然没有进展，坚决停止修补，准备回退。</li>
+</ol>
+        </div>
+      </section>
+      <!-- Section 4 -->
+      <section class="step-card-wrap" id="sec-part4">
+        <div class="card-top-tag">
+          <h2 class="step-heading-h2">四、建立安全网：贯彻“能用就存”的 Git 机制</h2>
+        </div>
+        <div class="step-inner-content">
+<ul class="bullet-list-custom">
+  <li><strong>踩坑点</strong>：辛苦调通的功能，因为后加的一个小改动全盘崩溃，且无法找回。</li>
+  <li><strong>正确做法</strong>：</li>
+</ul>
+<ol class="num-list-custom">
+  <li>每当你亲自验收完一个功能确认<strong>“当前能跑通”</strong>，立刻让 AI 执行 Git 存档（说明写清楚这一步做了什么）。</li>
+  <li>Git 操作的复杂命令行全部交给 AI 执行，你只需发指令：“这步能用了，帮我打个 Git 存档”。</li>
+  <li>一旦后续修 Bug 陷入越修越乱的恶性循环，立刻指令 AI <strong>“一键回退到上一个正常运行的存档点”</strong>，重整思路重新开始。</li>
+</ol>
+<div class="quote-callout"><strong>核心口诀</strong>：<strong>大白话说需求，先计划后动手；一次做一步，点完再存档；报错不慌张，修乱就回退。</strong></div>
+        </div>
+      </section>
+        
+        
+      <!-- 常见问题答疑 FAQ -->
+      <section class="faq-section-wrap" id="sec-faq">
+        <h2 class="faq-heading-h2">第 4 步常见问题答疑</h2>
+        
+        <details class="faq-accordion-item" open>
+          <summary>我说一句「帮我做个记账软件」，AI 就开始写代码了，这有什么问题？</summary>
+          <div class="faq-accordion-body">
+            问题在于你跳过了规划。一句话需求会让 AI 自作主张塞进登录、注册、分类、报表一整套，代码多到跑不起来，出了问题你也不知道从哪改。正确顺序是：新建空文件夹，用大白话交代<strong>给谁用、解决什么痛点、第一版只留哪一个核心功能</strong>，然后命令 AI「先不要写代码」，先出《需求.md》和《开发计划.md》，你过一遍砍掉多余步骤再批准动工。
+          </div>
+        </details>
+        
+        <details class="faq-accordion-item">
+          <summary>AI 说「已完成」，我怎么知道它真的做好了？</summary>
+          <div class="faq-accordion-body">
+            永远不要凭 AI 一句「已搞定」就信。每做完一步，要求它给一份验收指南：改了哪里、本地怎么运行、在哪看效果。然后<strong>你亲自点一遍</strong>：按钮点开有没有反应、刷新后数据还在不在、手机浏览器排版乱不乱。它负责做，你负责验收，这一步不能外包。
+          </div>
+        </details>
+        
+        <details class="faq-accordion-item">
+          <summary>报错了，我把截图发给 AI 它却越改越乱，是我发的方式不对吗？</summary>
+          <div class="faq-accordion-body">
+            多半是。半截截图和「赶紧修」会让 AI 盲猜。照「5 步排错法」来：报错从第一行到最后一行整段复制成文字；用三段式说清现场「我做了 A，期望 B，实际出现 C」；有多个报错只修第一个；<strong>先让它用大白话解释原因和打算怎么改，你看懂了再允许动代码</strong>；连续修 3~4 轮没进展就停手准备回退。
+          </div>
+        </details>
+        
+        <details class="faq-accordion-item">
+          <summary>Git 到底是什么？我不会用命令，能不用吗？</summary>
+          <div class="faq-accordion-body">
+            把 Git 理解成游戏存档点就够了，命令全部交给 AI 敲。你只需要养成一个习惯：每当你亲自验收完一个功能确认能跑通，立刻说一句「这步能用了，帮我打个 Git 存档」。等后面某次改动把一切搞崩，再说「回退到上一个正常运行的存档点」，几秒钟就能回到安全区。<strong>能用就存，是零基础开发最重要的安全网。</strong>
+          </div>
+        </details>
+        
+        <details class="faq-accordion-item">
+          <summary>一次只做一件事会不会太慢？我想让 AI 一口气把几个功能都做了。</summary>
+          <div class="faq-accordion-body">
+            表面省时间，实际更慢。几个功能一起改，出了 Bug 根本分不清是哪一步改崩的，排查时间远超省下的那点功夫。小步快跑的节奏是：做一个、验收一个、存档一个，每一步的改动都小到出问题立刻能定位，这才是零基础也能把项目一直推进下去的原因。
+          </div>
+        </details>
+      </section>
+        
+      </article>
+</PillarLayout>
