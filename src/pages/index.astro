@@ -84,7 +84,9 @@ const SHOWCASE_PROJECTS = [
     <meta name="description" content={SITE.description} />
     <meta name="author" content={SITE.author.name} />
     <link rel="canonical" href={canonical} />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" type="image/png" href="/favicon.png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="alternate" type="application/rss+xml" title={SITE.name} href="/rss.xml" />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <meta property="og:type" content="website" />
@@ -2001,11 +2003,8 @@ const SHOWCASE_PROJECTS = [
         height: 104px;
         border-radius: 50%;
         background: linear-gradient(135deg, #059669 0%, #10b981 100%);
-        display: grid;
-        place-items: center;
-        color: #ffffff;
-        font-size: 38px;
-        font-weight: 850;
+        object-fit: cover;
+        display: block;
         box-shadow: 0 10px 24px -4px rgba(5, 150, 105, 0.35);
         border: 4px solid #ffffff;
       }
@@ -2858,7 +2857,7 @@ const SHOWCASE_PROJECTS = [
           <div class="about-box">
             <div class="about-profile">
               <div class="about-avatar-wrap">
-                <div class="about-avatar">冬</div>
+                <img class="about-avatar" src="/images/avatar.jpg" alt="冬瓜的头像" width="104" height="104" loading="lazy" />
                 <div class="about-online-badge" title="实战排雷中"></div>
               </div>
               <h3 class="about-name">冬瓜</h3>

@@ -18,7 +18,7 @@ export const SITE = {
   },
   // 仓库还没公开，先留空。公开后填上地址，页面上的占位文字会自动换成链接。
   github: '' as string,
-  icp: '待办理（国内域名）',
+  icp: '浙ICP备19008373号-1',
 };
 
 // 「AI 独立开发者是什么」入口页：承接定义类问法，和首页的站点主词分开，参与撞词检查
@@ -56,7 +56,7 @@ export const NOT_FOR = [
 
 // 免费的中间台阶：加微信 / 领清单。目前都是占位。
 export const FREE_STEP = {
-  wechat: { label: '加冬瓜微信', value: '微信号待填', note: '备注「上线」，拉你进交流群（群待建）' },
+  wechat: { label: '加冬瓜微信', value: 'Eryx999', qr: '/images/wechat-qr.png', note: '备注「上线」，拉你进交流群（群待建）' },
   checklist: { label: '领《完整上线清单》', note: '从备账号到过审核的完整勾选清单，整理中，先占位' },
 };
 
@@ -64,7 +64,9 @@ export const FREE_STEP = {
 export const CAMP = {
   name: '48 小时实战营',
   format: '线下 · 小班 6~10 人',
-  price: '¥ 待定',
+  price: '¥ 9800',
+  // 划线原价
+  originalPrice: '¥ 13800',
   priceNote: '首期种子价 · 含两天午餐、助教、课后 30 天答疑',
   promises: [
     '结业时产品在公网可访问，带 HTTPS',

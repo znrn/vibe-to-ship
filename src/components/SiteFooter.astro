@@ -1,122 +1,41 @@
 ---
-// 全站共用的页脚（来自首页的双翼通栏页脚）。
+// 全站共用的页脚：一行版权信息 + 备案号，所有页面同一个。备案号来自 src/data/site.ts 的 SITE.icp。
+import { SITE } from '../data/site';
+const icp = SITE.icp && !SITE.icp.includes('待') ? SITE.icp : '';
 ---
 
-<!-- ═══════════════════════════════════════════════
-     极简双翼通栏页脚（采纳锁定）
-     ═══════════════════════════════════════════════ -->
-<footer class="site-footer-split" id="footer">
+<footer class="site-footer" id="footer">
   <div class="container">
-    <div class="footer-split-inner">
-      <!-- 左翼：品牌标牌与核心理念 -->
-      <div class="footer-split-left">
-        <a href="/" class="footer-split-brand">
-          <span class="footer-sign-dot"></span>
-          <span>冬瓜 AI 独立开发</span>
-        </a>
-        <span class="footer-split-sep">/</span>
-        <span class="footer-split-slogan">一人公司从想法到公网上线收钱的最后一公里</span>
-      </div>
-
-      <!-- 右翼：人类与AI协作完成声明 + 返回顶部 -->
-      <div class="footer-split-right">
-        <div class="footer-split-copy">
-          © {new Date().getFullYear()} 冬瓜 AI 独立开发 · 本站由人类（冬瓜）和 AI（Claude / Codex / Gemini / Grok）协作完成
-        </div>
-        <a href="#" class="footer-back-top" title="回到顶部">
-          <span>↑</span>
-          <span>返回顶部</span>
-        </a>
-      </div>
-    </div>
+    <p class="footer-copy">
+      © {new Date().getFullYear()} <a href="/">冬瓜 AI 独立开发</a>
+      {icp && <> · <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">{icp}</a></>}
+      · 本站由人类（冬瓜）和 AI（Claude / Codex / Gemini / Grok）协作完成
+    </p>
   </div>
 </footer>
 
 <style>
   .container { max-width: 1160px; margin: 0 auto; padding: 0 24px; }
-/* ══════════════════════════════════════════════════════════════
-   新版极简页脚（正式采纳）：双翼通栏呼吸条 (Split Horizon Bar)
-   ══════════════════════════════════════════════════════════════ */
-.site-footer-split {
-  border-top: 1px solid #e2e8f0;
-  background: #ffffff;
-  padding: 24px 0;
-  margin-top: 0;
-}
-.footer-split-inner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  flex-wrap: wrap;
-}
-.footer-split-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-.footer-split-brand {
-  font-size: 15px;
-  font-weight: 850;
-  color: #0f172a;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  text-decoration: none;
-}
-.footer-sign-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #059669;
-  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.2);
-}
-.footer-split-sep {
-  color: #cbd5e1;
-  font-size: 12px;
-}
-.footer-split-slogan {
-  font-size: 13px;
-  color: #64748b;
-}
-.footer-split-right {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-.footer-split-copy {
-  font-size: 12.5px;
-  color: #64748b;
-  line-height: 1.6;
-}
-.footer-split-copy strong {
-  color: #0f172a;
-  font-weight: 700;
-}
-.footer-back-top {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 12px;
-  font-weight: 700;
-  color: #475569;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  padding: 5px 12px;
-  border-radius: 999px;
-  text-decoration: none;
-  transition: 0.2s;
-  flex-shrink: 0;
-}
-.footer-back-top:hover {
-  border-color: #059669;
-  color: #059669;
-  background: #ecfdf5;
-}
-
-@media (max-width: 900px) {
-  .footer-split-inner { flex-direction: column; align-items: flex-start; gap: 14px; }
-  .footer-split-right { width: 100%; justify-content: space-between; }
-}
+  .site-footer {
+    border-top: 1px solid #e2e8f0;
+    background: #ffffff;
+    padding: 22px 0;
+    margin-top: 0;
+  }
+  .footer-copy {
+    margin: 0;
+    text-align: center;
+    font-size: 12.5px;
+    color: #64748b;
+    line-height: 1.8;
+  }
+  .footer-copy a {
+    color: #475569;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .footer-copy a:hover {
+    color: #059669;
+  }
 </style>

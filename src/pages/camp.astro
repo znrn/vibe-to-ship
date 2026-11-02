@@ -1,7 +1,8 @@
 ---
 // 48 小时 AI 独立开发实战营独立落地页
 // 访问路径: /camp/
-import { SITE } from '../data/site';
+import SiteFooter from '../components/SiteFooter.astro';
+import { SITE, CAMP, FREE_STEP } from '../data/site';
 
 const canonical = new URL('/camp/', Astro.site);
 ---
@@ -269,18 +270,15 @@ const canonical = new URL('/camp/', Astro.site);
     }
     .price-features li { display: flex; align-items: center; gap: 10px; }
     .price-features li strong { color: var(--ink); }
-    .price-cta-btn {
-      width: 100%; display: block; background: linear-gradient(135deg, #059669, #047857);
-      color: #ffffff; font-size: 17px; font-weight: 800; padding: 16px; border-radius: 12px;
-      text-decoration: none; transition: all 0.2s; box-shadow: 0 4px 16px rgba(5, 150, 105, 0.28);
-    }
-    .price-cta-btn:hover { background: #047857; transform: translateY(-2px); }
-    .guarantee-note { margin-top: 16px; font-size: 13px; color: var(--emerald-dark); display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 600; }
+    .price-original { font-size: 24px; font-weight: 600; color: #94a3b8; margin-right: 6px; }
+    .price-qr { display: flex; align-items: center; gap: 22px; text-align: left; background: #f8fafc; border: 1px solid var(--line); border-radius: 14px; padding: 18px 22px; }
+    .price-qr img { width: 180px; height: 180px; border-radius: 10px; flex-shrink: 0; background: #fff; }
+    .price-qr-text { display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: var(--muted); }
+    .price-qr-text strong { font-size: 17px; color: var(--ink); }
+    .price-qr-text b { color: var(--emerald-dark); }
+    @media (max-width: 560px) { .price-qr { flex-direction: column; text-align: center; } .price-qr-text { align-items: center; } }
 
     /* Footer */
-    footer { border-top: 1px solid var(--line); padding: 40px 0; text-align: center; font-size: 13.5px; color: var(--muted); background: #ffffff; }
-    footer a { color: var(--ink); text-decoration: none; font-weight: 600; }
-    footer a:hover { color: var(--emerald); }
   </style>
 </head>
 <body>
@@ -682,7 +680,7 @@ const canonical = new URL('/camp/', Astro.site);
       <div class="price-box">
         <span class="price-badge-top">第 01 期 · 种子学员内测营</span>
         <h2 style="font-size: 24px; font-weight: 800; color: var(--ink); margin-top: 10px;">48 小时脱产实训交付席位</h2>
-        <div class="price-main">¥ 待定 <span style="font-size: 16px; color: var(--muted); font-weight: normal;">/ 位 (首期种子特惠)</span></div>
+        <div class="price-main"><s class="price-original">{CAMP.originalPrice}</s> {CAMP.price} <span style="font-size: 16px; color: var(--muted); font-weight: normal;">/ 位 (首期种子特惠)</span></div>
         <div class="price-sub">本期仅开放 6~10 个极小班席位 · 按报名审核顺序锁定</div>
 
         <ul class="price-features">
@@ -693,25 +691,21 @@ const canonical = new URL('/camp/', Astro.site);
           <li><span class="check-mark">✓</span> <div><strong>课后 30 天深度项目答疑与冬瓜一人公司终身校友会</strong></div></li>
         </ul>
 
-        <a href="#" class="price-cta-btn" onclick="alert('首期种子营席位正在进行生源匹配。请加冬瓜微信沟通需求与开营时间：备注【48小时实训】'); return false;">
-          加冬瓜微信 · 预约首期席位 ➔
-        </a>
-
-        <div class="guarantee-note">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-          <span>保底交付承诺：未达到保底交付标准支持全额退款</span>
+        <div class="price-qr">
+          <img src={FREE_STEP.wechat.qr} alt="冬瓜微信二维码" width="220" height="220" loading="lazy" />
+          <div class="price-qr-text">
+            <strong>微信扫码加冬瓜 · 预约首期席位</strong>
+            <span>微信号 <b>{FREE_STEP.wechat.value}</b>，备注「48小时实训」</span>
+            <span>沟通需求与开营时间后锁定席位</span>
+          </div>
         </div>
+
       </div>
     </div>
   </section>
 
   <!-- 页脚 -->
-  <footer>
-    <div class="container">
-      <p style="margin-bottom: 8px; font-weight: 600; color: var(--ink);">冬瓜 AI 独立开发实战站 · 一人公司上线全流程</p>
-      <p style="color: var(--muted);">开源手册自学完全免费 · 实战营提供 100% 确定性线下交付</p>
-    </div>
-  </footer>
+  <SiteFooter />
 
 </body>
 </html>

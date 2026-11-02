@@ -52,7 +52,8 @@ const nextStage = next && stageOfArticle(next);
       <div class="free-item">
         <strong>{FREE_STEP.wechat.label}</strong>
         <p>{FREE_STEP.wechat.note}</p>
-        <span class="btn placeholder">{FREE_STEP.wechat.value}</span>
+        <img class="wechat-qr" src={FREE_STEP.wechat.qr} alt="冬瓜微信二维码" width="120" height="120" loading="lazy" />
+        <span class="wechat-id">微信号 <b>{FREE_STEP.wechat.value}</b></span>
       </div>
     </div>
   </div>
@@ -87,6 +88,9 @@ const nextStage = next && stageOfArticle(next);
   .free-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
   .free-item{background:var(--soft);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
   .free-item strong{font-size:15px}
+  .wechat-qr{width:120px;height:120px;border-radius:8px;border:1px solid var(--line);background:#fff}
+  .wechat-id{font-size:13px;color:var(--muted)}
+  .wechat-id b{color:var(--accent)}
   .free-item p{font-size:13px;color:var(--muted);line-height:1.55;flex:1}
   .camp{background:var(--accent-soft);border-color:transparent}
   .camp .label{color:var(--accent)}
