@@ -6,7 +6,7 @@
 import '../styles/pillar.css';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
-import { SITE, CAMP } from '../data/site';
+import { SITE } from '../data/site';
 import { FLOW_STEPS, flowUrl, flowOf, type FlowSlug } from '../data/flow';
 
 interface TocItem {
@@ -140,33 +140,35 @@ const jsonLd = Astro.props.jsonLd ?? [
         </nav>
         <Fragment set:html={body} />
 
-        <nav class="flow-next" aria-label={mode === 'flow' ? '上一步和下一步' : '这一步的完整流程'}>
+        <nav class="flow-next" aria-label="上一步和下一步">
           {mode === 'article' ? (
-            <a href={flowUrl(step.slug)} class="flow-next-primary">
+            <a href={flowUrl(step.slug)} class="flow-next-secondary">
               <div class="flow-next-label">本文属于 · STEP {String(step.step).padStart(2, '0')}</div>
-              <div class="flow-next-title">看第 {step.step} 步「{step.name}」完整流程 ➔</div>
+              <div class="flow-next-title">← 看第 {step.step} 步「{step.name}」完整流程</div>
             </a>
-          ) : next ? (
-            <a href={flowUrl(next.slug)} class="flow-next-primary">
+          ) : prev ? (
+            <a href={flowUrl(prev.slug)} class="flow-next-secondary">
+              <div class="flow-next-label">上一步 · STEP {String(prev.step).padStart(2, '0')}</div>
+              <div class="flow-next-title">← {prev.name}</div>
+            </a>
+          ) : (
+            <a href="/flow/" class="flow-next-secondary">
+              <div class="flow-next-label">这是第 1 步 · 从头开始</div>
+              <div class="flow-next-title">← 9 步上线流程总览</div>
+            </a>
+          )}
+          {next ? (
+            <a href={flowUrl(next.slug)} class="flow-next-secondary flow-next-right">
               <div class="flow-next-label">下一步 · STEP {String(next.step).padStart(2, '0')}</div>
               <div class="flow-next-title">{next.name} ➔</div>
             </a>
           ) : (
-            <a href={`${HOME}#flow`} class="flow-next-primary">
+            <a href="/flow/" class="flow-next-secondary flow-next-right">
               <div class="flow-next-label">9 步已走完 · 回到总览</div>
-              <div class="flow-next-title">回首页看全部 9 步与实战手册 ➔</div>
+              <div class="flow-next-title">回顾全部 9 步，看哪一步还没做扎实 ➔</div>
             </a>
           )}
-          <a href={CAMP.href} class="flow-next-camp">
-            <div class="flow-next-label">48 小时脱产实训营</div>
-            <div class="flow-next-title">现场主讲逐屏排雷，两天真机上线 ➔</div>
-          </a>
         </nav>
-        {mode === 'flow' && prev && (
-          <p class="flow-prev">
-            <a href={flowUrl(prev.slug)}>← 上一步 · 第 {prev.step} 步 {prev.name}</a>
-          </p>
-        )}
       </main>
 
       <aside class="toc-aside">

@@ -632,15 +632,13 @@
   .flow-next { margin-top: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   @media (max-width: 640px) { .flow-next { grid-template-columns: 1fr; } }
   .flow-next a { display: block; border-radius: 10px; padding: 18px 22px; }
-  .flow-next-primary { background: linear-gradient(135deg, #059669 0%, #047857 100%); color: #fff; }
-  .flow-next-primary .flow-next-label { opacity: 0.8; text-transform: uppercase; }
-  .flow-next-camp { background: #ffffff; border: 1px dashed rgba(5,150,105,0.4); }
-  .flow-next-camp .flow-next-label { font-weight: 800; color: var(--emerald); }
-  .flow-next-camp .flow-next-title { color: var(--ink); }
+  .flow-next-right { text-align: right; }
+  .flow-next-secondary { background: #ffffff; border: 1px solid var(--line); }
+  .flow-next-secondary:hover { border-color: var(--emerald); }
+  .flow-next-secondary .flow-next-label { font-weight: 800; color: var(--emerald); }
+  .flow-next-secondary .flow-next-title { color: var(--ink); }
   .flow-next-label { font-size: 11px; }
   .flow-next-title { font-size: 16px; font-weight: 800; margin-top: 2px; }
-  .flow-prev { margin-top: 14px; font-size: 13px; color: var(--muted); }
-  .flow-prev a:hover { color: var(--emerald); }
 
   /* ══════ 2026-11-02 支柱页 / 文章页共用布局补充 ══════ */
   /* 文章组件（分工、FAQ、来源、出口）沿用全站变量名，这里映射到支柱页配色 */
