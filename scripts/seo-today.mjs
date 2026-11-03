@@ -43,7 +43,7 @@ const daily = [
 ];
 const weekly = {
   1: [{ human: true, title: '定本周要写的一篇问题页：优先「有展现没点击」的词和读者问过的问题' }],
-  2: [],
+  2: [{ human: true, title: '学习地图：读一个还没勾的知识点（工作台底部），顺手看看本站这一项该不该做' }],
   3: [{ human: true, title: '内链：本周新文章链到所属支柱页，支柱页反链回来；看检查结果里的孤立页' }],
   4: [],
   5: [{ human: true, title: '分发：知乎 / V2EX / 即刻 / 小红书各发一条，带原文链接，记下哪个渠道来人' }],
@@ -128,6 +128,12 @@ const logHtml = esc(log)
   .replace(/^## (.*)$/gm, '<h4>$1</h4>')
   .replace(/^- (.*)$/gm, '<li>$1</li>')
   .replace(/^(?!<h4|<li|\s*$)(.+)$/gm, '<p>$1</p>');
+const lmap = existsSync('plan/seo/learning-map.json') ? JSON.parse(readFileSync('plan/seo/learning-map.json', 'utf8')) : null;
+const STATUS = { done: ['已做', 'ok'], doing: ['在做', 'doing'], later: ['以后', 'later'], skip: ['不需要', 'skip'] };
+const learnHtml = lmap ? lmap.modules.map((m, mi) => `<div class="mod"><h3>${esc(m.name)} <small>${esc(m.why)}</small></h3><ul>${m.points.map((pt, pi) => {
+  const [label, cls] = STATUS[pt.site] ?? ['', ''];
+  return `<li><label><input type="checkbox" data-learn="${mi}-${pi}" /> <b>${esc(pt.name)}</b></label><span class="st ${cls}">${label}</span><p>${esc(pt.what)}${pt.note ? ` <em>本站：${esc(pt.note)}</em>` : ''}${(pt.learn ?? []).map(([t, u]) => ` <a href="${esc(u)}" target="_blank" rel="noopener">${esc(t)} ↗</a>`).join('')}</p></li>`;
+}).join('')}</ul></div>`).join('') : '';
 const last14 = history.slice(-14);
 const maxW = Math.max(1, ...last14.map((h) => h.warns + h.errors));
 const taskRow = (t, i) => {
@@ -195,6 +201,23 @@ const html = `<!doctype html>
   .onetime .task.done { opacity:.6; }
   .how { font-size:12.5px; color:var(--muted); margin-top:4px; }
   .how code { background:#f1f5f9; border-radius:5px; padding:1px 6px; }
+  .learn { grid-column:1 / -1; }
+  .mods { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+  @media (max-width:1000px) { .mods { grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:640px) { .mods { grid-template-columns:1fr; } }
+  .mod { border:1px solid var(--line); border-radius:12px; padding:12px 14px; background:#fbfcfd; }
+  .mod h3 { font-size:14px; font-weight:800; margin-bottom:6px; }
+  .mod h3 small { display:block; font-size:12px; color:var(--muted); font-weight:500; }
+  .mod ul { list-style:none; }
+  .mod li { padding:6px 0; border-top:1px dashed var(--line); font-size:12.5px; }
+  .mod li label { cursor:pointer; } .mod li input { accent-color:var(--green); margin-right:4px; }
+  .mod li.learned b { color:var(--muted); text-decoration:line-through; }
+  .mod li p { color:#475569; line-height:1.55; margin-top:2px; }
+  .mod li em { font-style:normal; color:var(--green); }
+  .mod li a { color:#2563eb; text-decoration:none; white-space:nowrap; }
+  .st { font-size:10.5px; font-weight:700; border-radius:999px; padding:0 7px; margin-left:6px; vertical-align:1px; }
+  .st.ok { background:var(--green-soft); color:var(--green); } .st.doing { background:#eff6ff; color:#2563eb; } .st.later { background:#f1f5f9; color:#64748b; } .st.skip { background:#f8fafc; color:#94a3b8; }
+  .learn-progress { font-size:12px; color:var(--muted); }
 </style>
 </head>
 <body><div class="wrap">
@@ -246,8 +269,21 @@ const html = `<!doctype html>
   </section>
 </div>
 </div>
+${lmap ? `<section class="card learn">
+  <h2>SEO / GEO 学习地图 <span class="learn-progress">勾掉学过的，记在这台电脑的浏览器里 · <span id="learn-count"></span></span></h2>
+  <p class="how" style="margin-bottom:10px">来源：${esc(lmap.source)}。每条标了本站现状：<span class="st ok">已做</span><span class="st doing">在做</span><span class="st later">以后</span><span class="st skip">不需要</span>，点「↗」是学习资料。</p>
+  <div class="mods">${learnHtml}</div>
+</section>` : ''}
 </div>
 <script>
+  const learnBoxes = document.querySelectorAll('input[data-learn]');
+  const learnCount = () => { const el = document.getElementById('learn-count'); if (el) el.textContent = [...learnBoxes].filter((b) => b.checked).length + ' / ' + learnBoxes.length + ' 学过'; };
+  for (const box of learnBoxes) {
+    const k = 'seo-learn:' + box.dataset.learn;
+    try { if (localStorage.getItem(k) === '1') { box.checked = true; box.closest('li').classList.add('learned'); } } catch {}
+    box.addEventListener('change', () => { box.closest('li').classList.toggle('learned', box.checked); try { localStorage.setItem(k, box.checked ? '1' : '0'); } catch {} learnCount(); });
+  }
+  learnCount();
   for (const box of document.querySelectorAll('input[data-key]')) {
     const k = 'seo-task:' + box.dataset.key;
     try { if (localStorage.getItem(k) === '1') { box.checked = true; box.closest('.task').classList.add('done'); } } catch {}
