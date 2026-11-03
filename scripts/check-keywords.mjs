@@ -18,6 +18,11 @@ import { loadTopicMap } from './lib/topic-map.mjs';
 
 const SIMILAR = 0.5; // 两个词的字符二元组 Jaccard 相似度，超过就提示
 
+// 选题地图在 plan/ 里，不随仓库公开；没有它就跳过检查（公开仓库克隆下来也能直接 build）
+if (!existsSync('plan/topic-map.yaml')) {
+  console.log('没有 plan/topic-map.yaml（选题地图不在公开仓库里），跳过关键词检查');
+  process.exit(0);
+}
 const { map, nodes, articles, merged, errors, warnings } = loadTopicMap();
 const STAGES = ROADMAP.map((s) => s.slug);
 const PLATFORM_SLUGS = PLATFORMS.map((p) => p.slug);
