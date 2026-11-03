@@ -93,6 +93,17 @@ const SHOWCASE_PROJECTS = [
     <meta property="og:url" content={canonical} />
     <meta property="og:site_name" content={SITE.name} />
     <meta property="og:locale" content="zh_CN" />
+    {SITE.baiduTongji && (
+      <script is:inline define:vars={{ id: SITE.baiduTongji }}>
+        var _hmt = _hmt || [];
+        (function () {
+          var hm = document.createElement('script');
+          hm.src = 'https://hm.baidu.com/hm.js?' + id;
+          var s = document.getElementsByTagName('script')[0];
+          s.parentNode.insertBefore(hm, s);
+        })();
+      </script>
+    )}
     <style>
       :root {
         --bg: #f8fafc;

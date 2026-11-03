@@ -41,6 +41,17 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <meta property="og:locale" content="zh_CN" />
     <meta name="generator" content={Astro.generator} />
     <slot name="head" />
+    {SITE.baiduTongji && (
+      <script is:inline define:vars={{ id: SITE.baiduTongji }}>
+        var _hmt = _hmt || [];
+        (function () {
+          var hm = document.createElement('script');
+          hm.src = 'https://hm.baidu.com/hm.js?' + id;
+          var s = document.getElementsByTagName('script')[0];
+          s.parentNode.insertBefore(hm, s);
+        })();
+      </script>
+    )}
   </head>
   <body>
     <SiteHeader />
