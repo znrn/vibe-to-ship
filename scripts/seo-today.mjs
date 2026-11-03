@@ -42,6 +42,7 @@ const daily = [
   { human: true, title: '百度站长「流量与关键词」：昨天有展现没点击的词，记到关键词表的待写区', link: 'https://ziyuan.baidu.com/' },
   { human: true, title: '统计后台：昨天哪一页被看、从哪来', link: 'https://tongji.baidu.com/' },
   { human: true, title: '回复读者的问题，真实问题记进选题地图当选题' },
+  { auto: 'npm run seo:push', title: '把还没推过的网址推给百度（每天配额 10 条，脚本自动挑）' },
 ];
 const weekly = {
   1: [{ human: true, title: '定本周要写的一篇问题页：优先「有展现没点击」的词和读者问过的问题' }],
@@ -97,6 +98,9 @@ for (const e of check.errors) console.log('  ✗ ' + e);
 for (const w of check.warns.slice(0, 12)) console.log('  ⚠ ' + w);
 if (check.warns.length > 12) console.log(`  … 还有 ${check.warns.length - 12} 条建议，页面里有全部`);
 if (!check.errors.length && !check.warns.length) console.log('  站内检查全绿');
+
+// ── 百度推送：每天的配额用在没推过的网址上 ──
+try { console.log('  ' + execSync('node scripts/seo-push.mjs').toString().trim().split('\n')[0]); } catch (e) { console.log('  百度推送出错：' + (e.stdout?.toString().trim() || e.message)); }
 
 // ── 历史：每天一条，同一天覆盖 ──
 mkdirSync('plan/seo', { recursive: true });
