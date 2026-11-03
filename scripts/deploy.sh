@@ -21,7 +21,8 @@ echo "3/3 nginx 补充配置（.md 纯文本、llms.txt、旧网址 301）"
 ssh -i $KEY $HOST "cat > $EXT" <<'NGINX'
 # vibe-to-ship 静态站补充配置，由仓库 scripts/deploy.sh 写入，勿手改
 include /www/wwwroot/eryx.cn/redirects.nginx.conf;
-location ~ \.md$ { default_type text/markdown; charset utf-8; try_files $uri =404; }
+# nginx 的 mime.types 已把 .md 识别为 text/markdown，但它不在默认 charset_types 里，要单独声明才会带 charset=utf-8
+location ~ \.md$ { charset utf-8; charset_types text/markdown; try_files $uri =404; }
 location = /llms.txt { default_type text/plain; charset utf-8; }
 NGINX
 ssh -i $KEY $HOST "nginx -t && nginx -s reload"
