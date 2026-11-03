@@ -14,6 +14,17 @@ const canonical = new URL('/camp/', Astro.site);
   <title>48 小时 AI 独立开发线下实战营：两天把产品做上线并收到钱 - 冬瓜</title><link rel="canonical" href={canonical} />
   <meta name="description" content="杭州线下小班，6～10 人，两天时间，主讲和助教在旁边陪你把自己的产品做出来、放上网、配好域名和 HTTPS、收到第一笔钱。首期 9800 元，结业后 30 天继续答疑。">
   <meta name="launchpad-group" content="AI 开发培训">
+  {SITE.baiduTongji && (
+    <script is:inline define:vars={{ id: SITE.baiduTongji }}>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement('script');
+        hm.src = 'https://hm.baidu.com/hm.js?' + id;
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+  )}
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
