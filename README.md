@@ -7,7 +7,7 @@
 1. **网站源码**：eryx.cn 的全部代码，用 [Astro](https://astro.build) 生成静态网站。
 2. **开源手册**：`src/content/articles/` 里的每一篇 Markdown 就是手册的一章，不用打开网站，直接在 GitHub 上也能读。
 
-> 当前是第一版，文章都是**示例**，用来跑通模板；价格、联系方式、作品介绍等带「待填」「占位」的地方还没有定稿。
+网站已上线：https://eryx.cn 。9 步流程页在 `src/pages/flow/`，问题文章在 `src/content/articles/`。欢迎提 issue 指出写错的地方。
 
 ## 上线流程（9 步）
 

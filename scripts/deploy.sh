@@ -1,13 +1,17 @@
 #!/usr/bin/env bash
-# 把构建好的 dist/ 同步到阿里云服务器（eryx.cn，宝塔面板站点），并装上 nginx 补充配置。
+# 把构建好的 dist/ 同步到服务器（eryx.cn 用的是阿里云 + 宝塔面板），并装上 nginx 补充配置。
 # 用法：npm run build && bash scripts/deploy.sh
 # 服务器根目录里还有别的东西（hermes、niuma、mp、数字目录等），所以不加 --delete，只覆盖本站文件。
 set -euo pipefail
-HOST=root@你的服务器IP
-KEY=~/.ssh/你的私钥文件
-ROOT=/www/wwwroot/eryx.cn
-EXT=/www/server/panel/vhost/nginx/extension/eryx.cn/vibe-to-ship.conf
 cd "$(dirname "$0")/.."
+# 服务器地址和密钥不进仓库：复制 scripts/deploy.env.example 为 scripts/deploy.env 填好
+[ -f scripts/deploy.env ] || { echo "缺少 scripts/deploy.env（参考 scripts/deploy.env.example）"; exit 1; }
+# shellcheck source=/dev/null
+source scripts/deploy.env
+HOST=${DEPLOY_HOST:?deploy.env 里要有 DEPLOY_HOST，如 root@1.2.3.4}
+KEY=${DEPLOY_KEY:?deploy.env 里要有 DEPLOY_KEY，如 ~/.ssh/xxx}
+ROOT=${DEPLOY_ROOT:-/www/wwwroot/eryx.cn}
+EXT=${DEPLOY_NGINX_EXT:-/www/server/panel/vhost/nginx/extension/eryx.cn/vibe-to-ship.conf}
 [ -f dist/index.html ] || { echo "先 npm run build"; exit 1; }
 
 echo "1/3 备份服务器上的旧首页和 404"
