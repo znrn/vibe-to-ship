@@ -1,8 +1,10 @@
-// 每天的 SEO / GEO 清单：按日期组合「每天 + 周几 + 每月 1 号 + 每季度」的事，先跑一遍站内检查。
-// 用法：npm run seo:today            打印清单；要你亲自做的事写进 ~/launchpad/todos.json（同一天不重复）
-//       npm run seo:today -- --no-todo  只打印，不写待办
-// 规则和登录入口见 plan/seo-playbook.md
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+// 冬瓜站 SEO / GEO 工作台：按日期组合「每天 + 周几 + 每月 1 号 + 每季度」的事，先跑站内检查，
+// 然后生成一个页面 ~/launchpad/pages/aidev-seo-console.html（本机导航 http://localhost:8088 里会自动出现），
+// 并把要你亲自做的事写进 ~/launchpad/todos.json（同一天不重复）。
+// 用法：npm run seo:today              清单 + 检查 + 页面 + 待办
+//       npm run seo:today -- --no-todo   不写待办
+// 规则和登录入口见 plan/seo-playbook.md；关键词表 plan/seo/keywords.csv；日志 plan/seo/log.md
+import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { execSync } from 'node:child_process';
@@ -15,26 +17,44 @@ const dom = today.getDate();
 const month = today.getMonth() + 1;
 const W = ['日', '一', '二', '三', '四', '五', '六'];
 const PROJECT = 'AI 开发培训 · 冬瓜站 SEO';
-const TODOS = join(homedir(), 'launchpad', 'todos.json');
+const LAUNCHPAD = join(homedir(), 'launchpad');
+const TODOS = join(LAUNCHPAD, 'todos.json');
+const PAGE = join(LAUNCHPAD, 'pages', 'aidev-seo-console.html');
+const PAGE_URL = 'http://localhost:8088/pages/aidev-seo-console.html';
+const HISTORY = 'plan/seo/history.json';
 const noTodo = process.argv.includes('--no-todo');
 
-// ── 任务表：human = 要你亲自做，写进待办；auto = 脚本已经做或马上做 ──
+const PLATFORMS = [
+  ['百度站长', 'https://ziyuan.baidu.com/'],
+  ['Bing 站长', 'https://www.bing.com/webmasters/'],
+  ['Search Console', 'https://search.google.com/search-console'],
+  ['百度统计', 'https://tongji.baidu.com/'],
+  ['富媒体测试', 'https://search.google.com/test/rich-results'],
+  ['PageSpeed', 'https://pagespeed.web.dev/'],
+  ['网站', 'https://eryx.cn/'],
+  ['GitHub', 'https://github.com/znrn/vibe-to-ship'],
+];
+
+// ── 任务表：human = 要你亲自做（写进待办）；auto = 脚本做 ──
 const daily = [
-  { human: true, title: '百度站长「流量与关键词」：昨天有展现没点击的词，记到 plan/seo/keywords.csv 的待写区', link: 'https://ziyuan.baidu.com/' },
+  { human: true, title: '百度站长「流量与关键词」：昨天有展现没点击的词，记到关键词表的待写区', link: 'https://ziyuan.baidu.com/' },
   { human: true, title: '统计后台：昨天哪一页被看、从哪来', link: 'https://tongji.baidu.com/' },
-  { human: true, title: '回复读者的问题，真实问题记进 plan/topic-map.yaml 当选题' },
+  { human: true, title: '回复读者的问题，真实问题记进选题地图当选题' },
 ];
 const weekly = {
   1: [{ human: true, title: '定本周要写的一篇问题页：优先「有展现没点击」的词和读者问过的问题' }],
-  3: [{ human: true, title: '内链：本周新文章链到所属支柱页，支柱页反链回来；看下面检查里的孤立页' }],
+  2: [],
+  3: [{ human: true, title: '内链：本周新文章链到所属支柱页，支柱页反链回来；看检查结果里的孤立页' }],
+  4: [],
   5: [{ human: true, title: '分发：知乎 / V2EX / 即刻 / 小红书各发一条，带原文链接，记下哪个渠道来人' }],
+  6: [],
   0: [
     { human: true, title: '收录：site:eryx.cn 和站长平台索引量，没收录的页手动提交', link: 'https://ziyuan.baidu.com/' },
     { human: true, title: '在 plan/seo/log.md 写两行：这周做了什么、看到什么' },
   ],
 };
 const monthly = [
-  { human: true, title: 'plan/seo/keywords.csv 填当月排名；进前 20 的词加内链、更新内容' },
+  { human: true, title: '关键词表填当月排名；进前 20 的词加内链、更新内容' },
   { human: true, title: '流量最高的 3 页精修：补 FAQ、补来源、更新日期' },
   { human: true, title: '外链：找 2～3 个相关站点、公众号互推或投稿' },
   { human: true, title: 'GEO 核对：豆包 / Kimi / Perplexity / ChatGPT 各问一遍站点主词和 3 个支柱词，记录是否引用、引用哪页' },
@@ -45,12 +65,12 @@ const quarterly = [
   { human: true, title: 'PageSpeed Insights 跑首页和一个支柱页', link: 'https://pagespeed.web.dev/' },
   { human: true, title: '砍掉三个月零流量的方向，把精力集中到有搜索的词上' },
 ];
-
-const sections = [['每天', daily], [`周${W[weekday]}`, weekly[weekday] ?? []]];
+const sections = [['每天', daily], [`周${W[weekday]}`, weekly[weekday]]];
 if (dom === 1) sections.push(['每月 1 号', monthly]);
 if (dom === 1 && [1, 4, 7, 10].includes(month)) sections.push(['每季度', quarterly]);
 
-console.log(`\n${ymd} 周${W[weekday]} · 冬瓜站 SEO / GEO 清单（规则见 plan/seo-playbook.md）\n`);
+// ── 终端输出 ──
+console.log(`\n${ymd} 周${W[weekday]} · 冬瓜站 SEO / GEO 清单\n`);
 let n = 0;
 const humanTasks = [];
 for (const [name, tasks] of sections) {
@@ -65,29 +85,184 @@ for (const [name, tasks] of sections) {
 
 // ── 站内检查：dist 比 src 旧就先构建 ──
 console.log('\n【脚本检查】');
-const distTime = existsSync('dist/index.html') ? Number(execSync('stat -f %m dist/index.html').toString()) : 0;
-const srcTime = Number(execSync("find src public -type f -newer dist/index.html 2>/dev/null | head -1 | wc -l").toString().trim()) > 0 || !distTime;
-if (srcTime) {
+const stale = !existsSync('dist/index.html') || execSync('find src public -type f -newer dist/index.html | head -1').toString().trim() !== '';
+if (stale) {
   console.log('  dist/ 过期，先构建…');
   execSync('npm run build', { stdio: 'ignore' });
 }
-const { errors, warns } = runSeoCheck({ print: false });
-for (const e of errors) console.log('  ✗ ' + e);
-for (const w of warns.slice(0, 15)) console.log('  ⚠ ' + w);
-if (warns.length > 15) console.log(`  … 还有 ${warns.length - 15} 条建议，npm run seo:check 看全部`);
-if (!errors.length && !warns.length) console.log('  站内检查全绿');
+const check = runSeoCheck({ print: false });
+for (const e of check.errors) console.log('  ✗ ' + e);
+for (const w of check.warns.slice(0, 12)) console.log('  ⚠ ' + w);
+if (check.warns.length > 12) console.log(`  … 还有 ${check.warns.length - 12} 条建议，页面里有全部`);
+if (!check.errors.length && !check.warns.length) console.log('  站内检查全绿');
+
+// ── 历史：每天一条，同一天覆盖 ──
+mkdirSync('plan/seo', { recursive: true });
+const history = existsSync(HISTORY) ? JSON.parse(readFileSync(HISTORY, 'utf8')) : [];
+const rec = { date: ymd, pages: check.pages ?? 0, errors: check.errors.length, warns: check.warns.length };
+const idx = history.findIndex((h) => h.date === ymd);
+if (idx >= 0) history[idx] = rec; else history.push(rec);
+writeFileSync(HISTORY, JSON.stringify(history.slice(-90), null, 2) + '\n');
 
 // ── 待办：写进 launchpad，同一天同一条不重复 ──
+let todos = existsSync(TODOS) ? JSON.parse(readFileSync(TODOS, 'utf8')) : [];
 if (!noTodo && existsSync(TODOS)) {
-  const todos = JSON.parse(readFileSync(TODOS, 'utf8'));
   let added = 0;
   for (const t of humanTasks) {
-    const key = `${t.title}|${ymd}`;
     if (todos.some((x) => x.project === PROJECT && x.title === t.title && x.created === ymd)) continue;
     todos.push({ id: `t${Date.now()}${added}`, title: t.title, project: PROJECT, detail: `SEO 日常 · ${ymd}`, link: t.link ?? '', done: false, created: ymd });
     added++;
   }
   if (added) writeFileSync(TODOS, JSON.stringify(todos, null, 2) + '\n');
-  console.log(`\n待办：${added ? `写入 ${added} 条到` : '今天的已在'} ${TODOS}（http://localhost:8088）`);
 }
+const mine = todos.filter((x) => x.project === PROJECT);
+const oneTime = mine.filter((x) => !/^SEO 日常/.test(x.detail ?? ''));
+const todayTodos = mine.filter((x) => x.created === ymd && /^SEO 日常/.test(x.detail ?? ''));
+
+// ── 页面 ──
+const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const csv = existsSync('plan/seo/keywords.csv') ? readFileSync('plan/seo/keywords.csv', 'utf8').trim().split('\n').map((l) => l.split(',')) : [];
+const log = existsSync('plan/seo/log.md') ? readFileSync('plan/seo/log.md', 'utf8') : '';
+const logHtml = esc(log)
+  .replace(/^# .*$/m, '')
+  .replace(/^## (.*)$/gm, '<h4>$1</h4>')
+  .replace(/^- (.*)$/gm, '<li>$1</li>')
+  .replace(/^(?!<h4|<li|\s*$)(.+)$/gm, '<p>$1</p>');
+const last14 = history.slice(-14);
+const maxW = Math.max(1, ...last14.map((h) => h.warns + h.errors));
+const taskRow = (t, i) => {
+  const done = todayTodos.find((x) => x.title === t.title)?.done;
+  return `<li class="task${done ? ' done' : ''}"><label><input type="checkbox" data-key="${esc(ymd + '|' + t.title)}" ${done ? 'checked' : ''}/> <span>${esc(t.title)}</span></label>${t.link ? ` <a class="go" href="${esc(t.link)}" target="_blank" rel="noopener">打开 ↗</a>` : ''}${t.auto ? ` <code>${esc(t.auto)}</code>` : ''}</li>`;
+};
+const cal = [1, 2, 3, 4, 5, 6, 0].map((d) => `<div class="day${d === weekday ? ' today' : ''}"><b>周${W[d]}</b>${(weekly[d] ?? []).map((t) => `<p>${esc(t.title)}</p>`).join('') || '<p class="muted">只做每天的三件事</p>'}</div>`).join('');
+
+const html = `<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>冬瓜站 SEO 工作台</title>
+<meta name="description" content="eryx.cn 的 SEO / GEO 日常工作台：今天的清单、站内检查结果、关键词目标、周期安排和日志。每天 npm run seo:today 重新生成。" />
+<meta name="launchpad-group" content="AI 开发培训" />
+<style>
+  :root { --bg:#f8fafc; --card:#fff; --line:#e2e8f0; --ink:#0f172a; --muted:#64748b; --green:#059669; --green-soft:#ecfdf5; --red:#b91c1c; --red-soft:#fef2f2; --amber:#b45309; --amber-soft:#fef3c7; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--ink); font:15px/1.7 -apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB",sans-serif; padding:24px 16px 60px; }
+  .wrap { max-width:1100px; margin:0 auto; }
+  header { display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; gap:12px; margin-bottom:18px; }
+  h1 { font-size:24px; font-weight:800; }
+  h1 small { font-size:13px; color:var(--muted); font-weight:500; margin-left:10px; }
+  .platforms { display:flex; flex-wrap:wrap; gap:6px; }
+  .platforms a { font-size:12.5px; font-weight:600; color:#334155; background:#fff; border:1px solid var(--line); border-radius:999px; padding:4px 11px; text-decoration:none; }
+  .platforms a:hover { border-color:var(--green); color:var(--green); }
+  .grid { display:grid; grid-template-columns:minmax(0,1.3fr) minmax(0,1fr); gap:16px; }
+  @media (max-width:860px) { .grid { grid-template-columns:1fr; } }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px 20px; margin-bottom:16px; }
+  .card h2 { font-size:15px; font-weight:800; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; }
+  .card h2 span { font-size:12px; color:var(--muted); font-weight:500; }
+  .tasks { list-style:none; }
+  .task { padding:8px 0; border-bottom:1px dashed var(--line); display:flex; align-items:flex-start; gap:8px; flex-wrap:wrap; }
+  .task:last-child { border-bottom:0; }
+  .task label { display:flex; gap:10px; align-items:flex-start; cursor:pointer; flex:1; }
+  .task input { margin-top:6px; accent-color:var(--green); }
+  .task.done span { color:var(--muted); text-decoration:line-through; }
+  .task .go { font-size:12px; color:var(--green); font-weight:700; text-decoration:none; white-space:nowrap; margin-top:3px; }
+  .task code { font-size:12px; background:#f1f5f9; border-radius:5px; padding:1px 6px; }
+  .section-title { font-size:11px; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:#94a3b8; margin:12px 0 2px; }
+  .stat { display:flex; gap:10px; margin-bottom:12px; }
+  .stat div { flex:1; border-radius:10px; padding:10px 12px; background:#f8fafc; border:1px solid var(--line); }
+  .stat b { display:block; font-size:22px; }
+  .stat .bad b { color:var(--red); } .stat .warn b { color:var(--amber); } .stat .ok b { color:var(--green); }
+  .issues { list-style:none; font-size:13px; max-height:360px; overflow:auto; }
+  .issues li { padding:5px 8px; border-radius:6px; margin-bottom:4px; }
+  .issues .e { background:var(--red-soft); color:var(--red); } .issues .w { background:var(--amber-soft); color:var(--amber); }
+  .bars { display:flex; align-items:flex-end; gap:4px; height:60px; margin:6px 0 2px; }
+  .bars div { flex:1; background:#cbd5e1; border-radius:3px 3px 0 0; min-height:2px; position:relative; }
+  .bars div.today { background:var(--green); }
+  .bars div i { position:absolute; bottom:-18px; left:0; right:0; font-size:9px; color:#94a3b8; text-align:center; font-style:normal; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th, td { text-align:left; padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { color:var(--muted); font-weight:600; font-size:12px; }
+  .cal { display:grid; grid-template-columns:repeat(7,1fr); gap:6px; }
+  @media (max-width:860px) { .cal { grid-template-columns:repeat(2,1fr); } }
+  .day { background:#f8fafc; border:1px solid var(--line); border-radius:10px; padding:8px 10px; font-size:12px; }
+  .day.today { border-color:var(--green); background:var(--green-soft); }
+  .day b { display:block; margin-bottom:4px; }
+  .day p { color:#475569; line-height:1.5; margin-bottom:4px; }
+  .muted { color:#94a3b8; }
+  .cycle li { font-size:13px; margin:0 0 4px 18px; }
+  .log h4 { font-size:13px; margin:10px 0 4px; color:var(--green); }
+  .log li { font-size:13px; margin-left:18px; } .log p { font-size:13px; }
+  .onetime .task.done { opacity:.6; }
+  .how { font-size:12.5px; color:var(--muted); margin-top:4px; }
+  .how code { background:#f1f5f9; border-radius:5px; padding:1px 6px; }
+</style>
+</head>
+<body><div class="wrap">
+<header>
+  <h1>冬瓜站 SEO 工作台 <small>${ymd} 周${W[weekday]} · 生成于 ${today.toTimeString().slice(0, 5)}</small></h1>
+  <nav class="platforms">${PLATFORMS.map(([n, u]) => `<a href="${u}" target="_blank" rel="noopener">${n}</a>`).join('')}</nav>
+</header>
+<div class="grid">
+<div>
+  <section class="card">
+    <h2>今天要做的 <span>勾选只记在这台电脑的浏览器里；待办页里也有同样的事</span></h2>
+    ${sections.filter(([, t]) => t.length).map(([name, tasks]) => `<p class="section-title">${esc(name)}</p><ul class="tasks">${tasks.map(taskRow).join('')}</ul>`).join('')}
+    <p class="how">重新生成这个页面：在项目目录运行 <code>npm run seo:today</code>（会先构建并检查）。</p>
+  </section>
+  <section class="card">
+    <h2>站内检查 <span>${check.pages ?? 0} 页 · 规则见 plan/seo-playbook.md</span></h2>
+    <div class="stat">
+      <div class="${check.errors.length ? 'bad' : 'ok'}"><b>${check.errors.length}</b>必须改</div>
+      <div class="${check.warns.length ? 'warn' : 'ok'}"><b>${check.warns.length}</b>建议改</div>
+      <div class="ok"><b>${check.pages ?? 0}</b>页面</div>
+    </div>
+    <div class="bars">${last14.map((h) => `<div class="${h.date === ymd ? 'today' : ''}" style="height:${Math.max(4, Math.round(((h.errors + h.warns) / maxW) * 56))}px" title="${h.date}：${h.errors} 必须改 / ${h.warns} 建议改"><i>${h.date.slice(5)}</i></div>`).join('')}</div>
+    <p class="how" style="margin-top:22px">近 ${last14.length} 次检查的问题数走势，越矮越好。</p>
+    <ul class="issues" style="margin-top:10px">${check.errors.map((e) => `<li class="e">✗ ${esc(e)}</li>`).join('')}${check.warns.map((w) => `<li class="w">⚠ ${esc(w)}</li>`).join('') || '<li class="muted">全绿</li>'}</ul>
+  </section>
+  <section class="card onetime">
+    <h2>一次性准备 <span>在待办页勾完成；${oneTime.filter((x) => x.done).length} / ${oneTime.length}</span></h2>
+    <ul class="tasks">${oneTime.map((x) => `<li class="task${x.done ? ' done' : ''}"><label><input type="checkbox" disabled ${x.done ? 'checked' : ''}/> <span>${esc(x.title)}</span></label>${x.link ? ` <a class="go" href="${esc(x.link)}" target="_blank" rel="noopener">打开 ↗</a>` : ''}</li>`).join('') || '<li class="muted">没有</li>'}</ul>
+  </section>
+</div>
+<div>
+  <section class="card">
+    <h2>本周安排 <span>每天固定三件事之外</span></h2>
+    <div class="cal">${cal}</div>
+  </section>
+  <section class="card">
+    <h2>每月 1 号 / 每季度</h2>
+    <p class="section-title">每月 1 号</p><ul class="cycle">${monthly.map((t) => `<li>${esc(t.title)}</li>`).join('')}</ul>
+    <p class="section-title">每季度（1、4、7、10 月）</p><ul class="cycle">${quarterly.map((t) => `<li>${esc(t.title)}</li>`).join('')}</ul>
+  </section>
+  <section class="card">
+    <h2>关键词目标 <span>plan/seo/keywords.csv · 每月填排名</span></h2>
+    <table><thead><tr>${(csv[0] ?? []).slice(0, 5).map((h) => `<th>${esc(h)}</th>`).join('')}</tr></thead>
+    <tbody>${csv.slice(1).map((r) => `<tr>${r.slice(0, 5).map((c, i) => `<td>${i === 2 ? `<a href="https://eryx.cn${esc(c)}" target="_blank" rel="noopener">${esc(c)}</a>` : esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table>
+  </section>
+  <section class="card log">
+    <h2>工作日志 <span>plan/seo/log.md</span></h2>
+    ${logHtml || '<p class="muted">还没有</p>'}
+  </section>
+</div>
+</div>
+</div>
+<script>
+  for (const box of document.querySelectorAll('input[data-key]')) {
+    const k = 'seo-task:' + box.dataset.key;
+    try { if (localStorage.getItem(k) === '1') { box.checked = true; box.closest('.task').classList.add('done'); } } catch {}
+    box.addEventListener('change', () => {
+      box.closest('.task').classList.toggle('done', box.checked);
+      try { localStorage.setItem(k, box.checked ? '1' : '0'); } catch {}
+    });
+  }
+</script>
+</body>
+</html>
+`;
+mkdirSync(join(LAUNCHPAD, 'pages'), { recursive: true });
+writeFileSync(PAGE, html);
+console.log(`\n页面：${PAGE_URL}`);
+if (!noTodo && existsSync(TODOS)) console.log(`待办：http://localhost:8088 → 项目「${PROJECT}」`);
 console.log('');
