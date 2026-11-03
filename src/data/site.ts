@@ -16,8 +16,8 @@ export const SITE = {
     name: '冬瓜',
     description: '不写代码的独立开发者，产品代码都由 AI 写。',
   },
-  // 仓库还没公开，先留空。公开后填上地址，页面上的占位文字会自动换成链接。
-  github: '' as string,
+  // 公开仓库地址（2026-11-03 开源）。留空时导航和首页的 GitHub 按钮会自动隐藏。
+  github: 'https://github.com/znrn/vibe-to-ship' as string,
   icp: '浙ICP备19008373号-1',
 };
 
