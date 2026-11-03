@@ -9,6 +9,8 @@ import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { execSync } from 'node:child_process';
 import { runSeoCheck } from './seo-check.mjs';
+import { loadTopicMap } from './lib/topic-map.mjs';
+import { ROADMAP, PLATFORMS, WHAT_IS } from '../src/data/site.ts';
 
 const today = new Date();
 const ymd = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
@@ -24,7 +26,7 @@ const PAGE_URL = 'http://localhost:8088/pages/aidev-seo-console.html';
 const HISTORY = 'plan/seo/history.json';
 const noTodo = process.argv.includes('--no-todo');
 
-const PLATFORMS = [
+const LINKS = [
   ['百度站长', 'https://ziyuan.baidu.com/'],
   ['Bing 站长', 'https://www.bing.com/webmasters/'],
   ['Search Console', 'https://search.google.com/search-console'],
@@ -128,12 +130,48 @@ const logHtml = esc(log)
   .replace(/^## (.*)$/gm, '<h4>$1</h4>')
   .replace(/^- (.*)$/gm, '<li>$1</li>')
   .replace(/^(?!<h4|<li|\s*$)(.+)$/gm, '<p>$1</p>');
+// ── 关键词库：来自选题地图（plan/topic-map.yaml + 文章 frontmatter）、需求分和搜索量 ──
+const readJson = (f) => (existsSync(f) ? JSON.parse(readFileSync(f, 'utf8')) : null);
+const demand = readJson('plan/research/demand.json')?.demand ?? {};
+const volumeAll = readJson('plan/research/volume.json');
+const volume = volumeAll?.nodes ?? {};
+const metric = volumeAll?.metric ?? '搜索量';
+let kwNodes = [];
+let kwMap = null;
+try { ({ map: kwMap, merged: kwNodes } = loadTopicMap()); } catch (e) { console.log('  （读不到选题地图：' + e.message + '）'); }
+const stageName = Object.fromEntries(ROADMAP.map((r) => [r.slug, `${r.step} ${r.short}`]));
+const KW_STATUS = { published: ['已发布', 'ok'], draft: ['草稿', 'later'], planned: ['计划', 'doing'] };
+const topWords = [
+  ...['vibe coding', '一人公司'].map((w) => ({ w, level: '站点主词', page: '/' })),
+  { w: WHAT_IS.keyword, level: '入口页', page: WHAT_IS.path },
+  ...ROADMAP.map((r) => ({ w: r.keyword, level: '支柱词', page: `/flow/${r.slug}/` })),
+  ...PLATFORMS.map((pf) => ({ w: pf.keyword, level: '类目词', page: `/platforms/${pf.slug}/` })),
+];
+const kwSorted = [...kwNodes].sort((a, b) => (a.status === 'published' ? 0 : 1) - (b.status === 'published' ? 0 : 1) || (a.priority > b.priority ? 1 : -1) || (demand[b.id]?.score ?? 0) - (demand[a.id]?.score ?? 0));
+const longtail = kwNodes.reduce((n, x) => n + x.covers.length, 0);
+const kwRows = kwSorted.map((n) => {
+  const [label, cls] = KW_STATUS[n.status] ?? ['', ''];
+  const link = n.status === 'published' ? `https://eryx.cn/articles/${n.id}/` : '';
+  return `<tr data-status="${n.status}" data-p="${esc(n.priority)}" data-text="${esc((n.keyword + ' ' + n.covers.join(' ') + ' ' + (n.title ?? '')).toLowerCase())}"><td><b>${esc(n.keyword)}</b>${n.title ? `<br><small>${link ? `<a href="${link}" target="_blank" rel="noopener">${esc(n.title)} ↗</a>` : esc(n.title)}</small>` : ''}${n.covers.length ? `<details><summary>${n.covers.length} 个长尾</summary>${n.covers.map((c) => `<span class="lt">${esc(c)}</span>`).join('')}</details>` : ''}</td><td>${esc(stageName[n.stage] ?? n.stage ?? '')}</td><td>${esc(n.platforms.join(' / '))}</td><td>${esc(n.priority)}</td><td><span class="st ${cls}">${label}</span></td><td>${demand[n.id]?.score ?? '-'}</td><td>${volume[n.id]?.volume ?? '-'}</td></tr>`;
+}).join('');
+const kwHtml = kwNodes.length ? `
+  <p class="how" style="margin-bottom:8px">四层结构：站点主词 → 类目词 / 支柱词 → 文章主词（一个节点 = 一篇文章）→ 长尾（写进小标题和 FAQ）。
+  来源 plan/topic-map.yaml；需求分 = 联想词命中数（scripts/research/match.mjs），${esc(metric)} 来自关键词工具导入。
+  更完整的视图：<a href="/pages/aidev-topic-map.html">选题地图</a> · <a href="/pages/aidev-topic-research.html">问法对照</a> · <a href="/pages/aidev-keyword-bank.html">培训关键词库</a></p>
+  <div class="stat"><div><b>${topWords.length}</b>主词 / 类目 / 支柱词</div><div><b>${kwNodes.length}</b>文章节点</div><div class="ok"><b>${kwNodes.filter((n) => n.status === 'published').length}</b>已发布</div><div><b>${kwNodes.filter((n) => n.priority === 'P1' && n.status !== 'published').length}</b>P1 待写</div><div><b>${longtail}</b>长尾问法</div></div>
+  <p class="section-title">第 1～2 层 · 首页、入口页、支柱页、形态页</p>
+  <div class="chips">${topWords.map((t) => `<a class="chip" href="https://eryx.cn${esc(t.page)}" target="_blank" rel="noopener"><small>${esc(t.level)}</small>${esc(t.w)}</a>`).join('')}</div>
+  <p class="section-title">第 3～4 层 · 文章主词和长尾</p>
+  <div class="kw-tools"><input id="kw-q" type="search" placeholder="搜词、长尾或标题…" /><label><input type="radio" name="kw-s" value="" checked /> 全部</label><label><input type="radio" name="kw-s" value="published" /> 已发布</label><label><input type="radio" name="kw-s" value="planned" /> 计划</label><label><input type="checkbox" id="kw-p1" /> 只看 P1</label><span id="kw-n" class="muted"></span></div>
+  <div class="kw-wrap"><table id="kw-table"><thead><tr><th>文章主词 / 标题 / 长尾</th><th>步骤</th><th>形态</th><th>优先级</th><th>状态</th><th>需求分</th><th>${esc(metric)}</th></tr></thead><tbody>${kwRows}</tbody></table></div>` : '';
 const lmap = existsSync('plan/seo/learning-map.json') ? JSON.parse(readFileSync('plan/seo/learning-map.json', 'utf8')) : null;
 const STATUS = { done: ['已做', 'ok'], doing: ['在做', 'doing'], later: ['以后', 'later'], skip: ['不需要', 'skip'] };
 const learnHtml = lmap ? lmap.modules.map((m, mi) => `<div class="mod"><h3>${esc(m.name)} <small>${esc(m.why)}</small></h3><ul>${m.points.map((pt, pi) => {
   const [label, cls] = STATUS[pt.site] ?? ['', ''];
   return `<li><label><input type="checkbox" data-learn="${mi}-${pi}" /> <b>${esc(pt.name)}</b></label><span class="st ${cls}">${label}</span><p>${esc(pt.what)}${pt.note ? ` <em>本站：${esc(pt.note)}</em>` : ''}${(pt.learn ?? []).map(([t, u]) => ` <a href="${esc(u)}" target="_blank" rel="noopener">${esc(t)} ↗</a>`).join('')}</p></li>`;
 }).join('')}</ul></div>`).join('') : '';
+const tut = lmap?.tutorial;
+const tutHtml = tut ? `<div class="tut"><p class="how" style="margin-bottom:8px"><b><a href="${esc(tut.url)}" target="_blank" rel="noopener">${esc(tut.title)} ↗</a></b> ${esc(tut.note)}</p><ol class="tut-list">${tut.chapters.map((c) => { const [label, cls] = STATUS[c.site] ?? ['', '']; return `<li><a href="${esc(tut.url)}#${esc(c.id)}" target="_blank" rel="noopener">${esc(c.name)}</a><span class="st ${cls}">${label}</span><p>${esc(c.note)}</p></li>`; }).join('')}</ol></div>` : '';
 const last14 = history.slice(-14);
 const maxW = Math.max(1, ...last14.map((h) => h.warns + h.errors));
 const taskRow = (t, i) => {
@@ -218,12 +256,32 @@ const html = `<!doctype html>
   .st { font-size:10.5px; font-weight:700; border-radius:999px; padding:0 7px; margin-left:6px; vertical-align:1px; }
   .st.ok { background:var(--green-soft); color:var(--green); } .st.doing { background:#eff6ff; color:#2563eb; } .st.later { background:#f1f5f9; color:#64748b; } .st.skip { background:#f8fafc; color:#94a3b8; }
   .learn-progress { font-size:12px; color:var(--muted); }
+  .kw { grid-column:1 / -1; }
+  .chips { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; }
+  .chip { display:inline-flex; flex-direction:column; font-size:12.5px; font-weight:600; color:var(--ink); background:#f8fafc; border:1px solid var(--line); border-radius:8px; padding:4px 10px; text-decoration:none; }
+  .chip small { font-size:10px; color:#94a3b8; font-weight:600; }
+  .chip:hover { border-color:var(--green); }
+  .kw-tools { display:flex; flex-wrap:wrap; align-items:center; gap:12px; font-size:12.5px; margin:4px 0 8px; }
+  .kw-tools input[type=search] { flex:1; min-width:180px; border:1px solid var(--line); border-radius:8px; padding:6px 10px; font:inherit; }
+  .kw-wrap { max-height:520px; overflow:auto; border:1px solid var(--line); border-radius:10px; }
+  #kw-table th { position:sticky; top:0; background:#f8fafc; }
+  #kw-table td small { color:var(--muted); }
+  #kw-table details { font-size:11.5px; color:var(--muted); margin-top:2px; } #kw-table summary { cursor:pointer; }
+  .lt { display:inline-block; border:1px dashed var(--line); border-radius:6px; padding:0 6px; margin:2px 4px 0 0; }
+  tr.hide { display:none; }
+  .tut-list { list-style:none; display:grid; grid-template-columns:repeat(3,1fr); gap:8px; counter-reset:ch; }
+  @media (max-width:1000px) { .tut-list { grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:640px) { .tut-list { grid-template-columns:1fr; } }
+  .tut-list li { border:1px solid var(--line); border-radius:10px; padding:8px 12px; font-size:12.5px; background:#fbfcfd; counter-increment:ch; }
+  .tut-list li::before { content:counter(ch, decimal-leading-zero); font-size:10px; font-weight:800; color:#94a3b8; margin-right:6px; }
+  .tut-list li > a { font-weight:700; color:var(--ink); text-decoration:none; } .tut-list li > a:hover { color:var(--green); }
+  .tut-list li p { color:#475569; line-height:1.5; margin-top:2px; }
 </style>
 </head>
 <body><div class="wrap">
 <header>
   <h1>冬瓜站 SEO 工作台 <small>${ymd} 周${W[weekday]} · 生成于 ${today.toTimeString().slice(0, 5)}</small></h1>
-  <nav class="platforms">${PLATFORMS.map(([n, u]) => `<a href="${u}" target="_blank" rel="noopener">${n}</a>`).join('')}</nav>
+  <nav class="platforms">${LINKS.map(([n, u]) => `<a href="${u}" target="_blank" rel="noopener">${n}</a>`).join('')}</nav>
 </header>
 <div class="grid">
 <div>
@@ -269,10 +327,13 @@ const html = `<!doctype html>
   </section>
 </div>
 </div>
+${kwHtml ? `<section class="card kw"><h2>关键词库 <span>plan/topic-map.yaml · 改选题先改地图</span></h2>${kwHtml}</section>` : ''}
 ${lmap ? `<section class="card learn">
   <h2>SEO / GEO 学习地图 <span class="learn-progress">勾掉学过的，记在这台电脑的浏览器里 · <span id="learn-count"></span></span></h2>
   <p class="how" style="margin-bottom:10px">来源：${esc(lmap.source)}。每条标了本站现状：<span class="st ok">已做</span><span class="st doing">在做</span><span class="st later">以后</span><span class="st skip">不需要</span>，点「↗」是学习资料。</p>
   <div class="mods">${learnHtml}</div>
+  <h2 style="margin-top:18px">做法教程 <span>学习地图说「有哪些事」，这本说「怎么做」</span></h2>
+  ${tutHtml}
 </section>` : ''}
 </div>
 <script>
@@ -284,6 +345,20 @@ ${lmap ? `<section class="card learn">
     box.addEventListener('change', () => { box.closest('li').classList.toggle('learned', box.checked); try { localStorage.setItem(k, box.checked ? '1' : '0'); } catch {} learnCount(); });
   }
   learnCount();
+  const kwRowsEl = document.querySelectorAll('#kw-table tbody tr');
+  const kwFilter = () => {
+    const q = (document.getElementById('kw-q')?.value ?? '').trim().toLowerCase();
+    const st = document.querySelector('input[name=kw-s]:checked')?.value ?? '';
+    const p1 = document.getElementById('kw-p1')?.checked;
+    let shown = 0;
+    for (const r of kwRowsEl) {
+      const ok = (!q || r.dataset.text.includes(q)) && (!st || r.dataset.status === st) && (!p1 || r.dataset.p === 'P1');
+      r.classList.toggle('hide', !ok); if (ok) shown++;
+    }
+    const n = document.getElementById('kw-n'); if (n) n.textContent = shown + ' / ' + kwRowsEl.length + ' 条';
+  };
+  for (const el of document.querySelectorAll('#kw-q, input[name=kw-s], #kw-p1')) el.addEventListener('input', kwFilter);
+  kwFilter();
   for (const box of document.querySelectorAll('input[data-key]')) {
     const k = 'seo-task:' + box.dataset.key;
     try { if (localStorage.getItem(k) === '1') { box.checked = true; box.closest('.task').classList.add('done'); } } catch {}
@@ -298,6 +373,7 @@ ${lmap ? `<section class="card learn">
 `;
 mkdirSync(join(LAUNCHPAD, 'pages'), { recursive: true });
 writeFileSync(PAGE, html);
+try { execSync('node scripts/topic-map-page.mjs', { stdio: 'ignore' }); } catch {}
 console.log(`\n页面：${PAGE_URL}`);
 if (!noTodo && existsSync(TODOS)) console.log(`待办：http://localhost:8088 → 项目「${PROJECT}」`);
 console.log('');
