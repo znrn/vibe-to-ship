@@ -183,12 +183,11 @@ const html = `<!doctype html>
   table { width:100%; border-collapse:collapse; font-size:13px; }
   th, td { text-align:left; padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
   th { color:var(--muted); font-weight:600; font-size:12px; }
-  .cal { display:grid; grid-template-columns:repeat(7,1fr); gap:6px; }
-  @media (max-width:860px) { .cal { grid-template-columns:repeat(2,1fr); } }
-  .day { background:#f8fafc; border:1px solid var(--line); border-radius:10px; padding:8px 10px; font-size:12px; }
+  .cal { display:flex; flex-direction:column; gap:6px; }
+  .day { display:flex; gap:12px; align-items:flex-start; background:#f8fafc; border:1px solid var(--line); border-radius:10px; padding:8px 12px; font-size:12.5px; }
   .day.today { border-color:var(--green); background:var(--green-soft); }
-  .day b { display:block; margin-bottom:4px; }
-  .day p { color:#475569; line-height:1.5; margin-bottom:4px; }
+  .day b { flex:0 0 34px; color:var(--ink); }
+  .day p { color:#475569; line-height:1.5; }
   .muted { color:#94a3b8; }
   .cycle li { font-size:13px; margin:0 0 4px 18px; }
   .log h4 { font-size:13px; margin:10px 0 4px; color:var(--green); }
