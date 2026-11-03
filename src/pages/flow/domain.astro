@@ -11,27 +11,27 @@ const toc = [
   {"id": "sec-part5", "label": "第 3 步", "num": "05"},
   {"id": "sec-part6", "label": "第 5 步", "num": "06"},
   {"id": "sec-part7", "label": "极简行动清单", "num": "07"},
-  {"id": "sec-warning", "label": "避坑红线备忘", "kind": "warn"},
+  {"id": "sec-warning", "label": "这一步的规矩", "kind": "warn"},
   {"id": "sec-faq", "label": "常见问题 FAQ", "kind": "faq"},
 ];
 ---
 
 <PillarLayout
   slug="domain"
-  title="第6步：域名、备案与 HTTPS 到底怎么搞？上线合规实战指南"
-  description="买域名看重记忆度与拼音后缀，国内服务器必须走个人 ICP 备案（人脸识别与管局核验仅需 1~3 天），海外节点可即解析即用。证书坚决不花钱，让 AI 配自动化 Certbot/Let's Encrypt 脚本实现 90 天循环自动续期；最后"
+  title="域名、ICP 备案和 HTTPS 怎么办：个人建站合规流程（第 6 步）"
+  description="域名实名必须和备案人一致，国内服务器要先做个人 ICP 备案，网站名称别带商业字眼、审核期间别提前上线、24 小时内完成工信部短信核验。HTTPS 用免费证书，让 AI 配好自动续期；备案号下来 30 天内挂到页脚。"
   toc={toc}
 >
       <!-- 顶部 Hero 卡片 -->
       <header class="header-card" id="sec-header-conclusion">
         <div class="header-meta-row">
           <div class="header-pill-group">
-            <span class="phase-pill-dark">一人公司实战体系</span>
+            <span class="phase-pill-dark">9 步上线流程</span>
             <span class="step-pill-emerald">第 6 步 · 域名、备案与 HTTPS</span>
           </div>
           <span class="header-status-indicator">
             <span class="status-dot-pulse"></span>
-            <span>核心交付：绿色安全锁专属域名 + 极速合规通关</span>
+            <span>核心交付：绿色安全锁专属域名 + 合规上线</span>
           </span>
         </div>
 
@@ -45,10 +45,10 @@ const toc = [
             <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
               <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
             </svg>
-            <span>先说结论 · KEY TAKEAWAY</span>
+            <span>先说结论</span>
           </div>
           <p class="hci-text">
-            <strong>买域名看重记忆度与拼音后缀，国内服务器必须走个人 ICP 备案（人脸识别与管局核验仅需 1~3 天），海外节点可即解析即用。</strong>证书坚决不花钱，让 AI 配自动化 Certbot/Let's Encrypt 脚本实现 90 天循环自动续期；最后由 AI 修改 Nginx 强制 301 跳转 HTTPS，底部贴好备案号链接完成合规验收。
+            <strong>买域名看重记忆度与拼音后缀，国内服务器必须走个人 ICP 备案（人脸识别后管局审核一般 1～4 周），海外节点可即解析即用。</strong>证书坚决不花钱，让 AI 配自动化 Certbot/Let's Encrypt 脚本实现 90 天循环自动续期；最后由 AI 修改 Nginx 强制 301 跳转 HTTPS，底部贴好备案号链接完成合规验收。
           </p>
         </div>
 
@@ -138,7 +138,7 @@ const toc = [
   <li><strong>避坑要点</strong>：</li>
   <li><strong>避开续费陷阱</strong>：警惕首年 1 元但次年续费数百元的冷门后缀，优先选 <code>.com</code>、<code>.cn</code>、<code>.net</code> 或口碑稳定的通用后缀。</li>
   <li><strong>主体一致性</strong>：域名所有人必须与后续准备做 ICP 备案的身份证完全一致，否则管局直接驳回。</li>
-  <li><strong>拒绝智商税</strong>：购买时勾掉一切“企业邮箱套餐、隐私保护付费升级、收费 SSL 证书”等捆绑消费。</li>
+  <li><strong>别买用不上的付费项</strong>：购买时勾掉一切“企业邮箱套餐、隐私保护付费升级、收费 SSL 证书”等捆绑消费。</li>
 </ul>
         </div>
       </section>
@@ -160,7 +160,7 @@ const toc = [
       <!-- Section 5 -->
       <section class="step-card-wrap" id="sec-part5">
         <div class="card-top-tag">
-          <h2 class="step-heading-h2">第 3 步：个人 ICP 备案通关指南（只有你能做，AI 无法代劳）</h2>
+          <h2 class="step-heading-h2">第 3 步：个人 ICP 备案指南（只有你能做，AI 无法代劳）</h2>
         </div>
         <div class="step-inner-content">
 <p>内地服务器必须在对应的接入商 App（如阿里云 App、腾讯云 App）中办理。</p>
@@ -221,16 +221,16 @@ const toc = [
         </div>
       </section>
         
-      <!-- 避坑红线 -->
+      <!-- 规矩 -->
       <section class="danger-summary-box" id="sec-warning">
         <div class="danger-header">
           <span class="danger-badge-icon">🚫</span>
-          <h2 class="danger-title">千万不要这么做：本步骤必须守住的避坑红线</h2>
+          <h2 class="danger-title">千万别这么做：这一步要守住的几条规矩</h2>
         </div>
         <div>
           
         <div style="margin-bottom:14px;">
-          <h3 style="font-size:15px;font-weight:750;color:#9a3412;margin-bottom:8px;">第 4 步：全自动免费 HTTPS 配置（压榨 AI 敲代码，绝不掏钱）</h3>
+          <h3 style="font-size:15px;font-weight:750;color:#9a3412;margin-bottom:8px;">第 4 步：全自动免费 HTTPS 配置（让 AI 写配置，一分钱不花）</h3>
           <div><p>个人或初创产品<strong>一分钱也不需要花在 SSL 证书上</strong>，免费的 Let's Encrypt 证书完全足够且受各大浏览器信任。</p>
 <ul class="bullet-list-custom">
   <li><strong>分工</strong>：直接向 AI 提出需求，让 AI 生成配置脚本，你只需粘到服务器执行。</li>

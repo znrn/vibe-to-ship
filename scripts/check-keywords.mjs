@@ -63,21 +63,26 @@ function similarity(a, b) {
   return inter / (A.size + B.size - inter);
 }
 
-// 每一步最多一篇流程页文章（kind: flow）；有流程页文章的步骤，以那篇的文章主词为准，不再单独用 flow.ts 里的 keyword
+// 每一步最多一篇流程页文章（kind: flow）；有流程页文章的步骤，以那篇的文章主词为准，不再单独用 flow.ts 里的 keyword。
+// 2026-11 起流程页也可以是静态支柱页 src/pages/flow/<slug>.astro：这种步骤用 flow.ts 的 keyword，
+// 同一步里被它取代、已设 draft 的旧流程页文章不再参与撞词检查。
+const pillarPages = new Set(ROADMAP.filter((s) => existsSync(`src/pages/flow/${s.slug}.astro`)).map((s) => s.slug));
 const flowArticles = new Map();
 for (const [id, a] of articles) {
   if (a.data.kind !== 'flow' || a.data.draft) continue;
+  if (pillarPages.has(a.data.stage)) errors.push(`流程步骤 ${a.data.stage} 已有静态支柱页 src/pages/flow/${a.data.stage}.astro，流程页文章 ${id} 要设为 draft 或删掉`);
   if (flowArticles.has(a.data.stage)) errors.push(`流程步骤 ${a.data.stage} 有两篇流程页文章：${flowArticles.get(a.data.stage)} 和 ${id}，只能留一篇`);
   else flowArticles.set(a.data.stage, id);
 }
-for (const s of ROADMAP) if (!flowArticles.has(s.slug)) warnings.push(`流程第 ${s.step} 步「${s.name}」还没有流程页文章（kind: flow）`);
+for (const s of ROADMAP) if (!flowArticles.has(s.slug) && !pillarPages.has(s.slug)) warnings.push(`流程第 ${s.step} 步「${s.name}」还没有流程页（静态支柱页或 kind: flow 的文章）`);
+const supersededFlowDraft = (n) => n.status === 'draft' && articles.get(n.id)?.data.kind === 'flow' && pillarPages.has(articles.get(n.id).data.stage);
 
 const owners = [
   { id: '首页', words: [map.site?.keyword, ...(map.site?.covers ?? [])] },
   { id: `入口页 ${WHAT_IS.path}`, words: [WHAT_IS.keyword, ...WHAT_IS.covers] },
   ...ROADMAP.filter((s) => !flowArticles.has(s.slug)).map((s) => ({ id: `流程页 ${s.slug}`, words: [s.keyword] })),
   ...PLATFORMS.map((p) => ({ id: `形态页 ${p.slug}`, words: [p.keyword] })),
-  ...merged.map((n) => ({ id: n.id, words: [n.keyword, ...n.covers] })),
+  ...merged.filter((n) => !supersededFlowDraft(n)).map((n) => ({ id: n.id, words: [n.keyword, ...n.covers] })),
 ];
 // distinct 登记过的配对，不再提示相似
 const distinctPairs = new Set([

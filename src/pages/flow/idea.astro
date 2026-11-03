@@ -5,24 +5,24 @@ import PillarLayout from '../../layouts/PillarLayout.astro';
 const toc = [
   {"id": "sec-header-conclusion", "label": "先说结论", "kind": "conclusion"},
   {"id": "sec-step1", "label": "纸上回答 3 问", "num": "01"},
-  {"id": "sec-step2", "label": "降维网页文件", "num": "02"},
-  {"id": "sec-step3", "label": "刁民反向追问", "num": "03"},
+  {"id": "sec-step2", "label": "先做网页文件", "num": "02"},
+  {"id": "sec-step3", "label": "让 AI 反向追问", "num": "03"},
   {"id": "sec-step4", "label": "半小时搓样板间", "num": "04"},
-  {"id": "sec-summary", "label": "避坑红线两条", "kind": "warn"},
+  {"id": "sec-summary", "label": "两条规矩", "kind": "warn"},
   {"id": "sec-faq", "label": "常见问题 FAQ", "kind": "faq"},
 ];
 ---
 
 <PillarLayout
   slug="idea"
-  title="第1步：新手用 AI 写软件，第一步到底该怎么把模糊的想法落地成“能跑的原型”？"
-  description="很多新手用 AI 写软件，最容易犯的错误就是直接让 AI 帮我写一个类似某某的产品。要把脑子里模糊的想法在半天内变成鼠标可点击、流程能跑通的原型，照着4步流水线操作。"
+  title="产品想法怎么落地：用 AI 半天做出能点的原型（第 1 步）"
+  description="不要直接让 AI「帮我写一个类似某某的产品」。先在纸上用 3 个问题把想法收敛成一句话，再让 AI 做一个双击就能跑的单文件网页原型，登录支付先用弹窗占位，半天内拿到能发给朋友试的样板。"
   toc={toc}
 >
       <header class="header-card" id="sec-header-conclusion">
         <div class="header-meta-row">
           <div class="header-pill-group">
-            <span class="phase-pill-dark">一人公司实战体系</span>
+            <span class="phase-pill-dark">9 步上线流程</span>
             <span class="step-pill-emerald">第 1 步 · AI 原型设计与 MVP 落地</span>
           </div>
           <div class="header-status-indicator">
@@ -41,7 +41,7 @@ const toc = [
             <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
               <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
             </svg>
-            <span>先说结论 · KEY TAKEAWAY</span>
+            <span>先说结论</span>
           </div>
           <p class="hci-text">
             <strong>千万不要直接让 AI“帮我写一个类似某某的产品”。</strong>真正的第一步，是在纸上用 3 个问题把想法收敛成一句大白话，<strong>坚决不碰 App 和小程序，直接让 AI 搓出一个双击就能在浏览器跑的纯单文件 HTML</strong>。登录、支付全用弹窗占位，数据全部写死，只通核心业务那一盏灯——半天之内，手里必须先拿到一个鼠标可点、能发给朋友测反馈的“活样板间”。
@@ -61,7 +61,7 @@ const toc = [
             </div>
             <div class="meta-tag-content">
               <span class="meta-tag-label">核心动作:</span>
-              <span>克制野心 · 降维做单文件网页</span>
+              <span>克制野心 · 先做单文件网页</span>
             </div>
           </div>
 
@@ -128,7 +128,7 @@ const toc = [
       <!-- 第二步 -->
       <section class="step-card-wrap" id="sec-step2">
         <div class="card-top-tag">
-          <h2 class="step-heading-h2">第二步：克制野心，把形态降维到“网页文件”（轻量优先）</h2>
+          <h2 class="step-heading-h2">第二步：克制野心，先做成一个网页文件（轻量优先）</h2>
         </div>
         <div class="step-inner-content">
           <p>新手最喜欢说“我要做个安卓/iOS App”或“做个微信小程序”。<strong>在第一步，千万别做 App！</strong></p>
@@ -144,7 +144,7 @@ const toc = [
       <!-- 第三步 -->
       <section class="step-card-wrap" id="sec-step3">
         <div class="card-top-tag">
-          <h2 class="step-heading-h2">第三步：把 AI 当成“挑剔的刁民”，让它追问你（它问，你答）</h2>
+          <h2 class="step-heading-h2">第三步：把 AI 当成“挑剔的用户”，让它追问你（它问，你答）</h2>
         </div>
         <div class="step-inner-content">
           <p>把第一步的那句话发给 AI，但<strong>千万不要直接让它写代码</strong>，而是给它下达这个指令：</p>
@@ -194,16 +194,16 @@ const toc = [
         </div>
       </section>
 
-      <!-- 总结红线 -->
-      <!-- 千万不要这么做 / 总结避坑红线 -->
+      <!-- 总结规矩 -->
+      <!-- 千万不要这么做 / 总结规矩 -->
       <section class="danger-summary-box" id="sec-summary">
         <div class="danger-header">
           <span class="danger-badge-icon">🚫</span>
-          <h2 class="danger-title">千万不要这么做：必须刻在脑门上的两条避坑红线</h2>
+          <h2 class="danger-title">千万别这么做：两条必须记住的规矩</h2>
         </div>
         <ol class="num-list-custom danger-list">
-          <li><strong>红线一：原型一旦跑通，立刻踩刹车！</strong><br />不要在原型阶段觉得“哎呀再加上多主题切换吧”、“再加个用户等级吧”。每多加一个边角料，都是在为一个尚未验证的市场设想浪费生命。</li>
-          <li><strong>红线二：你是产品经理，AI 只是外包打工人。</strong><br />AI 会很热心地给你推荐“要不要加个向量数据库”、“要不要上微服务”。记住：<strong>它负责提供技术选项，你负责挥刀砍掉一切非核心欲望。</strong></li>
+          <li><strong>规矩一：原型一旦跑通，立刻踩刹车！</strong><br />不要在原型阶段觉得“哎呀再加上多主题切换吧”、“再加个用户等级吧”。每多加一个边角料，都是在为一个尚未验证的市场设想浪费生命。</li>
+          <li><strong>规矩二：你是产品经理，AI 只是外包帮手。</strong><br />AI 会很热心地给你推荐“要不要加个向量数据库”、“要不要上微服务”。记住：<strong>它负责提供技术选项，你负责挥刀砍掉一切非核心欲望。</strong></li>
         </ol>
         <p class="danger-footer-takeaway">完成这 4 步，你手里就有了一个<strong>随时能发给朋友试用、能用来录屏发朋友圈测反馈、能指导下一步真正写代码</strong>的“活原型”。</p>
       </section>
@@ -220,7 +220,7 @@ const toc = [
         </details>
 
         <details class="faq-accordion-item">
-          <summary>为什么非要降维到网页，我直接做微信小程序或者 App 不行吗？</summary>
+          <summary>为什么非要先做成网页，我直接做微信小程序或者 App 不行吗？</summary>
           <div class="faq-accordion-body">
             第一步的核心是“极速验证业务流程与获得体感”。做 App 需要安装 Xcode/Android Studio 开发环境、配证书、装模拟器，很容易直接劝退；小程序要注册账号、配域名和过审。单文件 HTML 零门槛、免安装，先用它把需求点透，后续随时能让 AI 把逻辑迁移到小程序或 App。
           </div>

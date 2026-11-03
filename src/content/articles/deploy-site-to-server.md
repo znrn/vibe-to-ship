@@ -1,4 +1,6 @@
 ---
+# 2026-11-03：这一步已改用静态支柱页 src/pages/flow/<slug>.astro，这篇旧流程页设为草稿保留
+draft: true
 title: 买了服务器，怎么把网站放上去：全程交给 Claude / Codex，你只做这 4 件事
 description: 把 AI 做好的网站放到轻量应用服务器上，生成 SSH 密钥、连服务器、装环境、部署、配 Nginx 和 HTTPS 都可以交给 Claude / Codex，不用装宝塔这类面板。你只需要买对服务器、在控制台绑定 AI 生成的密钥、做 AI 碰不到的控制台操作、最后用手机验收。
 intent: 买好了云服务器或轻量服务器，不知道怎么登录、怎么把 AI 做的网站放上去

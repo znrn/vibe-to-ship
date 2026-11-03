@@ -8,22 +8,22 @@ const toc = [
   {"id": "sec-part2", "label": "第二步", "num": "02"},
   {"id": "sec-part3", "label": "第三步", "num": "03"},
   {"id": "sec-part4", "label": "第四步", "num": "04"},
-  {"id": "sec-warning", "label": "避坑红线备忘", "kind": "warn"},
+  {"id": "sec-warning", "label": "这一步的规矩", "kind": "warn"},
   {"id": "sec-faq", "label": "常见问题 FAQ", "kind": "faq"},
 ];
 ---
 
 <PillarLayout
   slug="deploy"
-  title="第5步：开发完了怎么上线？不用装宝塔、不用记命令，如何让 AI 替你把网站搬上云服务器？"
-  description="彻底摒弃沉重且易留漏洞的可视化面板。轻量应用服务器优先，借助 SSH 密钥建立免密安全通道；把云服务器的终端权限以只读或受限方式交由 AI CLI 自动化搭建 Docker/Nginx 运行环境。部署完成后立即断开 Wi-Fi 用手机 4G"
+  title="轻量应用服务器怎么搭建网站：让 AI 替你部署，不装宝塔（第 5 步）"
+  description="纯静态页用免费托管，有后端才买轻量应用服务器（2 核 2G、Ubuntu）。用 SSH 密钥而不是密码，公钥你亲自在控制台绑定，之后让 AI 登录服务器装环境、配 Nginx 和守护进程，最后手机断开 Wi-Fi 验收。"
   toc={toc}
 >
       <!-- 顶部 Hero 卡片 -->
       <header class="header-card" id="sec-header-conclusion">
         <div class="header-meta-row">
           <div class="header-pill-group">
-            <span class="phase-pill-dark">一人公司实战体系</span>
+            <span class="phase-pill-dark">9 步上线流程</span>
             <span class="step-pill-emerald">第 5 步 · 免装宝塔上云服务器</span>
           </div>
           <span class="header-status-indicator">
@@ -42,7 +42,7 @@ const toc = [
             <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
               <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
             </svg>
-            <span>先说结论 · KEY TAKEAWAY</span>
+            <span>先说结论</span>
           </div>
           <p class="hci-text">
             <strong>彻底摒弃沉重且易留漏洞的可视化面板。</strong>轻量应用服务器优先，借助 SSH 密钥建立免密安全通道；把云服务器的终端权限以只读或受限方式交由 AI CLI 自动化搭建 Docker/Nginx 运行环境。部署完成后立即断开 Wi-Fi 用手机 4G/5G 真机回访验收，让 AI 一键输出资产清单备忘录。
@@ -179,7 +179,7 @@ const toc = [
           <h2 class="step-heading-h2">第四步：断开 Wi-Fi 真机验收，沉淀运维资产（你来验收，AI 归档）</h2>
         </div>
         <div class="step-inner-content">
-<p>部署完后不能在本地电脑自嗨，必须做跨网实测：</p>
+<p>部署完后不能只在自己电脑上看着高兴，必须做跨网实测：</p>
 <ol class="num-list-custom">
   <li><strong>真机断网验收：</strong>
 <ul class="bullet-list-custom">
@@ -202,16 +202,16 @@ const toc = [
         </div>
       </section>
         
-      <!-- 避坑红线 -->
+      <!-- 规矩 -->
       <section class="danger-summary-box" id="sec-warning">
         <div class="danger-header">
           <span class="danger-badge-icon">🚫</span>
-          <h2 class="danger-title">千万不要这么做：本步骤必须守住的避坑红线</h2>
+          <h2 class="danger-title">千万别这么做：这一步要守住的几条规矩</h2>
         </div>
         <div>
           
         <div style="margin-bottom:14px;">
-          <h3 style="font-size:15px;font-weight:750;color:#9a3412;margin-bottom:8px;">💡 核心避坑红线</h3>
+          <h3 style="font-size:15px;font-weight:750;color:#9a3412;margin-bottom:8px;">核心规矩</h3>
           <div><div style="overflow-x:auto;margin:18px 0;"><table style="width:100%;border-collapse:collapse;font-size:13.5px;background:#ffffff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">
   <tr style="font-weight:750;color:#0f172a;"><th style="padding:11px 16px;text-align:left;border:1px solid #e2e8f0;background:#f8fafc;">场景</th><th style="padding:11px 16px;text-align:left;border:1px solid #e2e8f0;background:#f8fafc;">错误做法</th><th style="padding:11px 16px;text-align:left;border:1px solid #e2e8f0;background:#f8fafc;">正确做法</th></tr>
   <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:10px 16px;color:#334155;border:1px solid #e2e8f0;"><strong>云账号安全</strong></td><td style="padding:10px 16px;color:#334155;border:1px solid #e2e8f0;">把云厂商账号/主密码/私钥发进对话框</td><td style="padding:10px 16px;color:#334155;border:1px solid #e2e8f0;">只给 AI 提供服务器 IP，通过本地私钥 SSH 连入，绝不给云厂商主控权</td></tr>

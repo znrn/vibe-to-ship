@@ -10,36 +10,36 @@ const toc = [
   {"id": "sec-part4", "label": "更新挂了？先回退，再查原因", "num": "04"},
   {"id": "sec-part5", "label": "第 3 件事", "num": "05"},
   {"id": "sec-part6", "label": "搞定搜索引擎收录", "num": "06"},
-  {"id": "sec-part7", "label": "戒掉「刷后台强迫症」，死磕前 10 个真实用户", "num": "07"},
+  {"id": "sec-part7", "label": "别老刷后台，死磕前 10 个真实用户", "num": "07"},
   {"id": "sec-part8", "label": "第 5 件事", "num": "08"},
   {"id": "sec-part9", "label": "先让 AI 帮你归类清洗", "num": "09"},
   {"id": "sec-part10", "label": "用「防变形三问」过滤伪需求", "num": "10"},
-  {"id": "sec-warning", "label": "避坑红线备忘", "kind": "warn"},
+  {"id": "sec-warning", "label": "这一步的规矩", "kind": "warn"},
   {"id": "sec-faq", "label": "常见问题 FAQ", "kind": "faq"},
 ];
 ---
 
 <PillarLayout
   slug="grow"
-  title="第9步：产品上线后该做什么？网站维护、搜索收录与首批用户破局指南"
-  description="上线是马拉松的起点。运维牢记「先看日志再改动，遇到问题回滚优先」；资产到期日设好日历双重预警；向 Google、百度提交 Sitemap 坐等搜索收录。冷启动期彻底戒掉每 5 分钟刷后台数据的强迫症，带着产品去垂直小红书、即刻、V2EX 和"
+  title="网站上线后怎么维护：运维、搜索收录和找到前 10 个用户（第 9 步）"
+  description="上线后网站挂了先看日志再改、更新前留好回退；域名、服务器、证书到期日设两重提醒；向百度和 Google 提交站点地图后等 2～6 周收录。别天天刷后台，带着产品去找前 10 个真实用户，按反馈定下一版。"
   toc={toc}
 >
       <!-- 顶部 Hero 卡片 -->
       <header class="header-card" id="sec-header-conclusion">
         <div class="header-meta-row">
           <div class="header-pill-group">
-            <span class="phase-pill-dark">一人公司实战体系</span>
+            <span class="phase-pill-dark">9 步上线流程</span>
             <span class="step-pill-emerald">第 9 步 · 线上运维、收录与获客</span>
           </div>
           <span class="header-status-indicator">
             <span class="status-dot-pulse"></span>
-            <span>核心交付：稳健自愈运维体系 + 首批 10 个真实用户破局</span>
+            <span>核心交付：网站能稳定运行 + 找到前 10 个真实用户</span>
           </span>
         </div>
 
         <h1 class="header-main-h1">
-          产品上线后该做什么？网站维护、搜索收录与<span class="hl">首批用户破局</span>指南
+          产品上线后该做什么？网站维护、搜索收录与<span class="hl">找到前 10 个用户</span>指南
         </h1>
 
         <!-- 先说结论 -->
@@ -48,10 +48,10 @@ const toc = [
             <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
               <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
             </svg>
-            <span>先说结论 · KEY TAKEAWAY</span>
+            <span>先说结论</span>
           </div>
           <p class="hci-text">
-            <strong>上线是马拉松的起点。</strong>运维牢记「先看日志再改动，遇到问题回滚优先」；资产到期日设好日历双重预警；向 Google、百度提交 Sitemap 坐等搜索收录。冷启动期彻底戒掉每 5 分钟刷后台数据的强迫症，带着产品去垂直小红书、即刻、V2EX 和行业微信群，死磕前 10 个真实付费用户，用「防变形三问」守护核心价值。
+            <strong>上线是马拉松的起点。</strong>运维牢记「先看日志再改动，遇到问题回滚优先」；资产到期日设好日历双重预警；向 Google、百度提交 Sitemap 等搜索收录。冷启动期彻底戒掉每 5 分钟刷后台数据的习惯，带着产品去垂直小红书、即刻、V2EX 和行业微信群，死磕前 10 个真实付费用户，用「防变形三问」守护核心价值。
           </p>
         </div>
 
@@ -183,7 +183,7 @@ const toc = [
           <h2 class="step-heading-h2">第 3 件事：资产续费——把底座筑牢（你来做）</h2>
         </div>
         <div class="step-inner-content">
-<p>很多网站平稳运行了半年突然失联，排查半天才发现是服务器欠费停机，甚至域名到期被黑客恶意抢注。这种非技术性的失误最伤元气。</p>
+<p>很多网站平稳运行了半年突然失联，排查半天才发现是服务器欠费停机，甚至域名到期被人抢注。这种非技术性的失误最伤元气。</p>
 <div style="overflow-x:auto;margin:18px 0;"><table style="width:100%;border-collapse:collapse;font-size:13.5px;background:#ffffff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">
   <tr style="font-weight:750;color:#0f172a;"><th style="padding:11px 16px;text-align:left;border:1px solid #e2e8f0;background:#f8fafc;">核心资产</th><th style="padding:11px 16px;text-align:left;border:1px solid #e2e8f0;background:#f8fafc;">谁来续费</th><th style="padding:11px 16px;text-align:left;border:1px solid #e2e8f0;background:#f8fafc;">到期没续的后果</th><th style="padding:11px 16px;text-align:left;border:1px solid #e2e8f0;background:#f8fafc;">实操建议</th></tr>
   <tr style="border-bottom:1px solid #f1f5f9;"><td style="padding:10px 16px;color:#334155;border:1px solid #e2e8f0;"><strong>域名</strong></td><td style="padding:10px 16px;color:#334155;border:1px solid #e2e8f0;"><strong>你本人</strong>（在域名服务商后台付款）</td><td style="padding:10px 16px;color:#334155;border:1px solid #e2e8f0;">网站彻底打不开；进入赎回期高价赎回，或被他人抢注导致前期积累清零</td><td style="padding:10px 16px;color:#334155;border:1px solid #e2e8f0;">直接开启<strong>「自动扣费续费」</strong>，或一次性续满 2~3 年</td></tr>
@@ -218,13 +218,13 @@ const toc = [
   <li><strong>Bing Webmaster Tools</strong>：登录添加并验证（如已配置 Google Search Console 可一键导入）。</li>
   <li><strong>Google Search Console</strong>：面向海外或泛技术用户必加。</li>
 </ol>
-<div class="quote-callout"><strong>客观规律提醒</strong>：提交后不要每天去搜索框搜自己十遍。新站在互联网上缺乏权重，搜索引擎爬虫通常需要 <strong>2 ~ 6 周</strong> 才会完成建库与初始抓取。只要确认验证文件没删、<code>sitemap</code> 正常，就可以把它抛在脑后，专心做下面的用户破局。</div>
+<div class="quote-callout"><strong>客观规律提醒</strong>：提交后不要每天去搜索框搜自己十遍。新站在互联网上缺乏权重，搜索引擎爬虫通常需要 <strong>2 ~ 6 周</strong> 才会完成建库与初始抓取。只要确认验证文件没删、<code>sitemap</code> 正常，就可以把它抛在脑后，专心去找第一批用户。</div>
         </div>
       </section>
       <!-- Section 7 -->
       <section class="step-card-wrap" id="sec-part7">
         <div class="card-top-tag">
-          <h2 class="step-heading-h2">2. 戒掉「刷后台强迫症」，死磕前 10 个真实用户</h2>
+          <h2 class="step-heading-h2">2. 别老刷后台，死磕前 10 个真实用户</h2>
         </div>
         <div class="step-inner-content">
 <p>刚上线时后台访问量是 <code>0</code> 太正常了——这不代表你的产品是垃圾，只代表<strong>还没人知道它的存在</strong>。把后台统计 App 从手机首屏移走，用下面这套动作去拿前 10 个活人用户：</p>
@@ -277,11 +277,11 @@ const toc = [
         </div>
       </section>
         
-      <!-- 避坑红线 -->
+      <!-- 规矩 -->
       <section class="danger-summary-box" id="sec-warning">
         <div class="danger-header">
           <span class="danger-badge-icon">🚫</span>
-          <h2 class="danger-title">千万不要这么做：本步骤必须守住的避坑红线</h2>
+          <h2 class="danger-title">千万别这么做：这一步要守住的几条规矩</h2>
         </div>
         <div>
           
@@ -290,7 +290,7 @@ const toc = [
           <div><p>凡是线上服务，没有 100% 永远不宕机的。新手最容易在网站打不开的瞬间陷入恐慌，对着 AI 喊「赶紧帮我修好！」。一旦不加限制，AI 往往会慌不择路地重装组件、乱改配置甚至误删数据，把几秒钟重启就能解决的小问题演变成大灾难。</p></div>
         </div>
         <div style="margin-bottom:14px;">
-          <h3 style="font-size:15px;font-weight:750;color:#9a3412;margin-bottom:8px;">这一步绝对别干的事（红线清单）</h3>
+          <h3 style="font-size:15px;font-weight:750;color:#9a3412;margin-bottom:8px;">这一步绝对别干的事（规矩清单）</h3>
           <div><ol class="num-list-custom">
   <li><strong>绝不交出核心主密码</strong>：别把云厂商、域名服务商、收款平台、搜索资源平台的账号登录密码直接交给 AI。</li>
   <li><strong>绝不盲目动线上数据</strong>：线上出问题时，先让 AI 只看不改；涉及<strong>删数据库、清空目录、重装系统</strong>的操作前，必须让 AI 先用大白话讲清后果并确认已备份。</li>

@@ -4,7 +4,7 @@ import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import { SITE, AUDIENCE, CAMP, WHAT_IS } from '../data/site';
 import { FLOW_STEPS, flowUrl } from '../data/flow';
-import { getArticles, articleUrl, formatDate } from '../lib/articles';
+import { getArticles, articleUrl, formatDate, stageOfArticle } from '../lib/articles';
 
 const articles = await getArticles();
 const recentArticles = articles.slice(0, 6);
@@ -24,10 +24,8 @@ const STEP_ICONS: Record<string, string> = {
 };
 
 // 9 步标题优化（更具动作感与交付目标感）
-const STEP_TITLES_A1: Record<string, string> = {
-  idea: '定位与选品：切中真实付费痛点',
-  base: '技术选型：开源改造还是 AI 从零生成',
-};
+// 9 步卡片标题直接用 flow.ts 里的步骤名，这里留空（以后想单独改某一步的标题再填）
+const STEP_TITLES_A1: Record<string, string> = {};
 
 const STEP_TITLES_A2: Record<string, string> = {
   idea: '需求切片：定义最小可收费版本 (MVP)',
@@ -80,7 +78,7 @@ const SHOWCASE_PROJECTS = [
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{SITE.homeTitle} - {SITE.name}</title>
+    <title>{SITE.homeTitle}</title>
     <meta name="description" content={SITE.description} />
     <meta name="author" content={SITE.author.name} />
     <link rel="canonical" href={canonical} />
@@ -2252,11 +2250,11 @@ const SHOWCASE_PROJECTS = [
       <section class="hero container">
         <div class="hero-tag">
           <span style="font-size: 16px;">⚡</span>
-          <span>一人公司 · 绝不教空泛语法 · 只管把产品推上线</span>
+          <span>Vibe Coding · 一人公司 · 9 步上线流程</span>
         </div>
-        <h1>不会写代码，<span class="gradient-text">也能靠 AI</span><br />把产品做到公网上线并收到钱</h1>
+        <h1>不会写代码，<span class="gradient-text">也能用 AI</span> <br />一个人把产品做上线、收到钱</h1>
         <p class="hero-sub">
-          你用大白话说业务需求，代码交给 AI 写。最难的其实是账号订阅、域名解析、服务器配置与合规审核——这里带你完整跑通从需求到收钱的闭环。
+          你用大白话说需求，代码交给 AI 写。真正难的是账号、域名、服务器、备案和审核这些事，这个站按 9 步带你走完，直到收到第一笔钱。
         </p>
         <div class="hero-actions" style="display: flex; justify-content: center; align-items: center; gap: 16px; margin-bottom: 48px; flex-wrap: wrap;">
           <!-- 选定方案 1：精制矢量路线图指南针图标 + 现代高质感按钮 -->
@@ -2265,28 +2263,25 @@ const SHOWCASE_PROJECTS = [
               <circle cx="12" cy="12" r="10"></circle>
               <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill="currentColor" fill-opacity="0.25"></polygon>
             </svg>
-            <span>查看 9 步通关指南</span>
+            <span>看 9 步上线流程</span>
             <span style="font-weight: 800; margin-left: 2px;">➔</span>
           </a>
 
-          <!-- GitHub 开源手册按钮 (并列平衡) -->
-          <a href="https://github.com" target="_blank" rel="noopener" class="btn btn-ghost" style="padding: 13px 24px; font-size: 15.5px; border-radius: 12px; background: #ffffff; border-color: #cbd5e1; display: inline-flex; align-items: center; gap: 9px;">
-            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #0f172a; flex-shrink: 0;">
-              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
-            </svg>
-            <span>GitHub 开源手册 (免费自学)</span>
+          <a href="/articles/" class="btn btn-ghost" style="padding: 13px 24px; font-size: 15.5px; border-radius: 12px; background: #ffffff; border-color: #cbd5e1; display: inline-flex; align-items: center; gap: 9px;">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #0f172a; flex-shrink: 0;"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+            <span>先看实战手册（免费）</span>
           </a>
         </div>
 
         <!-- 核心对比看板：5 项核心维度彻底对照 -->
         <div class="sec-header" style="margin: 64px auto 36px;">
-          <span class="sec-tag">COGNITIVE SHIFT</span>
-          <h2 class="sec-title">从层层大山到一句话上线：5 项核心维度彻底对照</h2>
-          <p class="sec-desc">你不需要重学一遍计算机科学，只需要把你的业务认知转化为可交付的软件</p>
+          <span class="sec-tag">换一种分工</span>
+          <h2 class="sec-title">以前要学一年，现在换一种分工</h2>
+          <p class="sec-desc">你不用重学一遍计算机，只要把懂的业务说清楚，剩下的交给 AI</p>
         </div>
 
         <div class="vs-container" id="contrast">
-          <div class="vs-badge-floating" style="background: #047857; border-color: #34d399;">认知进阶：带你逐层捅破窗户纸</div>
+          <div class="vs-badge-floating" style="background: #047857; border-color: #34d399;">两种做法对照</div>
 
           <!-- 左侧：传统技术老路（去框纯净清单） -->
           <div class="vs-card vs-left">
@@ -2347,7 +2342,7 @@ const SHOWCASE_PROJECTS = [
             <div class="vs-card-top" style="margin-bottom: 24px;">
               <div class="vs-icon-tag success">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                冬瓜 AI 交付营：一句话说对，层层窗户纸全捅破
+                换一种分工：你说清楚要什么，AI 来写
               </div>
               <h3 class="vs-title">一句话让 AI 敲代码，难在“怎么跟 AI 说”</h3>
               <p style="font-size: 13.5px; color: #047857; font-weight: 600; margin-top: 8px;">现在代码变成了薄纸，线下 48 小时带你现场逐层穿透：</p>
@@ -2397,9 +2392,9 @@ const SHOWCASE_PROJECTS = [
       <section class="sec" id="audience-plan-a" style="background: #fafcff; border-bottom: 1px solid #e2e8f0;">
         <div class="container">
           <div class="sec-header">
-            <span class="sec-tag">WHO IS THIS FOR</span>
-            <h2 class="sec-title">专为这四类想把业务做成软件的人捅破窗户纸</h2>
-            <p class="sec-desc">你不需要懂计算机底层原理，只需要带着你真实沉淀的业务想法与客户需求</p>
+            <span class="sec-tag">写给谁</span>
+            <h2 class="sec-title">这个站是写给这四类人的</h2>
+            <p class="sec-desc">不需要懂技术，带着你的业务想法和客户需求来就行</p>
           </div>
 
           <div class="aud-grid-a">
@@ -2483,8 +2478,8 @@ const SHOWCASE_PROJECTS = [
               <div class="aud-gain-box">
                 <span class="aud-check-icon">➔</span>
                 <div>
-                  <strong class="aud-gain-title">拿公网可点击的真家伙降维碾压</strong>
-                  <p class="aud-gain-desc">不碰底层语法，直接做出别人手机能打开、能点击的公网高保真版本，用真实上线版本彻底拉齐团队共识。</p>
+                  <strong class="aud-gain-title">拿一个能点开的真实版本去说服人</strong>
+                  <p class="aud-gain-desc">不碰代码，直接做出别人手机上能打开、能点的版本，用真东西拉齐团队共识。</p>
                 </div>
               </div>
               <div class="aud-footer-tag">
@@ -2530,18 +2525,18 @@ const SHOWCASE_PROJECTS = [
       <section class="sec" id="flow" style="background: #ffffff; border-bottom: 1px solid #e2e8f0;">
         <div class="container">
           <div class="sec-header">
-            <span class="sec-tag">DELIVERY PIPELINE</span>
-            <h2 class="sec-title">非程序员独立开发 9 步通关流水线</h2>
-            <p class="sec-desc">每一步都拆清楚：你来决定什么、交给 AI 做什么、哪些卡点线下带你现场穿透</p>
+            <span class="sec-tag">9 步上线流程</span>
+            <h2 class="sec-title">不会写代码的人，按这 9 步把产品做上线</h2>
+            <p class="sec-desc">每一步都拆清楚：你来决定什么、交给 AI 做什么、哪些事只能你亲自做</p>
           </div>
 
           <!-- 阶段 1 -->
           <div class="pipeline-phase-group">
             <div class="phase-badge-bar unified">
-              <span class="phase-pill uni-green">PHASE 01</span>
+              <span class="phase-pill uni-green">第 1～3 步</span>
               <div>
-                <span class="phase-title-text">阶段一：筹备与架构设计</span>
-                <span class="phase-desc-text">—— 把模糊点子收敛为可执行工程，完成开发账号与环境就位</span>
+                <span class="phase-title-text">想清楚、选底子、备账号</span>
+                <span class="phase-desc-text">—— 把点子收敛成一句话，定好技术底子，把工具和账号准备好</span>
               </div>
             </div>
             <div class="pipeline-grid-a">
@@ -2564,7 +2559,7 @@ const SHOWCASE_PROJECTS = [
                     </div>
                   </div>
                   <div style="font-size: 12.5px; color: #059669; font-weight: 700; display: flex; justify-content: space-between; border-top: 1px dashed #e2e8f0; padding-top: 12px;">
-                    <span>查看第 0{step.step} 步通关指南</span>
+                    <span>看第 0{step.step} 步</span>
                     <span>➔</span>
                   </div>
                 </a>
@@ -2575,10 +2570,10 @@ const SHOWCASE_PROJECTS = [
           <!-- 阶段 2 -->
           <div class="pipeline-phase-group">
             <div class="phase-badge-bar unified">
-              <span class="phase-pill uni-green">PHASE 02</span>
+              <span class="phase-pill uni-green">第 4～6 步</span>
               <div>
-                <span class="phase-title-text">阶段二：AI 协同构建与云端部署</span>
-                <span class="phase-desc-text">—— 从本地白开水到公网安全穿透，做出别人手机能秒开的真家伙</span>
+                <span class="phase-title-text">做出来、放上网、配域名</span>
+                <span class="phase-desc-text">—— 让 AI 写出能跑的东西，放到服务器上，配好域名、备案和 HTTPS</span>
               </div>
             </div>
             <div class="pipeline-grid-a">
@@ -2601,7 +2596,7 @@ const SHOWCASE_PROJECTS = [
                     </div>
                   </div>
                   <div style="font-size: 12.5px; color: #059669; font-weight: 700; display: flex; justify-content: space-between; border-top: 1px dashed #e2e8f0; padding-top: 12px;">
-                    <span>查看第 0{step.step} 步通关指南</span>
+                    <span>看第 0{step.step} 步</span>
                     <span>➔</span>
                   </div>
                 </a>
@@ -2612,10 +2607,10 @@ const SHOWCASE_PROJECTS = [
           <!-- 阶段 3 -->
           <div class="pipeline-phase-group" style="margin-bottom: 0;">
             <div class="phase-badge-bar unified">
-              <span class="phase-pill uni-green">PHASE 03</span>
+              <span class="phase-pill uni-green">第 7～9 步</span>
               <div>
-                <span class="phase-title-text">阶段三：商业变现与审核自增长</span>
-                <span class="phase-desc-text">—— 现场跑通真实收款进账，完成上架合规与长期自主迭代</span>
+                <span class="phase-title-text">收到钱、过审核、维护好</span>
+                <span class="phase-desc-text">—— 收到第一笔钱，过小程序和 App 审核，上线后维护、更新、找用户</span>
               </div>
             </div>
             <div class="pipeline-grid-a">
@@ -2638,7 +2633,7 @@ const SHOWCASE_PROJECTS = [
                     </div>
                   </div>
                   <div style="font-size: 12.5px; color: #059669; font-weight: 700; display: flex; justify-content: space-between; border-top: 1px dashed #e2e8f0; padding-top: 12px;">
-                    <span>查看第 0{step.step} 步通关指南</span>
+                    <span>看第 0{step.step} 步</span>
                     <span>➔</span>
                   </div>
                 </a>
@@ -2648,174 +2643,15 @@ const SHOWCASE_PROJECTS = [
         </div>
       </section>
 
-      <!-- ── 实战作品交付证明：全形态终端实战作品 (Showcase) ── -->
-      <section class="sec" id="showcase" style="background: #ffffff; border-bottom: 1px solid #e2e8f0;">
-        <div class="container">
-          <div class="sec-header">
-            <span class="sec-tag">SHIPPED PRODUCTS · 全终端覆盖</span>
-            <h2 class="sec-title">覆盖全终端形态：不仅能做，更能真实上线</h2>
-            <p class="sec-desc">不碰枯燥底层代码，借助 AI 跨越环境与平台差异，亲手把软件交付到用户终端</p>
-          </div>
-
-          <div class="showcase-grid-c">
-            {SHOWCASE_PROJECTS.map((item) => (
-              <div class="showcase-card-c">
-                <div>
-                  <div class="sc-c-type-bar">
-                    <span class={`sc-c-badge ${item.type}`}>
-                      {item.typeLabel}
-                    </span>
-                    <div class="sc-c-device-icon">
-                      {item.type === 'mp' && (
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                          <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
-                          <line x1="12" y1="18" x2="12.01" y2="18"></line>
-                        </svg>
-                      )}
-                      {item.type === 'web' && (
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                          <circle cx="12" cy="12" r="10"></circle>
-                          <line x1="2" y1="12" x2="22" y2="12"></line>
-                          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
-                        </svg>
-                      )}
-                      {item.type === 'app' && (
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                          <rect x="4" y="2" width="16" height="20" rx="3"></rect>
-                          <path d="M11 4h2"></path>
-                          <line x1="12" y1="18" x2="12.01" y2="18"></line>
-                        </svg>
-                      )}
-                    </div>
-                  </div>
-
-                  <!-- 仿真设备与界面截图/模型视窗 -->
-                  <div class="sc-mockup-wrapper">
-                    {item.type === 'mp' && (
-                      <div class="mock-mp-phone">
-                        <div class="mock-mp-capsule-bar">
-                          <span style="font-size: 8.5px; font-weight: 700; color: #0f172a;">商户核销</span>
-                          <div class="mock-mp-capsule">
-                            <span class="mock-mp-capsule-dot"></span>
-                            <span class="mock-mp-capsule-circle"></span>
-                          </div>
-                        </div>
-                        <div class="mock-mp-screen">
-                          <div class="mock-mp-hero-banner">
-                            <div style="font-size: 11px; font-weight: 800;">会员权益 & 验券</div>
-                            <div style="font-size: 8.5px; opacity: 0.9; margin-top: 2px;">实时同步收银台</div>
-                          </div>
-                          <div class="mock-mp-ticket-box">
-                            <div class="mock-qr-sample"></div>
-                            <span style="font-size: 8px; color: #64748b; font-family: monospace;">扫码自动核销</span>
-                          </div>
-                          <div class="mock-mp-btn">确认结账完成</div>
-                        </div>
-                      </div>
-                    )}
-
-                    {item.type === 'web' && (
-                      <div class="mock-web-browser">
-                        <div class="mock-web-bar">
-                          <div class="mock-web-dots">
-                            <span class="mock-web-dot r"></span>
-                            <span class="mock-web-dot y"></span>
-                            <span class="mock-web-dot g"></span>
-                          </div>
-                          <div class="mock-web-input">https://vectorcraft.io/pricing</div>
-                        </div>
-                        <div class="mock-web-content">
-                          <div class="mock-web-nav">
-                            <span style="font-size: 10px; font-weight: 850; color: #1e293b;">VectorCraft</span>
-                            <span style="font-size: 8px; color: #2563eb; font-weight: 700; background: #dbeafe; padding: 2px 6px; border-radius: 4px;">PRO Tier</span>
-                          </div>
-                          <div class="mock-web-hero-card">
-                            <div style="font-size: 9.5px; font-weight: 800; color: #0f172a; margin-bottom: 2px;">SVG Auto Converter</div>
-                            <div style="font-size: 8px; color: #64748b;">Cloudflare Edge CDN · 秒级极速转换</div>
-                          </div>
-                          <div class="mock-web-grid">
-                            <div class="mock-web-pill">Stripe 信用卡</div>
-                            <div class="mock-web-pill">Google 授权</div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {item.type === 'app' && (
-                      <div class="mock-app-phone">
-                        <div class="mock-app-island-bar">
-                          <div class="mock-app-island"></div>
-                        </div>
-                        <div class="mock-app-screen">
-                          <div style="display: flex; justify-content: space-between; align-items: center; padding: 2px 0;">
-                            <span style="font-size: 10px; font-weight: 800; color: #0f172a;">资产看板</span>
-                            <span style="font-size: 8px; color: #7e22ce; font-weight: 700;">iOS 17 原生</span>
-                          </div>
-                          <div class="mock-app-chart-box">
-                            <span style="font-size: 8px; color: #64748b;">本月收支动态 (真机 SQLite)</span>
-                            <div class="mock-app-bars">
-                              <div class="mock-app-bar-col" style="height: 45%;"></div>
-                              <div class="mock-app-bar-col" style="height: 70%;"></div>
-                              <div class="mock-app-bar-col" style="height: 35%;"></div>
-                              <div class="mock-app-bar-col" style="height: 90%; background: #7e22ce;"></div>
-                              <div class="mock-app-bar-col" style="height: 60%;"></div>
-                            </div>
-                          </div>
-                          <div class="mock-app-item">
-                            <span style="font-size: 8.5px; font-weight: 700; color: #1e293b;">App Store 审核</span>
-                            <span style="font-size: 8px; color: #16a34a; font-weight: 700;">Ready for Sale ✓</span>
-                          </div>
-                        </div>
-                        <div class="mock-app-dock">
-                          <div class="mock-dock-dot active"></div>
-                          <div class="mock-dock-dot"></div>
-                          <div class="mock-dock-dot"></div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  <h3 class="sc-c-title">{item.title}</h3>
-                  <div class="sc-c-sub">{item.sub}</div>
-
-                  <div class="sc-c-desc-box">
-                    {item.desc}
-                  </div>
-
-                  <ul class="sc-c-checklist">
-                    {item.highlights.map((hl) => (
-                      <li>
-                        <span>✓</span>
-                        <div>{hl}</div>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div class="sc-c-footer">
-                  <div class="sc-c-meta-row">
-                    <span class="label">交付耗时</span>
-                    <span class="val">{item.buildTime}</span>
-                  </div>
-                  <div class="sc-c-meta-row">
-                    <span class="label">底层技术栈</span>
-                    <span class="val">{item.tech}</span>
-                  </div>
-                  <a href={item.demoUrl} class="sc-c-btn">查看形态上线与排雷复盘 ➔</a>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <!-- 作品区暂时下线：SHOWCASE_PROJECTS 里的三个案例是占位示例，等有真实作品和复盘文章再放回来 -->
 
       <!-- ── 首页文章集合：方案 A · 知识库精读卡片流 (定稿采用) ── -->
       <section class="sec" id="articles" style="background: #ffffff; border-bottom: 1px solid #e2e8f0;">
         <div class="container">
           <div class="sec-header">
-            <span class="sec-tag">HANDBOOK & KNOWLEDGE</span>
-            <h2 class="sec-title">一线真机实战排错手册</h2>
-            <p class="sec-desc">非程序员的第一手解药：不讲语法教条，只解具体问题与避坑指南</p>
+            <span class="sec-tag">实战手册</span>
+            <h2 class="sec-title">卡住了看这里</h2>
+            <p class="sec-desc">不讲语法，只解决具体问题，每篇开头直接给结论</p>
           </div>
 
           <div class="art-grid-a">
@@ -2823,7 +2659,7 @@ const SHOWCASE_PROJECTS = [
               <a href={articleUrl(art)} class="art-card-a">
                 <div>
                   <div class="art-badge-top">
-                    <span class="art-tag-stage">{art.data.stage ? `流程 · ${art.data.stage}` : '实战手记'}</span>
+                    <span class="art-tag-stage">第 {stageOfArticle(art).step} 步 · {stageOfArticle(art).name}</span>
                     <span class="art-time">{formatDate(art.data.date)}</span>
                   </div>
                   <h3 class="art-title-a">{art.data.title}</h3>
@@ -2849,16 +2685,16 @@ const SHOWCASE_PROJECTS = [
       <section class="sec" id="about" style="background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
         <div class="container">
           <div class="sec-header">
-            <span class="sec-tag">BUILDER & PRACTITIONER</span>
-            <h2 class="sec-title">关于冬瓜：一个非程序员的上线实战手记</h2>
-            <p class="sec-desc">不做纸上谈兵的理论派，只做亲手把产品推到公网真机上收钱的排雷人</p>
+            <span class="sec-tag">关于</span>
+            <h2 class="sec-title">关于冬瓜</h2>
+            <p class="sec-desc">不写代码的独立开发者，产品代码都由 AI 写</p>
           </div>
 
           <div class="about-box">
             <div class="about-profile">
               <div class="about-avatar-wrap">
                 <img class="about-avatar" src="/images/avatar.jpg" alt="冬瓜的头像" width="104" height="104" loading="lazy" />
-                <div class="about-online-badge" title="实战排雷中"></div>
+                <div class="about-online-badge" title="在线"></div>
               </div>
               <h3 class="about-name">冬瓜</h3>
               <span class="about-role-tag">一人公司实践者 · AI 独立开发</span>
@@ -2866,15 +2702,15 @@ const SHOWCASE_PROJECTS = [
               <div class="about-badges-mini">
                 <div class="about-mini-item">
                   <span>技术背景</span>
-                  <strong>0 行底层代码</strong>
+                  <strong>非科班，不写代码</strong>
                 </div>
                 <div class="about-mini-item">
-                  <span>上线产品</span>
-                  <strong>5+ 款公网运行</strong>
+                  <span>做法</span>
+                  <strong>代码全部交给 AI</strong>
                 </div>
                 <div class="about-mini-item">
                   <span>经验来源</span>
-                  <strong>真机踩坑排雷</strong>
+                  <strong>自己上线过的产品</strong>
                 </div>
               </div>
             </div>
@@ -2894,17 +2730,17 @@ const SHOWCASE_PROJECTS = [
               <div class="about-pillars">
                 <div class="about-pillar-card">
                   <div class="pillar-icon">🛠️</div>
-                  <div class="pillar-title">100% 真实真机交付</div>
-                  <div class="pillar-desc">拒绝只在本地 localhost 跑 Demo，所有指南只以“真机能开、公网能收钱”为验收标准。</div>
+                  <div class="pillar-title">只认真机能打开</div>
+                  <div class="pillar-desc">不在自己电脑上跑个演示就算数，每一步都以别人手机能打开、能收到钱为准。</div>
                 </div>
                 <div class="about-pillar-card">
                   <div class="pillar-icon">📖</div>
-                  <div class="pillar-title">开源避坑完全公开</div>
-                  <div class="pillar-desc">不搞信息差割韭菜，核心通关流程与真实配置脚本持续在 GitHub 与知识库公开发布。</div>
+                  <div class="pillar-title">流程全部公开</div>
+                  <div class="pillar-desc">9 步流程、提示词和配置脚本都在这个站上公开，自己看就能做。</div>
                 </div>
                 <div class="about-pillar-card">
                   <div class="pillar-icon">🤝</div>
-                  <div class="pillar-title">手把手逐个排雷</div>
+                  <div class="pillar-title">线下陪你做一遍</div>
                   <div class="pillar-desc">通过小班制 48 小时线下实训与社群，在关键的账号、支付、部署与过审节点陪你现场打通。</div>
                 </div>
               </div>
@@ -2913,8 +2749,8 @@ const SHOWCASE_PROJECTS = [
                 <span class="contact-text">交流与探讨一人公司 / AI 独立开发：</span>
                 <div class="contact-actions">
                   <a href="/camp/" class="contact-btn primary">48 小时线下实训详情 ➔</a>
-                  <a href="https://github.com" target="_blank" rel="noopener" class="contact-btn">GitHub 仓库</a>
-                  <a href="#faq" class="contact-btn">查看常见答疑</a>
+                  {SITE.github && <a href={SITE.github} target="_blank" rel="noopener" class="contact-btn">GitHub 仓库</a>}
+                  <a href="#faq" class="contact-btn">看常见问题</a>
                 </div>
               </div>
             </div>
@@ -2926,9 +2762,9 @@ const SHOWCASE_PROJECTS = [
       <section class="sec" id="faq" style="background: #ffffff; border-bottom: 1px solid #e2e8f0;">
         <div class="container">
           <div class="sec-header">
-            <span class="sec-tag">FREQUENTLY ASKED QUESTIONS</span>
-            <h2 class="sec-title">新手常被卡住的关键困惑</h2>
-            <p class="sec-desc">关于门槛、资质、收款与交付的真实解答，把问号变成确定的可执行步骤</p>
+            <span class="sec-tag">常见问题</span>
+            <h2 class="sec-title">常见问题</h2>
+            <p class="sec-desc">关于门槛、资质、收款和实训营，最常被问到的几件事</p>
           </div>
 
           <div class="faq-wrap-v3">
@@ -2941,9 +2777,9 @@ const SHOWCASE_PROJECTS = [
                 <span class="faq-chevron">▼</span>
               </summary>
               <div class="faq-body-v3">
-                <strong>能，并且一秒都不需要你重学计算机科学。</strong><br />
-                现在的 AI（如 Claude Code、Cursor、Codex 等）已经完全具备编写高质量前端、后端与数据库脚本的能力。你在这个协作闭环中的角色是<strong>“指挥官与业务把关者”</strong>：你用大白话把产品要解决的痛点切细、让 AI 逐块构建、遇到报错直接复制给它排查。你只需负责验收真机效果与做关键决策。
-                <div class="faq-callout-pill">💡 手册与实战营会手把手教你如何搭建最顺畅的终端与 AI 协作环境，抹平所有工具畏惧感。</div>
+                <strong>能，不需要先去学编程。</strong><br />
+                现在的 AI（如 Claude Code、Cursor、Codex 等）已经能写出前端、后端和数据库代码。你在这个协作闭环中的角色是<strong>“提需求的人和验收的人”</strong>：你用大白话把产品要解决的痛点切细、让 AI 逐块构建、遇到报错直接复制给它排查。你只需负责验收真机效果与做关键决策。
+                <div class="faq-callout-pill">💡 第 3 步会手把手讲怎么把 AI 编程工具装好、用起来。</div>
               </div>
             </details>
 
@@ -2956,10 +2792,10 @@ const SHOWCASE_PROJECTS = [
                 <span class="faq-chevron">▼</span>
               </summary>
               <div class="faq-body-v3">
-                <strong>完全可以，且这是所有一人公司验证商业价值的标准推荐路径。</strong><br />
+                <strong>可以，而且验证期就该这么做。</strong><br />
                 在产品刚上线初期，千万不要为了收几十块钱先花时间去办营业执照和对公账户。你可以通过：
                 <ol style="margin-left: 20px; margin-top: 6px;">
-                  <li>国内通过“小报童”、“微信赞赏码/个人商户签约”等第三方免资质合规工具完成冷启动付费验证；</li>
+                  <li>国内用小报童、爱发电这类创作者收款工具，或者加微信人工收款，先收到第一笔钱；</li>
                   <li>出海产品可通过 Stripe、Lemon Squeezy 等聚合商户以合规个人身份接入海外信用卡支付；</li>
                   <li>待月收入稳定、确需规模化扩张后，再办理个体工商户营业执照接入正式微信支付商户号。</li>
                 </ol>
@@ -2977,9 +2813,9 @@ const SHOWCASE_PROJECTS = [
               <div class="faq-body-v3">
                 <strong>分平台和服务器部署区域：</strong><br />
                 <ul>
-                  <li><strong>海外 Web 商业站 / 出海产品：</strong>使用海外轻量服务器（如 Cloudflare Pages、Vercel、AWS 硅谷节点），<strong>买完域名解析后几分钟内即可秒级上线公网</strong>，完全不需要国内 ICP 备案。</li>
+                  <li><strong>海外 Web 商业站 / 出海产品：</strong>使用海外轻量服务器（如 Cloudflare Pages、Vercel、AWS 硅谷节点），<strong>买完域名、加好解析，几分钟就能上线</strong>，完全不需要国内 ICP 备案。</li>
                   <li><strong>国内服务器 Web 网站：</strong>需要进行工信部 ICP 备案，通常需要 1~2 周时间；</li>
-                  <li><strong>微信小程序：</strong>微信对个人主体审核通常 1~3 天，核心避坑在于<strong>绝不要误选需要前置资质审批的敏感服务类目</strong>，只要选对类目（如工具、生活信息类），提审通常极速通过。</li>
+                  <li><strong>微信小程序：</strong>微信对个人主体的审核通常 1～2 个工作日，核心避坑在于<strong>绝不要误选需要前置资质审批的敏感服务类目</strong>，只要选对类目（如工具、生活信息类），提审通常极速通过。</li>
                 </ul>
               </div>
             </details>
@@ -2993,8 +2829,8 @@ const SHOWCASE_PROJECTS = [
                 <span class="faq-chevron">▼</span>
               </summary>
               <div class="faq-body-v3">
-                <strong>手册给你的是“完整地图”，而 48 小时线下实训卖给你的是“100% 确定性的交付结果”。</strong><br />
-                自己看手册完全能做，但新手往往容易在冷僻的报错（如 SSH 密钥格式错误、域名 DNS 没生效、跨域报错 CORS、微信支付回调签名失败）上卡死好几天并中途放弃。线下实训是脱产周末两天，主讲加助教在现场逐个屏幕排雷，<strong>确保每个人在离开教室时，手机上都有一个带 HTTPS、带收款通道、公网可运行的真家伙。</strong>
+                <strong>手册给你的是“完整地图”，而 48 小时线下实训卖给你的是“两天内做完并上线的结果”。</strong><br />
+                自己看手册完全能做，但新手往往容易在冷僻的报错（如 SSH 密钥格式错误、域名 DNS 没生效、跨域报错 CORS、微信支付回调签名失败）上卡死好几天并中途放弃。线下实训是脱产周末两天，主讲和助教在现场逐个看，<strong>确保每个人在离开教室时，手机上都能打开自己的网站，带 HTTPS，能收到钱。</strong>
               </div>
             </details>
 

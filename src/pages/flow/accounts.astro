@@ -6,23 +6,23 @@ const toc = [
   {"id": "sec-header-conclusion", "label": "先说结论", "kind": "conclusion"},
   {"id": "sec-part1", "label": "破除心魔", "num": "01"},
   {"id": "sec-part2", "label": "安全金库准则", "num": "02"},
-  {"id": "sec-part3", "label": "通关口诀", "num": "03"},
-  {"id": "sec-warning", "label": "避坑红线备忘", "kind": "warn"},
+  {"id": "sec-part3", "label": "一句口诀", "num": "03"},
+  {"id": "sec-warning", "label": "这一步的规矩", "kind": "warn"},
   {"id": "sec-faq", "label": "常见问题 FAQ", "kind": "faq"},
 ];
 ---
 
 <PillarLayout
   slug="accounts"
-  title="第3步：从动嘴到动手：新手怎么配置本地 AI 编程工具与开发者账号，才不会被命令行吓退或踩坑破产？"
-  description="命令行不是黑客专属，本质上就是个「没有图标的快捷启动器」。配置工具牢记「不见兔子不撒鹰」：前期优先使用官方按月订阅工具（如 Claude Code、Cursor、GitHub Copilot），少折腾第三方转发；涉及 API Key 必须锁"
+  title="AI 编程工具和开发者账号：新手怎么配、哪些先别买（第 3 步）"
+  description="命令行只是没有图标的启动器，报错整段复制给 AI 就行。API Key 只放本地 .env 并设每月消费上限；开发者会员、云服务器、域名在本地跑通之前一律不买，实名和人脸认证必须本人操作。"
   toc={toc}
 >
       <!-- 顶部 Hero 卡片 -->
       <header class="header-card" id="sec-header-conclusion">
         <div class="header-meta-row">
           <div class="header-pill-group">
-            <span class="phase-pill-dark">一人公司实战体系</span>
+            <span class="phase-pill-dark">9 步上线流程</span>
             <span class="step-pill-emerald">第 3 步 · 工具与账号配置</span>
           </div>
           <span class="header-status-indicator">
@@ -41,10 +41,10 @@ const toc = [
             <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
               <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
             </svg>
-            <span>先说结论 · KEY TAKEAWAY</span>
+            <span>先说结论</span>
           </div>
           <p class="hci-text">
-            <strong>命令行不是黑客专属，本质上就是个「没有图标的快捷启动器」。</strong>配置工具牢记「不见兔子不撒鹰」：前期优先使用官方按月订阅工具（如 Claude Code、Cursor、GitHub Copilot），少折腾第三方转发；涉及 API Key 必须锁死限额报警、绝不写入 Git 仓库，严防一觉醒来天价账单。
+            <strong>命令行不是程序员专属，本质上就是个「没有图标的快捷启动器」。</strong>配置工具牢记「不见兔子不撒鹰」：前期优先使用官方按月订阅工具（如 Claude Code、Cursor、GitHub Copilot），少折腾第三方转发；涉及 API Key 必须锁死限额报警、绝不写入 Git 仓库，严防一觉醒来天价账单。
           </p>
         </div>
 
@@ -88,8 +88,8 @@ const toc = [
           <span>新手最易踩的坑</span>
         </div>
         <p>很多新手在网页版 AI（ChatGPT/Claude）里聊得很开心，但一进入“本地配置工具和申请账号”这一步，往往立刻被黑底白字的命令行、看不懂的报错代码、各种要充钱的开发者认证给劝退了。</p>
-        <p>其实，只要掌握<strong>“心理脱敏、安全红线、不见兔子不撒鹰”</strong>这三个原则，你就能零基础顺畅过渡，既不被吓退，也不会多花冤枉钱。</p>
-        <p>以下是保姆级的通关指南：</p>
+        <p>其实，只要掌握<strong>“心理脱敏、安全规矩、不见兔子不撒鹰”</strong>这三个原则，你就能零基础顺畅过渡，既不被吓退，也不会多花冤枉钱。</p>
+        <p>下面一步步来：</p>
       </div>
         
       <!-- Section 1 -->
@@ -102,7 +102,7 @@ const toc = [
 <p><strong>完全不需要！</strong></p>
 <ol class="num-list-custom">
   <li><strong>不要再人工复制粘贴代码</strong>：过去在网页版聊，你得手动把代码一段段复制到记事本里，漏个标点就报错；文件一多，网页 AI 就记前忘后。</li>
-  <li><strong>终端工具（如 Claude Code / Codex）本质上是“长了手的打工人”</strong>：</li>
+  <li><strong>终端工具（如 Claude Code / Codex）本质上是“长了手的帮手”</strong>：</li>
 </ol>
 <ul class="bullet-list-custom">
   <li>以前：你告诉 AI 想法，它出代码，你搬砖；</li>
@@ -120,18 +120,18 @@ const toc = [
       <!-- Section 2 -->
       <section class="step-card-wrap" id="sec-part2">
         <div class="card-top-tag">
-          <h2 class="step-heading-h2">二、 安全金库准则：严防 API Key 泄露导致“一觉醒来破产”</h2>
+          <h2 class="step-heading-h2">二、 安全金库准则：严防 API Key 泄露被盗刷</h2>
         </div>
         <div class="step-inner-content">
-<p>这是新手踩坑最惨烈的地方——把花钱买来的 API Key（接口密钥）直接写进代码，顺手上传到 GitHub 公开仓库，几分钟内就会被黑客的爬虫扫走，一觉醒来几千美金账单打底。</p>
-<p><strong>必须死守的两条安全红线：</strong></p>
+<p>这是新手踩坑最惨烈的地方——把花钱买来的 API Key（接口密钥）直接写进代码，顺手上传到 GitHub 公开仓库，几分钟内就会被扫描程序扫走，醒来就是几千美金账单。</p>
+<p><strong>必须死守的两条安全规矩：</strong></p>
 <ol class="num-list-custom">
   <li><strong>钥匙进保险柜（<code>.env</code> 文件隔离）</strong>：
 <ul class="bullet-list-custom">
   <li>所有密钥、密码严禁写在代码文件里；</li>
   <li>只能保存在本地专用的 <code>.env</code> 配置文件中，并确保你的 <code>.gitignore</code> 文件里写了 <code>.env</code>，<strong>绝不让密钥随代码同步到网上</strong>。</li>
 </ul></li>
-  <li><strong>后台死锁消费上限</strong>：
+  <li><strong>后台锁死消费上限</strong>：
 <ul class="bullet-list-custom">
   <li>无论用哪家 AI 服务的 API，登录平台的第一件事：<strong>设置每月/每日消费限额（Spend Limit）</strong>（例如设置每月最高 20 美元），一旦超额直接停服，彻底锁死被盗刷的财务风险。</li>
 </ul></li>
@@ -141,18 +141,18 @@ const toc = [
       <!-- Section 3 -->
       <section class="step-card-wrap" id="sec-part3">
         <div class="card-top-tag">
-          <h2 class="step-heading-h2">通关口诀：记在脑子里，今天就能通关</h2>
+          <h2 class="step-heading-h2">一句口诀：记在脑子里，今天就能过</h2>
         </div>
         <div class="step-inner-content">
 <div class="quote-callout"><strong>工具轻装上阵，不装花哨插件；</strong><br /><strong>终端打中文，报错丢给它修；</strong><br /><strong>Key 锁在本地，限额绝不能忘；</strong><br /><strong>本地没跑通，一分钱都不掏！</strong></div>
         </div>
       </section>
         
-      <!-- 避坑红线 -->
+      <!-- 规矩 -->
       <section class="danger-summary-box" id="sec-warning">
         <div class="danger-header">
           <span class="danger-badge-icon">🚫</span>
-          <h2 class="danger-title">千万不要这么做：本步骤必须守住的避坑红线</h2>
+          <h2 class="danger-title">千万别这么做：这一步要守住的几条规矩</h2>
         </div>
         <div>
           

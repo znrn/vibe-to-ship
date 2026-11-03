@@ -6,22 +6,22 @@ const toc = [
   {"id": "sec-header-conclusion", "label": "先说结论", "kind": "conclusion"},
   {"id": "sec-part1", "label": "没有营业执照，第一笔钱怎么收？", "num": "01"},
   {"id": "sec-part2", "label": "从人工收款到接入微信支付，一共分 4 步", "num": "02"},
-  {"id": "sec-warning", "label": "避坑红线备忘", "kind": "warn"},
+  {"id": "sec-warning", "label": "这一步的规矩", "kind": "warn"},
   {"id": "sec-faq", "label": "常见问题 FAQ", "kind": "faq"},
 ];
 ---
 
 <PillarLayout
   slug="payment"
-  title="第7步：没有营业执照怎么收第一笔钱？独立开发从人工收款到接入微信支付要分几步？"
-  description="验证期坚决不办营业执照！第一阶段采用「贴微信赞赏码/个人收款码 + AI 自动弹窗加群发放激活码」的半自动模式，哪怕只有 10 个人真金白银付款，也足以证明商业价值。等稳定产生现金流后，再去政务网零元办个体工商户执照，申请微信支付官方商户号"
+  title="个人开发者怎么收款：没有营业执照先收第一笔钱，再接微信支付（第 7 步）"
+  description="验证期不办执照：用现成收款工具或加微信人工转账先收到第一笔钱，顺便和前 10 个付费用户聊清楚他们为什么买。有稳定付款后再办个体工商户、申请微信支付商户号，让 AI 接入时密钥和证书不进对话框。"
   toc={toc}
 >
       <!-- 顶部 Hero 卡片 -->
       <header class="header-card" id="sec-header-conclusion">
         <div class="header-meta-row">
           <div class="header-pill-group">
-            <span class="phase-pill-dark">一人公司实战体系</span>
+            <span class="phase-pill-dark">9 步上线流程</span>
             <span class="step-pill-emerald">第 7 步 · 商业收款与微信支付</span>
           </div>
           <span class="header-status-indicator">
@@ -40,7 +40,7 @@ const toc = [
             <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
               <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
             </svg>
-            <span>先说结论 · KEY TAKEAWAY</span>
+            <span>先说结论</span>
           </div>
           <p class="hci-text">
             <strong>验证期坚决不办营业执照！</strong>第一阶段采用「贴微信赞赏码/个人收款码 + AI 自动弹窗加群发放激活码」的半自动模式，哪怕只有 10 个人真金白银付款，也足以证明商业价值。等稳定产生现金流后，再去政务网零元办个体工商户执照，申请微信支付官方商户号，由 AI 接入原生扫码与 JSAPI 支付SDK。
@@ -98,7 +98,7 @@ const toc = [
         <div class="step-inner-content">
 <p>纯个人没有营业执照，无法直接申请微信支付官方商户号，但你可以通过以下 <strong>2 种零成本方式</strong> 马上收下第一笔钱：</p>
 <ol class="num-list-custom">
-  <li><strong>现成的第三方创作者收款工具（如爱发电、面包多）</strong>
+  <li><strong>现成的第三方创作者收款工具（如小报童、爱发电）</strong>
 <ul class="bullet-list-custom">
   <li><strong>做法</strong>：直接用个人身份证实名注册，在平台上创建商品卡片或付费链接，挂到你的网页上。</li>
   <li><strong>优点</strong>：用户可以直接用微信或支付宝付款，平台负责合规结算并提现到你的个人账户，无需营业执照。</li>
@@ -185,16 +185,16 @@ const toc = [
         </div>
       </section>
         
-      <!-- 避坑红线 -->
+      <!-- 规矩 -->
       <section class="danger-summary-box" id="sec-warning">
         <div class="danger-header">
           <span class="danger-badge-icon">🚫</span>
-          <h2 class="danger-title">千万不要这么做：本步骤必须守住的避坑红线</h2>
+          <h2 class="danger-title">千万别这么做：这一步要守住的几条规矩</h2>
         </div>
         <div>
           
         <div style="margin-bottom:14px;">
-          <h3 style="font-size:15px;font-weight:750;color:#9a3412;margin-bottom:8px;">三、 必须守住的 2 条红线（避坑备忘）</h3>
+          <h3 style="font-size:15px;font-weight:750;color:#9a3412;margin-bottom:8px;">三、 必须守住的 2 条规矩（避坑备忘）</h3>
           <div><ol class="num-list-custom">
   <li><strong>移动端 App 的支付铁律</strong>：
 <ul class="bullet-list-custom">
@@ -217,7 +217,7 @@ const toc = [
         <details class="faq-accordion-item" open>
           <summary>没有营业执照，真的能合法收钱吗？</summary>
           <div class="faq-accordion-body">
-            能。纯个人虽然申请不了微信支付官方商户号，但有两条零成本的路：一是用爱发电、面包多这类创作者收款工具，个人身份证实名就能创建付费链接，平台负责合规结算；二是页面上放微信二维码，<strong>加微信人工转账、人工开通</strong>。验证期先用这两种，等收到钱、确定要长期做，再办执照接官方支付。
+            能。纯个人虽然申请不了微信支付官方商户号，但有两条零成本的路：一是用小报童、爱发电这类创作者收款工具，个人身份证实名就能创建付费链接，平台负责合规结算；二是页面上放微信二维码，<strong>加微信人工转账、人工开通</strong>。验证期先用这两种，等收到钱、确定要长期做，再办执照接官方支付。
           </div>
         </details>
         

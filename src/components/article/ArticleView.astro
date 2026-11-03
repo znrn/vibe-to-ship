@@ -96,7 +96,7 @@ const jsonLd: object[] = [
     mainEntityOfPage: { '@type': 'WebPage', '@id': url },
     url,
     author: { '@type': 'Person', name: SITE.author.name, url: SITE.url, description: SITE.author.description },
-    publisher: { '@type': 'Person', name: SITE.author.name, url: SITE.url },
+    publisher: { '@type': 'Organization', name: SITE.name, url: SITE.url },
   },
   {
     '@context': 'https://schema.org',
@@ -158,7 +158,7 @@ if (data.faq.length > 0) {
     <div class="header-conclusion-inner">
       <div class="hci-badge-pill">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>
-        <span>先说结论 · KEY TAKEAWAY</span>
+        <span>先说结论</span>
       </div>
       <p class="hci-text">{data.answer}</p>
       {data.steps.length > 0 && (

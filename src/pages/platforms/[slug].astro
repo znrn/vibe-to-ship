@@ -18,7 +18,8 @@ const hub = await hubOf(`platforms/${platform.slug}`);
 <BaseLayout title={platform.headline} description={hub?.data.description ?? `${platform.name}上线完整流程：${platform.desc}。按上线流程逐步说明，每一步讲清你来决定什么、交给 AI 做什么。`} noindex={articles.length === 0}>
   <div class="wrap page-head">
     <nav class="crumbs" aria-label="面包屑"><a href="/">首页</a><span>/</span><a href="/flow/">上线流程</a><span>/</span><span>{platform.name}</span></nav>
-    <h1>{platform.icon} {platform.headline}</h1>
+    <p class="h1-icon" aria-hidden="true">{platform.icon}</p>
+    <h1>{platform.headline}</h1>
     <p>{platform.desc}</p>
   </div>
   <div class="wrap body">

@@ -21,8 +21,8 @@ export const GET: APIRoute = async () => {
 
   lines.push('## 上线流程（每步一个流程页）', '');
   for (const s of ROADMAP) {
-    const flow = flowArticleOf(articles, s.slug);
-    lines.push(flow ? `- [第 ${s.step} 步 ${s.name}](${abs(markdownUrl(flow))})：${s.desc}` : `- [第 ${s.step} 步 ${s.name}](${abs(flowUrl(s.slug))})：${s.desc}（流程页整理中）`);
+    // 9 个流程页都有纯文本版 /flow/<slug>.md（静态支柱页在 [slug].md.ts 里生成）
+    lines.push(`- [第 ${s.step} 步 ${s.name}](${abs(`/flow/${s.slug}.md`)})：${s.desc}`);
   }
   lines.push('');
 

@@ -18,7 +18,8 @@ const hub = await hubOf(`topics/${topic.slug}`);
 <BaseLayout title={topic.name} description={hub?.data.description ?? `${topic.name}：${topic.desc}`} noindex={articles.length === 0}>
   <div class="wrap page-head">
     <nav class="crumbs" aria-label="面包屑"><a href="/">首页</a><span>/</span><a href="/flow/">上线流程</a><span>/</span><span>{topic.name}</span></nav>
-    <h1>{topic.icon} {topic.name}</h1>
+    <p class="h1-icon" aria-hidden="true">{topic.icon}</p>
+    <h1>{topic.name}</h1>
     <p>{topic.desc}</p>
   </div>
   <div class="wrap body">

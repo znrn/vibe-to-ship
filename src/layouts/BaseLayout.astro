@@ -13,7 +13,8 @@ interface Props {
 }
 
 const { title, description = SITE.description, ogType = 'website', noindex = false } = Astro.props;
-const fullTitle = title ? `${title} - ${SITE.name}` : `${SITE.homeTitle} - ${SITE.name}`;
+// 后缀只留「冬瓜」：百度结果只显示 30 字左右，长后缀会把正文标题挤掉
+const fullTitle = title ? `${title} - ${SITE.shortName}` : SITE.homeTitle;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 ---
 
