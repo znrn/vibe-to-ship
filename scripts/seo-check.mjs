@@ -28,6 +28,7 @@ export function loadPages() {
   for (const f of walk(DIST)) {
     const html = readFileSync(f, 'utf8');
     if (/<meta http-equiv="refresh"/.test(html.slice(0, 400))) continue; // 301 跳转桩
+    if (!/<head[\s>]/i.test(html)) continue; // 不是网页的 .html（如站长平台验证文件）
     const url = '/' + f.slice(DIST.length + 1).replace(/index\.html$/, '').replace(/\.html$/, '/');
     pages.set(url, html);
   }

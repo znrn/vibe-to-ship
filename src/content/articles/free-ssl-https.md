@@ -1,6 +1,6 @@
 ---
 title: 免费SSL证书申请：网站显示「不安全」，让 AI 配上免费证书和自动续期
-description: 浏览器提示网站「不安全」，多半是没开 HTTPS 或证书过期了。个人网站用免费证书就够：托管平台绑定域名后自动配好；自己的服务器让 Claude / Codex 用 Let's Encrypt 申请并配好自动续期，不用装面板、不用每 90 天手动换。
+description: 浏览器提示网站「不安全」，多半是没开 HTTPS 或证书过期。个人网站用免费证书就够：托管平台绑定域名后自动配好；自己的服务器让 Claude / Codex 用 Let's Encrypt 申请并配好自动续期，不用装面板。
 intent: 浏览器提示网站「不安全」，想免费配上 HTTPS
 keyword: 免费SSL证书申请
 covers:

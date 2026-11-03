@@ -1,6 +1,6 @@
 ---
 title: 不会写代码怎么做网页：新建项目、说想法，让 AI 找模板改或从零写
-description: 不会写代码也能做网页：打开 Claude Code 或 Codex，新建一个空文件夹，用大白话说想法，让 AI 先找现成的开源模板来改，没有合适的再从零写。在自己电脑上看效果、继续改，做好后拖到 Netlify Drop 或 Cloudflare Pages 就有一个别人能打开的网址。
+description: 不会写代码也能做网页：打开 Claude Code 或 Codex，新建空文件夹，用大白话说想法，让 AI 先找开源模板改，没有合适的再从零写；做好后拖到 Netlify Drop 或 Cloudflare Pages 就有网址。
 intent: 完全不会写代码，想用 AI 自己把一个网站 / 网页从零做出来
 keyword: 不会写代码怎么做网页
 covers:

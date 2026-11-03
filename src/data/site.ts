@@ -106,10 +106,10 @@ export const platformOf = (slug: string) => PLATFORMS.find((p) => p.slug === slu
 
 // 跨阶段的专题标签
 export const TOPICS = [
-  { slug: 'tools', name: '工具怎么选', icon: '🧰', desc: '主力工具怎么搭，国产 AI 能帮到哪' },
+  { slug: 'tools', name: '工具怎么选', icon: '🧰', desc: '不会写代码的人该用哪个 AI 编程工具、怎么搭配，国产 AI 能帮到哪一步，哪些工具在本地跑通之前先别花钱。' },
   { slug: 'cost', name: '成本与时间账', icon: '🧮', desc: '外包报价 vs 自己做；一共要花多少钱和时间' },
   { slug: 'roles', name: '按岗位对号', icon: '🧭', desc: '运营、产品、老板第一周各容易卡在哪' },
-  { slug: 'debug', name: '翻车与排错', icon: '🧯', desc: '报错怎么问 AI；备案、审核被驳回怎么改' },
+  { slug: 'debug', name: '翻车与排错', icon: '🧯', desc: '报错了怎么跟 AI 说、怎么一次只改一处；ICP 备案、小程序和 App 审核被驳回时怎么看懂理由、照着改。' },
   { slug: 'works', name: '作品证明', icon: '🏆', desc: '真实上线的产品和完整复盘' },
 ] as const;
 
