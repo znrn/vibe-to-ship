@@ -115,15 +115,7 @@ const jsonLd = Astro.props.jsonLd ?? [
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
     <slot name="head" />
     {SITE.baiduTongji && (
-      <script is:inline define:vars={{ id: SITE.baiduTongji }}>
-        var _hmt = _hmt || [];
-        (function () {
-          var hm = document.createElement('script');
-          hm.src = 'https://hm.baidu.com/hm.js?' + id;
-          var s = document.getElementsByTagName('script')[0];
-          s.parentNode.insertBefore(hm, s);
-        })();
-      </script>
+      <script is:inline set:html={`var _hmt = _hmt || [];(function(){var hm=document.createElement("script");hm.src="https://hm.baidu.com/hm.js?${SITE.baiduTongji}";var s=document.getElementsByTagName("script")[0];s.parentNode.insertBefore(hm,s);})();`} />
     )}
   </head>
   <body>
