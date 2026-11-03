@@ -20,7 +20,7 @@ export const SITE = {
   github: 'https://github.com/znrn/vibe-to-ship' as string,
   icp: '浙ICP备19008373号-1',
   // 百度统计的站点 ID（tongji.baidu.com → 管理 → 代码获取，hm.js?后面那串），填了三个布局会自动带统计代码
-  baiduTongji: '' as string,
+  baiduTongji: '644cf813904a52b5cfabbbfa0c5ad587' as string,
 };
 
 // 「AI 独立开发者是什么」入口页：承接定义类问法，和首页的站点主词分开，参与撞词检查
