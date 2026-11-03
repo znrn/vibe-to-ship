@@ -44,11 +44,13 @@ const nextStage = next && stageOfArticle(next);
   <div class="block free">
     <p class="label">不想一篇篇找？免费领</p>
     <div class="free-grid">
+      {FREE_STEP.checklist.href && (
       <div class="free-item">
-        <strong>{FREE_STEP.checklist.label}</strong>
-        <p>{FREE_STEP.checklist.note}</p>
-        <span class="btn placeholder">清单整理中（占位）</span>
-      </div>
+          <strong>{FREE_STEP.checklist.label}</strong>
+          <p>{FREE_STEP.checklist.note}</p>
+          <a class="btn primary" href={FREE_STEP.checklist.href}>下载清单</a>
+        </div>
+      )}
       <div class="free-item">
         <strong>{FREE_STEP.wechat.label}</strong>
         <p>{FREE_STEP.wechat.note}</p>

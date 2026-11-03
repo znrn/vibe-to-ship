@@ -31,6 +31,9 @@ location = /llms.txt { default_type text/plain; charset utf-8; }
 NGINX
 ssh -i $KEY $HOST "nginx -t && nginx -s reload"
 
+# 有百度推送 token 时，把新站点地图里的网址推给百度
+node scripts/seo-push.mjs || true
+
 echo "自查"
 for u in / /flow/deploy/ /articles/ /step2/ /v3/ /not-exist/ /flow/deploy.md /llms.txt /sitemap-index.xml; do
   printf "%-24s %s\n" "$u" "$(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' https://eryx.cn$u)"

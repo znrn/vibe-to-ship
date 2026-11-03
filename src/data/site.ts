@@ -57,7 +57,8 @@ export const NOT_FOR = [
 // 免费的中间台阶：加微信 / 领清单。目前都是占位。
 export const FREE_STEP = {
   wechat: { label: '加冬瓜微信', value: 'Eryx999', qr: '/images/wechat-qr.png', note: '备注「上线」，拉你进交流群（群待建）' },
-  checklist: { label: '领《完整上线清单》', note: '从备账号到过审核的完整勾选清单，整理中，先占位' },
+  // 清单准备好后填 href（文件或页面地址），为空时文章末尾不显示这一块
+  checklist: { label: '领《完整上线清单》', note: '从备账号到过审核的完整勾选清单', href: '' },
 };
 
 // 48 小时实战营。只承诺保底档：公网上线 + 收款链路跑通。

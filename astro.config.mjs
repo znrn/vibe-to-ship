@@ -1,7 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
-import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { parse } from 'yaml';
 import { SITE as SITE_DATA, ROADMAP, PLATFORMS, TOPICS } from './src/data/site.ts';
@@ -21,7 +21,8 @@ function emptyHubUrls() {
     .map((f) => parse(readFileSync(`${dir}/${f}`, 'utf8').match(/^---\n([\s\S]*?)\n---/)?.[1] ?? '') ?? {})
     .filter((d) => !d.draft);
   return new Set([
-    ...ROADMAP.filter((s) => !published.some((d) => d.stage === s.slug)).map((s) => `${SITE}/flow/${s.slug}/`),
+    // 有静态支柱页（src/pages/flow/<slug>.astro）的步骤永远可收录，只有既没支柱页又没文章的步骤才算空
+    ...ROADMAP.filter((s) => !existsSync(`./src/pages/flow/${s.slug}.astro`) && !published.some((d) => d.stage === s.slug)).map((s) => `${SITE}/flow/${s.slug}/`),
     ...PLATFORMS.filter((p) => !published.some((d) => d.platforms?.includes(p.slug))).map((p) => `${SITE}/platforms/${p.slug}/`),
     ...TOPICS.filter((t) => !published.some((d) => d.topics?.includes(t.slug))).map((t) => `${SITE}/topics/${t.slug}/`),
   ]);
