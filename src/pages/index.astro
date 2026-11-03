@@ -2,7 +2,7 @@
 // 首页（2026-11-02 由 v3 提案转正；改版前的首页备份在 backup/2026-11-02-home-before-v3/index.astro）
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
-import { SITE, AUDIENCE, CAMP, WHAT_IS } from '../data/site';
+import { SITE, AUDIENCE, CAMP, WHAT_IS, FREE_STEP } from '../data/site';
 import { FLOW_STEPS, flowUrl } from '../data/flow';
 import { getArticles, articleUrl, formatDate, stageOfArticle } from '../lib/articles';
 
@@ -2032,24 +2032,21 @@ const SHOWCASE_PROJECTS = [
         border: 1px solid #a7f3d0;
         margin-bottom: 16px;
       }
-      .about-badges-mini {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
+      .about-qr {
         width: 100%;
-      }
-      .about-mini-item {
         background: #f8fafc;
         border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 8px 12px;
-        font-size: 12px;
-        color: #475569;
+        border-radius: 12px;
+        padding: 14px 12px 12px;
         display: flex;
+        flex-direction: column;
         align-items: center;
-        justify-content: space-between;
+        gap: 6px;
+        text-align: center;
       }
-      .about-mini-item strong { color: #0f172a; }
+      .about-qr img { width: 168px; height: 168px; border-radius: 8px; background: #fff; }
+      .about-qr strong { font-size: 13.5px; color: #0f172a; margin-top: 4px; }
+      .about-qr span { font-size: 12px; color: #64748b; line-height: 1.5; }
 
       .about-content {
         display: flex;
@@ -2699,19 +2696,10 @@ const SHOWCASE_PROJECTS = [
               <h3 class="about-name">冬瓜</h3>
               <span class="about-role-tag">一人公司实践者 · AI 独立开发</span>
 
-              <div class="about-badges-mini">
-                <div class="about-mini-item">
-                  <span>技术背景</span>
-                  <strong>非科班，不写代码</strong>
-                </div>
-                <div class="about-mini-item">
-                  <span>做法</span>
-                  <strong>代码全部交给 AI</strong>
-                </div>
-                <div class="about-mini-item">
-                  <span>经验来源</span>
-                  <strong>自己上线过的产品</strong>
-                </div>
+              <div class="about-qr">
+                <img src="/images/wechat-qr-plain.png" alt="冬瓜微信二维码" width="168" height="168" loading="lazy" />
+                <strong>微信扫码加冬瓜</strong>
+                <span>微信号 {FREE_STEP.wechat.value} · 聊一人公司和 AI 独立开发</span>
               </div>
             </div>
 
