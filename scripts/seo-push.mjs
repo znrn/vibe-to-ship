@@ -72,6 +72,6 @@ if (rest.length) {
 for (const u of urls.slice(0, 1 + rest.length)) pushedLog[u] = today;
 mkdirSync('plan/seo', { recursive: true });
 writeFileSync(LOG, JSON.stringify(pushedLog, null, 2) + '\n');
-const left = urls.length - 1 - rest.length;
-console.log(`百度推送：成功 ${pushed} 条，今天剩余配额 ${remain}${left > 0 ? `，还有 ${left} 条没推（明天会接着推没推过的）` : ''}`);
+const never = urls.slice(1 + rest.length).filter((u) => !pushedLog[u]).length;
+console.log(`百度推送：成功 ${pushed} 条，今天剩余配额 ${remain}${never > 0 ? `，还有 ${never} 条从没推过（明天接着推）` : '，全部页面都推过了'}`);
 if (pushed) console.log('  已推：' + urls.slice(0, 1 + rest.length).map((u) => u.replace(SITE, '')).join(' '));
