@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
+import IntentTracker from '../components/IntentTracker.astro';
 import { SITE } from '../data/site';
 
 interface Props {
@@ -49,5 +50,6 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <SiteHeader />
     <slot />
     <SiteFooter />
+    <IntentTracker />
   </body>
 </html>

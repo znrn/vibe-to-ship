@@ -66,6 +66,8 @@ const articles = defineCollection({
     stuckNext: z.string().optional(),
     // 下一篇推荐（填文章文件名，不带 .md）
     next: reference('articles').optional(),
+    // 文末「相关问题」：同一步或相邻步骤里值得顺手看的文章（文件名）。自动流水线会给站内链接少的文章补这一项
+    related: z.array(reference('articles')).default([]),
     // 示例文章会打上「示例」标记
     sample: z.boolean().default(false),
     draft: z.boolean().default(false),

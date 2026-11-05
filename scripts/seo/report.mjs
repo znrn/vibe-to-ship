@@ -1,5 +1,5 @@
 // 日报：把采集和分析结果写成 plan/seo/daily/<日期>.md 和 latest.json（工作台页面读它），异常发 macOS 通知。
-import { writeFileSync } from 'node:fs';
+import { writeFileSync, readFileSync } from 'node:fs';
 import { readJson, writeJson, TODAY, YESTERDAY, daysAgo, DATA, DAILY, fmt, notify } from './lib.mjs';
 
 const crawl = readJson(`${DATA}/crawl.json`, { days: {} });
@@ -10,6 +10,13 @@ const geo = readJson(`${DATA}/geo.json`, { weeks: {} });
 const sources = readJson(`${DATA}/sources.json`, {});
 const findings = readJson(`${DATA}/findings.json`, {});
 const lastRun = readJson(`${DATA}/last-run.json`, {});
+const live = readJson(`${DATA}/live.json`, {});
+const changesAll = readJson(`${DATA}/changes.json`, []);
+const changesToday = changesAll.filter((c) => c.date === TODAY);
+const fixManual = readJson(`${DATA}/fix-manual.json`, {}).items ?? [];
+// 转化回填：plan/seo/leads.csv（日期,类型,来源,备注），类型写 咨询 / 报名。意向事件在百度统计「事件分析」里看
+const leads = (() => { try { return readFileSync('plan/seo/leads.csv', 'utf8').trim().split('\n').slice(1).map((l) => l.split(',')).filter((r) => r[0]).map(([date, type, source, note]) => ({ date, type, source, note })); } catch { return []; } })();
+const leads28 = leads.filter((l) => l.date >= daysAgo(28));
 
 const y = crawl.days[YESTERDAY];
 const t = traffic.days[YESTERDAY];
@@ -31,9 +38,10 @@ const summary = {
   bingIndexed: b?.indexed ?? null,
   rankTop10: { baidu: top10('baidu').length, bing: top10('bing').length }, rankTop50: { baidu: top50('baidu'), bing: top50('bing') }, rankWords: Object.keys(rankDay).length,
   geo: geoWeek ? Object.values(geoWeek).flatMap((w) => Object.values(w)).filter((x) => x.cited).length : null,
-  opportunities: findings.opportunities?.length ?? 0, weakLinks: findings.weakLinks?.length ?? 0, decline: findings.decline?.length ?? 0,
+  opportunities: findings.opportunities?.length ?? 0, lowCtr: findings.lowCtrPages?.length ?? 0, weakLinks: findings.weakLinks?.length ?? 0, decline: findings.decline?.length ?? 0,
   spider404: findings.crawl?.notFound?.length ?? 0, notCrawled: findings.crawl?.notCrawled?.length ?? 0, deadSources: findings.deadSources?.length ?? 0,
   steps: lastRun.steps ?? [],
+  liveProblems: live.problems ?? [], changesToday, fixManual, leads28: { 咨询: leads28.filter((l) => l.type === '咨询').length, 报名: leads28.filter((l) => l.type === '报名').length, total: leads.length },
   trend: { visits: week((d) => traffic.days[d]?.uv ?? crawl.days[d]?.human?.hits ?? null), baiduspider: week((d) => crawl.days[d]?.spiders?.Baiduspider?.hits ?? null) },
 };
 
@@ -48,6 +56,7 @@ if (geoWeek) L.push(`- GEO（本周）：${Object.entries(geoWeek).map(([p, w]) 
 L.push('');
 const sec = (title, rows, empty = '没有') => { L.push(`## ${title}`); if (!rows.length) L.push(`- ${empty}`); else L.push(...rows); L.push(''); };
 sec('机会词', (findings.opportunities ?? []).slice(0, 20).map((o) => `- 【${o.action}】${o.word} ← ${o.source}${o.impressions != null ? `，展现 ${o.impressions} 点击 ${o.clicks ?? 0}` : ''}${o.rank ? `，排名 ${o.rank}` : ''}${o.page ? `，对应 ${o.page}` : ''}`), '没有新的机会词（需要百度站长、Bing 或排名数据）');
+sec('有展现没人点的页面（改标题和描述）', (findings.lowCtrPages ?? []).map((p) => `- ${p.page}：展现 ${p.impressions}，点击 0（${p.basis}）`));
 sec('排名变化', (findings.rankChanges ?? []).map((c) => `- ${c.word}：${c.engine} ${c.from} → ${c.to}`));
 sec('弱内链（站内链接不到 2 条）', (findings.weakLinks ?? []).map((w) => `- ${w.page}（${w.inbound} 条）${w.suggest.length ? `，可从 ${w.suggest.join('、')} 链过来` : ''}`));
 sec('衰退页（近 7 天比前 7 天少 30%+）', (findings.decline ?? []).map((d) => `- ${d.page}：${d.before} → ${d.now}（${d.basis}）`));
@@ -56,11 +65,18 @@ sec('抓取异常', [
   ...(findings.crawl?.notCrawled ?? []).map((u) => `- 7 天没被百度抓过：${u}`),
 ]);
 sec('来源失效', (findings.deadSources ?? []).map((d) => `- ${d.url}（${d.status}）出现在 ${d.in.join('、')}`), sources.date ? `没有（${sources.date} 查了 ${sources.checked} 个链接）` : '还没查');
+sec('线上巡检', (live.problems ?? []).map((p) => `- ${p.url}：${p.issue}`), live.date ? `正常（${live.date} 查了 ${live.checked} 页）` : '还没查');
+sec('脚本改了什么', changesToday.map((c) => `- 【${c.type}】${c.file.replace('src/content/articles/', '')}：${c.what}`), '今天没有自动改动');
+sec('待人工处理', fixManual.map((m) => `- ${m.file.replace('src/content/articles/', '')}：${m.what}`));
+L.push('## 转化（近 28 天）');
+L.push(leads.length ? `- 咨询 ${leads28.filter((l) => l.type === '咨询').length}，报名 ${leads28.filter((l) => l.type === '报名').length}；来源：${Object.entries(leads28.reduce((o, l) => (o[l.source] = (o[l.source] ?? 0) + 1, o), {})).map(([k, v]) => `${k} ${v}`).join('、') || '-'}` : '- 还没有记录。有人加微信咨询或报名时，在 plan/seo/leads.csv 加一行：日期,咨询或报名,来源,备注');
+L.push('- 意向事件（看实训营、点二维码、复制微信号）在百度统计 → 事件分析里看，分类「意向」');
+L.push('');
 if (findings.pageStats) {
   const ps = findings.pageStats;
   L.push(`## 页面状态（${ps.total} 页：推过 ${ps.pushed}，7 天内被百度抓过 ${ps.crawled7}，从没被抓 ${ps.neverCrawled}）`);
-  L.push('| 页面 | 最近推送 | 最近被百度抓 | 必应展现 | 7 天访问 |', '| --- | --- | --- | --- | --- |');
-  for (const p of findings.pages) L.push(`| ${p.url} | ${p.pushed || '-'} | ${p.crawled || '从没'} | ${p.bingImp ?? '-'} | ${p.visits7 ?? '-'} |`);
+  L.push('| 页面 | 最近推送 | 最近被百度抓 | 百度展现 | 必应展现 | 7 天访问 |', '| --- | --- | --- | --- | --- | --- |');
+  for (const p of findings.pages) L.push(`| ${p.url} | ${p.pushed || '-'} | ${p.crawled || '从没'} | ${p.baiduImp ?? '-'} | ${p.bingImp ?? '-'} | ${p.visits7 ?? '-'} |`);
   L.push('');
 }
 if (findings.notes?.length) sec('提醒', findings.notes.map((n) => `- ${n}`));
@@ -74,6 +90,7 @@ const alerts = [];
 if (summary.spider404 >= 5) alerts.push(`蜘蛛抓到 ${summary.spider404} 个 404`);
 if (summary.deadSources) alerts.push(`${summary.deadSources} 个来源打不开`);
 if (summary.decline) alerts.push(`${summary.decline} 页流量下滑`);
+if (live.problems?.some((p) => /状态/.test(p.issue))) alerts.push(`线上有页面打不开`);
 const failed = (lastRun.steps ?? []).filter((s) => !s.ok && !s.skipped);
 if (failed.length) alerts.push(`${failed.map((s) => s.label).join('、')}失败`);
 // 可选：把日报推到企业微信 / 飞书群机器人（deploy.env 里 DAILY_WEBHOOK_URL=，企业微信和飞书的 markdown 格式都支持）

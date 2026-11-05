@@ -55,7 +55,7 @@ const nextStage = next && stageOfArticle(next);
         <strong>{FREE_STEP.wechat.label}</strong>
         <p>{FREE_STEP.wechat.note}</p>
         <img class="wechat-qr" src={FREE_STEP.wechat.qr} alt="冬瓜微信二维码" width="120" height="120" loading="lazy" />
-        <span class="wechat-id">微信号 <b>{FREE_STEP.wechat.value}</b></span>
+        <span class="wechat-id">微信号 <b data-wechat-id={FREE_STEP.wechat.value} title="点一下复制" style="cursor:pointer">{FREE_STEP.wechat.value}</b></span>
       </div>
     </div>
   </div>

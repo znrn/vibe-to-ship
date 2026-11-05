@@ -2,6 +2,8 @@
 // 用法：npm run seo:daily                 全套
 //       npm run seo:daily -- --quick      跳过慢的（排名、GEO）
 //       npm run seo:daily -- --skip=rank,geo,tongji
+//       npm run seo:daily -- --skip=fix    不自动改站、不自动部署
+//       npm run seo:daily -- --deploy      即使没有改动也部署一次
 // 每步独立，一步失败不影响后面；每步的结果记在 plan/seo/data/last-run.json，日报里有「脚本执行」一栏。
 import { existsSync, writeFileSync, readFileSync, unlinkSync } from 'node:fs';
 import { spawnSync, execSync } from 'node:child_process';
@@ -54,7 +56,31 @@ run('console', '百度站长', 'collect-baidu-console.mjs', 150);
 run('sources', '来源检查', 'collect-sources.mjs', 300);
 run('geo', 'GEO 探测', 'collect-geo.mjs', 900);
 run('rank', '排名', 'collect-rank.mjs', 1500);
+run('live', '线上巡检', 'collect-live.mjs', 300);
 run('analyze', '分析', 'analyze.mjs', 60);
+
+// ── 二期：自动改站 → 有改动就构建、部署、推送 ──
+if (!skip.has('fix') && online) {
+  run('fix', '自动改站', 'fix.mjs', 120);
+  const dirty = execSync('git status --porcelain -- src public').toString().trim();
+  const needDeploy = dirty || hasFlag('--deploy');
+  if (needDeploy) {
+    console.log('\n== 构建并部署（有改动）');
+    const s = Date.now();
+    let ok = false, msg = '';
+    try {
+      execSync('npm run build', { stdio: 'pipe', timeout: 300000 });
+      const r = spawnSync('bash', ['scripts/deploy.sh'], { encoding: 'utf8', timeout: 600000 });
+      process.stdout.write((r.stdout || '').split('\n').map((l) => '  ' + l).join('\n') + '\n');
+      ok = r.status === 0;
+      msg = ok ? '已部署并通过线上巡检' : '部署或巡检失败：' + ((r.stdout || '') + (r.stderr || '')).trim().split('\n').pop()?.slice(0, 120);
+      if (ok && dirty) execSync(`git add -A src public && git commit -q -m "自动改站 ${TODAY}：$(node -e "const c=require('./plan/seo/data/changes.json').filter(x=>x.date==='${TODAY}');console.log(c.map(x=>x.type+' '+x.what).join('；').slice(0,180))")" --author="SEO 流水线 <seo@eryx.cn>"`, { stdio: 'ignore' });
+    } catch (e) { msg = '构建失败：' + (e.stderr?.toString() || e.message).trim().split('\n').pop()?.slice(0, 120); }
+    rec('构建部署', ok, Math.round((Date.now() - s) / 1000), msg);
+    if (!ok) notify('冬瓜站 SEO', '自动部署失败，看日报；回退：bash scripts/rollback.sh');
+  }
+}
+
 run('report', '日报', 'report.mjs', 60);
 
 // 原版工作台：构建 + 站内检查 + 百度推送 + 页面 + 待办（它会把 latest.json 渲染到页面顶部）

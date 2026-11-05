@@ -2,6 +2,7 @@
 // 首页（2026-11-02 由 v3 提案转正；改版前的首页备份在 backup/2026-11-02-home-before-v3/index.astro）
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
+import IntentTracker from '../components/IntentTracker.astro';
 import { SITE, AUDIENCE, CAMP, WHAT_IS, FREE_STEP } from '../data/site';
 import { FLOW_STEPS, flowUrl } from '../data/flow';
 import { getArticles, articleUrl, formatDate, stageOfArticle } from '../lib/articles';
@@ -2702,7 +2703,7 @@ const SHOWCASE_PROJECTS = [
               <div class="about-qr">
                 <img src="/images/wechat-qr-plain.png" alt="冬瓜微信二维码" width="168" height="168" loading="lazy" />
                 <strong>微信扫码加冬瓜</strong>
-                <span>微信号 {FREE_STEP.wechat.value} · 聊一人公司和 AI 独立开发</span>
+                <span>微信号 <b data-wechat-id={FREE_STEP.wechat.value} title="点一下复制" style="cursor:pointer">{FREE_STEP.wechat.value}</b> · 聊一人公司和 AI 独立开发</span>
               </div>
             </div>
 
@@ -2844,5 +2845,6 @@ const SHOWCASE_PROJECTS = [
     </main>
 
     <SiteFooter />
+    <IntentTracker />
   </body>
 </html>

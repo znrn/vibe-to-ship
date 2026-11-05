@@ -6,8 +6,11 @@
 import '../styles/pillar.css';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
+import IntentTracker from '../components/IntentTracker.astro';
 import { SITE } from '../data/site';
 import { FLOW_STEPS, flowUrl, flowOf, type FlowSlug } from '../data/flow';
+import ArticleList from '../components/ArticleList.astro';
+import { getArticles } from '../lib/articles';
 
 interface TocItem {
   id: string;
@@ -29,6 +32,8 @@ interface Props {
   crumbs?: Crumb[];
   jsonLd?: object[];
   ogType?: 'article' | 'website';
+  // 流程页底部自动列出这一步的问题页（支柱页 → 文章的内链）。ArticleView 的流程页文章自己渲染这块，传 false
+  showQuestions?: boolean;
 }
 
 const HOME = '/';
@@ -40,8 +45,11 @@ const PHASES = [
   { title: '第 7～9 步 · 收到钱、过审核、维护好', steps: [7, 8, 9] },
 ];
 
-const { slug, title, description, toc, mode = 'flow', ogType = 'article' } = Astro.props;
+const { slug, title, description, toc: tocIn, mode = 'flow', ogType = 'article', showQuestions = true } = Astro.props;
 const step = flowOf(slug);
+// 这一步的问题页：流程页底部列出来，让每篇文章都能从所属支柱页进入
+const questions = mode === 'flow' && showQuestions ? (await getArticles()).filter((a) => a.data.stage === slug && a.data.kind !== 'flow') : [];
+const toc = questions.length ? [...tocIn, { id: 'questions', label: '这一步常见的问题' }] : tocIn;
 const prev = FLOW_STEPS.find((s) => s.step === step.step - 1);
 const next = FLOW_STEPS.find((s) => s.step === step.step + 1);
 const canonical = new URL(Astro.url.pathname, Astro.site);
@@ -149,6 +157,14 @@ const jsonLd = Astro.props.jsonLd ?? [
         </nav>
         <Fragment set:html={body} />
 
+        {questions.length > 0 && (
+          <section class="flow-questions" id="questions">
+            <h2>这一步常见的问题</h2>
+            <p class="flow-questions-note">每篇只讲一个具体卡点，讲透原因和改法。</p>
+            <ArticleList articles={questions} showDesc />
+          </section>
+        )}
+
         <nav class="flow-next" aria-label="上一步和下一步">
           {mode === 'article' ? (
             <a href={flowUrl(step.slug)} class="flow-next-secondary">
@@ -202,6 +218,13 @@ const jsonLd = Astro.props.jsonLd ?? [
     </div>
 
     <SiteFooter />
+    <IntentTracker />
+
+    <style>
+      .flow-questions { margin-top: 40px; }
+      .flow-questions h2 { font-size: 20px; margin-bottom: 6px; }
+      .flow-questions-note { font-size: 14px; color: var(--muted); margin-bottom: 12px; }
+    </style>
 
     <script>
       // 右侧目录随滚动高亮

@@ -19,7 +19,7 @@ const keywords = await loadKeywords();
 let nodes = [];
 try { nodes = (await import('../lib/topic-map.mjs')).loadTopicMap().merged; } catch {}
 const published = nodes.filter((n) => n.status === 'published');
-const findings = { date: TODAY, opportunities: [], weakLinks: [], decline: [], crawl: { notFound: [], notCrawled: [] }, rankChanges: [], deadSources: sources.dead ?? [], notes: [] };
+const findings = { date: TODAY, opportunities: [], lowCtrPages: [], weakLinks: [], decline: [], crawl: { notFound: [], notCrawled: [] }, rankChanges: [], deadSources: sources.dead ?? [], notes: [] };
 
 // ── 机会词 ──
 const norm = (s) => String(s).toLowerCase().replace(/\s+/g, '');
@@ -38,11 +38,15 @@ const addOpp = (word, extra) => {
   const m = matchContent(word);
   findings.opportunities.push({ word, ...extra, action: m ? '待优化' : '待写', page: m?.page ?? '', via: m?.via ?? '' });
 };
-const latestConsole = Object.keys(console_.days ?? {}).sort().at(-1);
-for (const k of console_.days?.[latestConsole]?.keywords ?? []) {
-  if (k.impressions >= 5 && k.clicks === 0) addOpp(k.word, { source: '百度站长', impressions: k.impressions, clicks: 0, rank: k.rank });
-  else if (k.rank && k.rank > 10 && k.rank <= 30) addOpp(k.word, { source: '百度站长', impressions: k.impressions, clicks: k.clicks, rank: k.rank });
+const latestConsole = Object.keys(console_.days ?? {}).filter((d) => console_.days[d].keywords).sort().at(-1);
+const cday = console_.days?.[latestConsole] ?? {};
+// 近 7 天汇总的词更稳：展现 ≥ 3 没点击，或排 11～30
+for (const k of cday.keywordsWeek ?? cday.keywords ?? []) {
+  if (k.impressions >= 3 && k.clicks === 0) addOpp(k.word, { source: '百度站长（7 天）', impressions: k.impressions, clicks: 0, rank: k.rank });
+  else if (k.rank && k.rank > 10 && k.rank <= 30) addOpp(k.word, { source: '百度站长（7 天）', impressions: k.impressions, clicks: k.clicks, rank: k.rank });
 }
+// 页面级：展现不少但没人点，说明标题和描述不够吸引
+findings.lowCtrPages = (cday.pages ?? []).filter((p) => p.impressions >= 10 && p.clicks === 0).map((p) => ({ page: p.page, impressions: p.impressions, basis: '百度站长（昨天）' }));
 for (const q of bing.latest?.queries ?? []) {
   if (q.impressions >= 5 && q.clicks === 0) addOpp(q.word, { source: 'Bing', impressions: q.impressions, clicks: 0, rank: q.rank });
 }
@@ -115,7 +119,8 @@ const impByPage = {};
 for (const p of bing.latest?.pages ?? []) impByPage[p.page] = (impByPage[p.page] ?? 0) + (p.impressions ?? 0);
 const landing7 = {};
 for (const d of last7) for (const x of traffic.days[d]?.landing ?? []) landing7[x.name] = (landing7[x.name] ?? 0) + x.visits;
-findings.pages = sitemapUrls().map((u) => ({ url: u, pushed: pushedLog[`https://eryx.cn${u === '/' ? '/' : u}`] ?? pushedLog[`https://eryx.cn${u}`] ?? '', crawled: lastCrawl[u] ?? '', bingImp: impByPage[u] ?? null, visits7: landing7[u] ?? null }));
+const baiduImp = Object.fromEntries((cday.pages ?? []).map((p) => [p.page, p.impressions]));
+findings.pages = sitemapUrls().map((u) => ({ url: u, baiduImp: baiduImp[u] ?? null, pushed: pushedLog[`https://eryx.cn${u === '/' ? '/' : u}`] ?? pushedLog[`https://eryx.cn${u}`] ?? '', crawled: lastCrawl[u] ?? '', bingImp: impByPage[u] ?? null, visits7: landing7[u] ?? null }));
 findings.pageStats = { total: findings.pages.length, pushed: findings.pages.filter((p) => p.pushed).length, crawled7: findings.pages.filter((p) => p.crawled && p.crawled >= daysAgo(7)).length, neverCrawled: findings.pages.filter((p) => !p.crawled).length };
 
 if (console_.loginNeeded) findings.notes.push('Ego 浏览器里没登录百度站长平台，流量与关键词拿不到；也可以导出 CSV 放进 plan/seo/inbox/');

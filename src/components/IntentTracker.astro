@@ -1,0 +1,28 @@
+---
+// 意向事件：把「加微信、看实训营」这类动作记进百度统计的事件分析（分类「意向」），日报按天汇总。
+// 只记点击，不记曝光。微信号点一下会复制并提示，二维码点一下也算一次意向。
+// 没有百度统计 id 时什么都不做。
+import { SITE } from '../data/site';
+---
+{SITE.baiduTongji && (
+  <script is:inline>
+    (function () {
+      var track = function (name) { try { (window._hmt = window._hmt || []).push(['_trackEvent', '意向', name, location.pathname]); } catch (e) {} };
+      var copy = function (text, el) {
+        var done = function () { var old = el.getAttribute('data-copied-label') || '已复制'; var t = el.textContent; el.textContent = old; setTimeout(function () { el.textContent = t; }, 1500); };
+        if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, done); else done();
+      };
+      document.addEventListener('click', function (e) {
+        var t = e.target;
+        var a = t.closest && t.closest('a[href="/camp/"], a[href^="/camp/"]');
+        if (a) { track('看实训营'); return; }
+        var qr = t.closest && t.closest('img[alt*="微信二维码"]');
+        if (qr) { track('点二维码'); return; }
+        var id = t.closest && t.closest('[data-wechat-id]');
+        if (id) { track('复制微信号'); copy(id.getAttribute('data-wechat-id'), id); }
+      });
+      var cta = document.querySelector('[data-intent-cta]');
+      if (cta) cta.addEventListener('click', function () { track(cta.getAttribute('data-intent-cta')); });
+    })();
+  </script>
+)}

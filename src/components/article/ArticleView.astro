@@ -27,6 +27,7 @@ const { data } = article;
 const isFlow = data.kind === 'flow';
 const { Content, headings } = await render(article);
 const next = data.next ? await getEntry(data.next) : undefined;
+const related = (await Promise.all(data.related.map((r) => getEntry(r)))).filter((a): a is Article => !!a && !a.data.draft);
 const step = stageOfArticle(article);
 const url = new URL(articleUrl(article), Astro.site).href;
 const mdUrl = new URL(markdownUrl(article), Astro.site).href;
@@ -117,7 +118,7 @@ if (data.faq.length > 0) {
 }
 ---
 
-<PillarLayout slug={data.stage} mode={isFlow ? 'flow' : 'article'} title={data.title} description={data.description} toc={toc} crumbs={crumbs} jsonLd={jsonLd}>
+<PillarLayout slug={data.stage} mode={isFlow ? 'flow' : 'article'} title={data.title} description={data.description} toc={toc} crumbs={crumbs} jsonLd={jsonLd} showQuestions={false}>
   <Fragment slot="head">
     <meta property="article:published_time" content={data.date.toISOString()} />
     <meta property="article:author" content={SITE.author.name} />
@@ -228,11 +229,20 @@ if (data.faq.length > 0) {
 
     <ArticleSources sources={data.sources} reviewed={data.reviewed} />
 
+    {related.length > 0 && (
+      <section class="related" id="related">
+        <h2>相关问题</h2>
+        <ArticleList articles={related} />
+      </section>
+    )}
+
     <ArticleExit step={step.step} stuckNext={data.stuckNext} next={next} />
   </article>
 </PillarLayout>
 
 <style>
+  .related { margin-top: 36px; }
+  .related h2 { font-size: 20px; margin-bottom: 12px; }
   .flow-questions { margin-top: 40px; }
   .flow-questions h2 { font-size: 20px; margin-bottom: 12px; }
   .flow-questions .empty { border: 1px dashed var(--line); border-radius: 12px; padding: 14px 18px; color: var(--muted); font-size: 14px; }

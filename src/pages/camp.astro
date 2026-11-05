@@ -2,6 +2,7 @@
 // 48 小时 AI 独立开发实战营独立落地页
 // 访问路径: /camp/
 import SiteFooter from '../components/SiteFooter.astro';
+import IntentTracker from '../components/IntentTracker.astro';
 import { SITE, CAMP, FREE_STEP } from '../data/site';
 
 const canonical = new URL('/camp/', Astro.site);
@@ -694,7 +695,7 @@ const canonical = new URL('/camp/', Astro.site);
           <img src={FREE_STEP.wechat.qr} alt="冬瓜微信二维码" width="220" height="220" loading="lazy" />
           <div class="price-qr-text">
             <strong>微信扫码加冬瓜 · 预约首期席位</strong>
-            <span>微信号 <b>{FREE_STEP.wechat.value}</b>，备注「48小时实训」</span>
+            <span>微信号 <b data-wechat-id={FREE_STEP.wechat.value} title="点一下复制" style="cursor:pointer">{FREE_STEP.wechat.value}</b>，备注「48小时实训」</span>
             <span>沟通需求与开营时间后锁定席位</span>
           </div>
         </div>
@@ -705,6 +706,7 @@ const canonical = new URL('/camp/', Astro.site);
 
   <!-- 页脚 -->
   <SiteFooter />
+  <IntentTracker />
 
 </body>
 </html>

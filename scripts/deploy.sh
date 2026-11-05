@@ -14,14 +14,17 @@ ROOT=${DEPLOY_ROOT:-/www/wwwroot/eryx.cn}
 EXT=${DEPLOY_NGINX_EXT:-/www/server/panel/vhost/nginx/extension/eryx.cn/vibe-to-ship.conf}
 [ -f dist/index.html ] || { echo "先 npm run build"; exit 1; }
 
-echo "1/3 备份服务器上的旧首页和 404"
-ssh -i ${KEY} ${HOST} "mkdir -p ${ROOT}-backup && cp -a ${ROOT}/index.html ${ROOT}/404.html ${ROOT}-backup/ 2>/dev/null || true"
+# 本站在服务器上占用的路径（根目录里还有别的应用，只快照和回退这些）
+SITE_PATHS="index.html 404.html _astro flow articles platforms topics categories images ai-indie-dev camp llms.txt robots.txt rss.xml sitemap-index.xml sitemap-0.xml redirects.nginx.conf"
+SNAP=${ROOT}-backup/snap-$(date +%Y%m%d-%H%M%S).tar.gz
+echo "1/4 快照服务器上的本站文件 → ${SNAP}（只留最近 10 份）"
+ssh -i ${KEY} ${HOST} "mkdir -p ${ROOT}-backup && cd ${ROOT} && tar -czf ${SNAP} \$(ls -d ${SITE_PATHS} *.txt 2>/dev/null | sort -u) 2>/dev/null; ls -t ${ROOT}-backup/snap-*.tar.gz 2>/dev/null | tail -n +11 | xargs -r rm -f"
 
-echo "2/3 同步 dist/ 到 ${ROOT}（不删除根目录里的其他内容）"
+echo "2/4 同步 dist/ 到 ${ROOT}（不删除根目录里的其他内容）"
 rsync -az --no-perms --no-owner --no-group -e "ssh -i ${KEY}" dist/ ${HOST}:${ROOT}/
 ssh -i ${KEY} ${HOST} "chown -R www:www ${ROOT}/_astro ${ROOT}/flow ${ROOT}/articles ${ROOT}/platforms ${ROOT}/topics ${ROOT}/images 2>/dev/null || true"
 
-echo "3/3 nginx 补充配置（.md 纯文本、llms.txt、旧网址 301）"
+echo "3/4 nginx 补充配置（.md 纯文本、llms.txt、旧网址 301）"
 ssh -i ${KEY} ${HOST} "cat > ${EXT}" <<'NGINX'
 # vibe-to-ship 静态站补充配置，由仓库 scripts/deploy.sh 写入，勿手改
 include /www/wwwroot/eryx.cn/redirects.nginx.conf;
@@ -36,7 +39,12 @@ ssh -i ${KEY} ${HOST} "nginx -t && nginx -s reload"
 node scripts/seo-push.mjs || true
 node scripts/seo/indexnow.mjs || true
 
-echo "自查"
-for u in / /flow/deploy/ /articles/ /step2/ /v3/ /not-exist/ /flow/deploy.md /llms.txt /sitemap-index.xml; do
+echo "4/4 线上巡检（站点地图里每一页的状态、canonical、title）"
+if ! node scripts/seo/collect-live.mjs; then
+  echo "线上巡检有页面打不开。回退到这次部署前的快照："
+  echo "  bash scripts/rollback.sh"
+  exit 1
+fi
+for u in /step2/ /v3/ /not-exist/ /sitemap.xml; do
   printf "%-24s %s\n" "$u" "$(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' https://eryx.cn$u)"
 done

@@ -145,11 +145,15 @@ const dailyHtml = (() => {
   const list = (title, rows) => rows.length ? `<details${rows.length <= 6 ? ' open' : ''}><summary><b>${title}</b> ${rows.length}</summary><ul class="issues">${rows.map((r) => `<li class="${r[0]}">${esc0(r[1])}</li>`).join('')}</ul></details>` : '';
   const rows = [
     list('机会词', (f.opportunities ?? []).slice(0, 20).map((o) => [o.action === '待写' ? 'w' : 'e', `【${o.action}】${o.word} ← ${o.source}${o.impressions != null ? `，展现 ${o.impressions} 点击 ${o.clicks ?? 0}` : ''}${o.rank ? `，排名 ${o.rank}` : ''}${o.page ? `，对应 ${o.page}` : ''}`])),
+    list('有展现没人点的页面', (f.lowCtrPages ?? []).map((p) => ['w', `${p.page}：展现 ${p.impressions}，点击 0（${p.basis}）`])),
     list('排名变化', (f.rankChanges ?? []).map((c) => ['w', `${c.word}：${c.engine} ${c.from} → ${c.to}`])),
     list('弱内链', (f.weakLinks ?? []).map((w) => ['w', `${w.page}（${w.inbound} 条）${w.suggest?.length ? `，可从 ${w.suggest.join('、')} 链过来` : ''}`])),
     list('衰退页', (f.decline ?? []).map((d) => ['e', `${d.page}：${d.before} → ${d.now}（${d.basis}）`])),
     list('抓取异常', [...(f.crawl?.notFound ?? []).slice(0, 12).map((n) => ['w', `${n.spider} 抓到 404：${n.path}（${n.hits} 次）`]), ...(f.crawl?.notCrawled ?? []).map((u) => ['w', `7 天没被百度抓过：${u}`])]),
     list('来源失效', (f.deadSources ?? []).map((d) => ['e', `${d.url}（${d.status}）出现在 ${d.in.join('、')}`])),
+    list('线上巡检', (autoDaily.liveProblems ?? []).map((p) => ['e', `${p.url}：${p.issue}`])),
+    list('脚本改了什么', (autoDaily.changesToday ?? []).map((c) => ['', `【${c.type}】${c.file.replace('src/content/articles/', '')}：${c.what}`])),
+    list('待人工处理', (autoDaily.fixManual ?? []).map((m) => ['w', `${m.file.replace('src/content/articles/', '')}：${m.what}`])),
     list('提醒', (f.notes ?? []).map((n) => ['w', n])),
     list('脚本执行', (autoDaily.steps ?? []).map((s) => [s.ok ? '' : 'e', `${s.ok ? '✓' : '✗'} ${s.label}（${s.seconds}s）${s.summary ? `：${s.summary}` : ''}`])),
   ].join('');
@@ -160,11 +164,12 @@ const dailyHtml = (() => {
       ${st(autoDaily.baiduspider, '百度蜘蛛')}
       ${st(`${autoDaily.rankTop10?.baidu ?? 0}/${autoDaily.rankTop50?.baidu ?? 0}`, '百度前10/前50', autoDaily.rankTop10?.baidu ? 'ok' : '')}
       ${st(autoDaily.opportunities, '机会词', autoDaily.opportunities ? 'ok' : '')}
+      ${st(autoDaily.leads28 ? `${autoDaily.leads28.咨询}/${autoDaily.leads28.报名}` : '-', '28 天咨询/报名', autoDaily.leads28?.报名 ? 'ok' : '')}
       ${st((autoDaily.spider404 ?? 0) + (autoDaily.deadSources ?? 0) + (autoDaily.decline ?? 0), '异常', (autoDaily.spider404 ?? 0) + (autoDaily.deadSources ?? 0) + (autoDaily.decline ?? 0) ? 'warn' : 'ok')}
     </div>
     <div class="trend2"><div><p class="section-title">访客 7 天</p>${bars(autoDaily.trend?.visits ?? [], 'today')}</div><div><p class="section-title">百度蜘蛛 7 天</p>${bars(autoDaily.trend?.baiduspider ?? [], '')}</div></div>
     <div class="daily-lists">${rows || '<p class="muted">没有要处理的事</p>'}
-    ${f.pageStats ? `<details><summary><b>页面状态</b> ${f.pageStats.total} 页：推过 ${f.pageStats.pushed}，7 天内被百度抓过 ${f.pageStats.crawled7}，从没被抓 ${f.pageStats.neverCrawled}</summary><div class="kw-wrap" style="max-height:320px;margin-top:6px"><table><thead><tr><th>页面</th><th>最近推送</th><th>最近被百度抓</th><th>必应展现</th><th>7 天访问</th></tr></thead><tbody>${(f.pages ?? []).map((p) => `<tr><td><a href="https://eryx.cn${esc0(p.url)}" target="_blank" rel="noopener">${esc0(p.url)}</a></td><td>${esc0(p.pushed || '-')}</td><td class="${p.crawled ? '' : 'muted'}">${esc0(p.crawled || '从没')}</td><td>${esc0(p.bingImp ?? '-')}</td><td>${esc0(p.visits7 ?? '-')}</td></tr>`).join('')}</tbody></table></div></details>` : ''}
+    ${f.pageStats ? `<details><summary><b>页面状态</b> ${f.pageStats.total} 页：推过 ${f.pageStats.pushed}，7 天内被百度抓过 ${f.pageStats.crawled7}，从没被抓 ${f.pageStats.neverCrawled}</summary><div class="kw-wrap" style="max-height:320px;margin-top:6px"><table><thead><tr><th>页面</th><th>最近推送</th><th>最近被百度抓</th><th>百度展现</th><th>必应展现</th><th>7 天访问</th></tr></thead><tbody>${(f.pages ?? []).map((p) => `<tr><td><a href="https://eryx.cn${esc0(p.url)}" target="_blank" rel="noopener">${esc0(p.url)}</a></td><td>${esc0(p.pushed || '-')}</td><td class="${p.crawled ? '' : 'muted'}">${esc0(p.crawled || '从没')}</td><td>${esc0(p.baiduImp ?? '-')}</td><td>${esc0(p.bingImp ?? '-')}</td><td>${esc0(p.visits7 ?? '-')}</td></tr>`).join('')}</tbody></table></div></details>` : ''}
     </div>
   </section>`;
 })();
