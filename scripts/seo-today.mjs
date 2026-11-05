@@ -138,45 +138,55 @@ const mine = todos.filter((x) => x.project === PROJECT);
 const oneTime = mine.filter((x) => !/^SEO 日常/.test(x.detail ?? ''));
 const todayTodos = mine.filter((x) => x.created === ymd && /^SEO 日常/.test(x.detail ?? ''));
 
-// ── 页面 ──
+// ── 页面：共用外壳在 scripts/seo/ui.mjs，这里只拼各个分区 ──
 const esc0 = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-const dailyHtml = (() => {
-  if (!autoDaily) return `<section class="card" id="sec-daily"><h2>自动日报 <span>还没跑过</span></h2><p class="how">运行 <code>npm run seo:daily</code>（launchd 每天 7:30 自动跑）后这里显示昨天的流量、蜘蛛、排名和要处理的事。</p></section>`;
-  const f = autoDaily.findings ?? {};
-  const st = (n, label, cls = '') => `<div class="${cls}"><b>${typeof n === 'string' && n.startsWith('<a ') ? n : esc0(n ?? '-')}</b>${label}</div>`;
-  const bars = (arr, cls) => { const max = Math.max(1, ...arr.map((x) => x.v ?? 0)); return `<div class="bars">${arr.map((x) => `<div class="${cls}" style="height:${Math.max(3, Math.round(((x.v ?? 0) / max) * 48))}px" title="${x.d}：${x.v ?? '-'}"><i>${x.d.slice(5)}</i></div>`).join('')}</div>`; };
-  const list = (title, rows) => rows.length ? `<details${rows.length <= 6 ? ' open' : ''}><summary><b>${title}</b> ${rows.length}</summary><ul class="issues">${rows.map((r) => `<li class="${r[0]}">${esc0(r[1])}</li>`).join('')}</ul></details>` : '';
-  const rows = [
-    list('机会词', (f.opportunities ?? []).slice(0, 20).map((o) => [o.action === '待写' ? 'w' : 'e', `【${o.action}】${o.word} ← ${o.source}${o.impressions != null ? `，展现 ${o.impressions} 点击 ${o.clicks ?? 0}` : ''}${o.rank ? `，排名 ${o.rank}` : ''}${o.page ? `，对应 ${o.page}` : ''}`])),
+const f = autoDaily?.findings ?? {};
+const tile = (n, label, cls = '') => `<div class="tile ${cls}"><b>${typeof n === 'string' && n.startsWith('<a ') ? n : esc0(n ?? '-')}</b><small>${label}</small></div>`;
+const bars = (arr, hi) => { const max = Math.max(1, ...arr.map((x) => x.v ?? 0)); return `<div class="bars">${arr.map((x) => `<div class="${hi ? 'hi' : ''}" style="height:${Math.max(3, Math.round(((x.v ?? 0) / max) * 48))}px" title="${x.d}：${x.v ?? '-'}"><i>${x.d.slice(5)}</i></div>`).join('')}</div>`; };
+const list = (title, rows, open) => rows.length ? `<details class="block"${open ?? rows.length <= 6 ? ' open' : ''}><summary>${title}<span class="n">${rows.length}</span></summary><ul class="issues">${rows.map((r) => `<li class="${r[0]}">${esc0(r[1])}</li>`).join('')}</ul></details>` : '';
+const issuesN = autoDaily ? (autoDaily.spider404 ?? 0) + (autoDaily.deadSources ?? 0) + (autoDaily.decline ?? 0) + (autoDaily.liveProblems?.length ?? 0) : 0;
+
+// 总览：数字 + 两条 7 天走势
+const overviewHtml = autoDaily ? `<section class="card" id="sec-daily">
+  <h2>总览 <span>数据到 ${esc0(autoDaily.for)} · ${esc0(autoDaily.date)} 生成</span><a class="btn small right" href="/pages/aidev-seo-review.html">审核台${autoDaily.queue?.draft ? ` · ${autoDaily.queue.draft} 篇待审` : ''}</a><a class="btn small" href="/pages/aidev-seo-distribute.html">分发台${autoDaily.distPending ? ` · ${autoDaily.distPending} 篇待发` : ''}</a></h2>
+  <div class="tiles">
+    ${tile(autoDaily.visits ?? autoDaily.humanHits, autoDaily.visits != null ? '昨天访客' : '昨天页面请求')}
+    ${tile(autoDaily.baiduspider, '百度蜘蛛来了几次')}
+    ${tile(`${autoDaily.rankTop10?.baidu ?? 0} / ${autoDaily.rankTop50?.baidu ?? 0}`, '百度前 10 / 前 50 的词', autoDaily.rankTop10?.baidu ? 'ok' : '')}
+    ${tile(autoDaily.opportunities, '机会词', autoDaily.opportunities ? 'accent' : '')}
+    ${tile(autoDaily.queue ? `<a href="/pages/aidev-seo-review.html">${autoDaily.queue.draft}</a>` : '-', '待审草稿', autoDaily.queue?.draft ? 'warn' : '')}
+    ${tile(autoDaily.leads28 ? `${autoDaily.leads28.咨询} / ${autoDaily.leads28.报名}` : '-', '28 天咨询 / 报名', autoDaily.leads28?.报名 ? 'ok' : '')}
+    ${tile(issuesN, '要处理的异常', issuesN ? 'bad' : 'ok')}
+  </div>
+  <div class="trend2"><div><p class="section-title">访客 7 天</p>${bars(autoDaily.trend?.visits ?? [], true)}</div><div><p class="section-title">百度蜘蛛 7 天</p>${bars(autoDaily.trend?.baiduspider ?? [], false)}</div></div>
+  ${list('脚本执行', (autoDaily.steps ?? []).map((s) => [s.ok ? '' : 'e', `${s.ok ? '✓' : '✗'} ${s.label}（${s.seconds}s）${s.summary ? `：${s.summary}` : ''}`]), false)}
+</section>` : `<section class="card" id="sec-daily"><h2>总览 <span>还没跑过</span></h2><p class="how">运行 <code>npm run seo:daily</code>（launchd 每天 7:30 自动跑）后这里显示昨天的流量、蜘蛛、排名和要处理的事。</p></section>`;
+
+// 要处理的事：机会词、异常、改动、待人工
+const findingsHtml = autoDaily ? `<section class="card" id="sec-findings">
+  <h2>要处理的事 <span>流水线分析出来的，按轻重排</span></h2>
+  ${[
+    list('机会词', (f.opportunities ?? []).slice(0, 20).map((o) => [o.action === '待写' ? 'w' : '', `【${o.action}】${o.word} ← ${o.source}${o.impressions != null ? `，展现 ${o.impressions} 点击 ${o.clicks ?? 0}` : ''}${o.rank ? `，排名 ${o.rank}` : ''}${o.page ? `，对应 ${o.page}` : ''}`])),
     list('有展现没人点的页面', (f.lowCtrPages ?? []).map((p) => ['w', `${p.page}：展现 ${p.impressions}，点击 0（${p.basis}）`])),
-    list('排名变化', (f.rankChanges ?? []).map((c) => ['w', `${c.word}：${c.engine} ${c.from} → ${c.to}`])),
-    list('弱内链', (f.weakLinks ?? []).map((w) => ['w', `${w.page}（${w.inbound} 条）${w.suggest?.length ? `，可从 ${w.suggest.join('、')} 链过来` : ''}`])),
-    list('衰退页', (f.decline ?? []).map((d) => ['e', `${d.page}：${d.before} → ${d.now}（${d.basis}）`])),
-    list('抓取异常', [...(f.crawl?.notFound ?? []).slice(0, 12).map((n) => ['w', `${n.spider} 抓到 404：${n.path}（${n.hits} 次）`]), ...(f.crawl?.notCrawled ?? []).map((u) => ['w', `7 天没被百度抓过：${u}`])]),
-    list('来源失效', (f.deadSources ?? []).map((d) => ['e', `${d.url}（${d.status}）出现在 ${d.in.join('、')}`])),
+    list('排名变化', (f.rankChanges ?? []).map((c) => ['', `${c.word}：${c.engine} ${c.from} → ${c.to}`])),
     list('线上巡检', (autoDaily.liveProblems ?? []).map((p) => ['e', `${p.url}：${p.issue}`])),
-    list('脚本改了什么', (autoDaily.changesToday ?? []).map((c) => ['', `【${c.type}】${c.file.replace('src/content/articles/', '')}：${c.what}`])),
+    list('衰退页', (f.decline ?? []).map((d) => ['e', `${d.page}：${d.before} → ${d.now}（${d.basis}）`])),
+    list('来源失效', (f.deadSources ?? []).map((d) => ['e', `${d.url}（${d.status}）出现在 ${d.in.join('、')}`])),
+    list('抓取异常', [...(f.crawl?.notFound ?? []).slice(0, 12).map((n) => ['w', `${n.spider} 抓到 404：${n.path}（${n.hits} 次）`]), ...(f.crawl?.notCrawled ?? []).map((u) => ['w', `7 天没被百度抓过：${u}`])]),
+    list('弱内链', (f.weakLinks ?? []).map((w) => ['w', `${w.page}（${w.inbound} 条）${w.suggest?.length ? `，可从 ${w.suggest.join('、')} 链过来` : ''}`])),
     list('待人工处理', (autoDaily.fixManual ?? []).map((m) => ['w', `${m.file.replace('src/content/articles/', '')}：${m.what}`])),
+    list('脚本改了什么', (autoDaily.changesToday ?? []).map((c) => ['', `【${c.type}】${c.file.replace('src/content/articles/', '')}：${c.what}`])),
     list('提醒', (f.notes ?? []).map((n) => ['w', n])),
-    list('脚本执行', (autoDaily.steps ?? []).map((s) => [s.ok ? '' : 'e', `${s.ok ? '✓' : '✗'} ${s.label}（${s.seconds}s）${s.summary ? `：${s.summary}` : ''}`])),
-  ].join('');
-  return `<section class="card" id="sec-daily">
-    <h2>自动日报 <span>${esc0(autoDaily.date)} 生成 · 数据到 ${esc0(autoDaily.for)} · plan/seo/daily/</span></h2>
-    <div class="stat">
-      ${st(autoDaily.visits ?? autoDaily.humanHits, autoDaily.visits != null ? '访客' : '页面请求')}
-      ${st(autoDaily.baiduspider, '百度蜘蛛')}
-      ${st(`${autoDaily.rankTop10?.baidu ?? 0}/${autoDaily.rankTop50?.baidu ?? 0}`, '百度前10/前50', autoDaily.rankTop10?.baidu ? 'ok' : '')}
-      ${st(autoDaily.opportunities, '机会词', autoDaily.opportunities ? 'ok' : '')}
-      ${st(autoDaily.queue ? `<a href="/pages/aidev-seo-review.html" style="color:inherit;text-decoration:none">${autoDaily.queue.draft}</a>` : '-', '待审草稿', autoDaily.queue?.draft ? 'warn' : '')}
-      ${st(autoDaily.leads28 ? `${autoDaily.leads28.咨询}/${autoDaily.leads28.报名}` : '-', '28 天咨询/报名', autoDaily.leads28?.报名 ? 'ok' : '')}
-      ${st((autoDaily.spider404 ?? 0) + (autoDaily.deadSources ?? 0) + (autoDaily.decline ?? 0), '异常', (autoDaily.spider404 ?? 0) + (autoDaily.deadSources ?? 0) + (autoDaily.decline ?? 0) ? 'warn' : 'ok')}
-    </div>
-    <div class="trend2"><div><p class="section-title">访客 7 天</p>${bars(autoDaily.trend?.visits ?? [], 'today')}</div><div><p class="section-title">百度蜘蛛 7 天</p>${bars(autoDaily.trend?.baiduspider ?? [], '')}</div></div>
-    <div class="daily-lists">${rows || '<p class="muted">没有要处理的事</p>'}
-    ${f.pageStats ? `<details><summary><b>页面状态</b> ${f.pageStats.total} 页：推过 ${f.pageStats.pushed}，7 天内被百度抓过 ${f.pageStats.crawled7}，从没被抓 ${f.pageStats.neverCrawled}</summary><div class="kw-wrap" style="max-height:320px;margin-top:6px"><table><thead><tr><th>页面</th><th>最近推送</th><th>最近被百度抓</th><th>百度展现</th><th>必应展现</th><th>7 天访问</th></tr></thead><tbody>${(f.pages ?? []).map((p) => `<tr><td><a href="https://eryx.cn${esc0(p.url)}" target="_blank" rel="noopener">${esc0(p.url)}</a></td><td>${esc0(p.pushed || '-')}</td><td class="${p.crawled ? '' : 'muted'}">${esc0(p.crawled || '从没')}</td><td>${esc0(p.baiduImp ?? '-')}</td><td>${esc0(p.bingImp ?? '-')}</td><td>${esc0(p.visits7 ?? '-')}</td></tr>`).join('')}</tbody></table></div></details>` : ''}
-    </div>
-  </section>`;
-})();
+  ].join('') || '<p class="muted">今天没有要处理的事。</p>'}
+</section>` : '';
+
+// 页面状态表
+const pagesHtml = f.pageStats ? `<section class="card" id="sec-pages">
+  <h2>页面状态 <span>分清「推过 / 被抓 / 有展现 / 有人看」，推过不等于收录</span></h2>
+  <div class="tiles">${tile(f.pageStats.total, '站点地图页数')}${tile(f.pageStats.pushed, '推过百度')}${tile(f.pageStats.crawled7, '7 天内被百度抓过', f.pageStats.crawled7 ? 'ok' : '')}${tile(f.pageStats.neverCrawled, '从没被抓', f.pageStats.neverCrawled ? 'warn' : 'ok')}</div>
+  <div class="scroll"><table><thead><tr><th>页面</th><th>最近推送</th><th>最近被百度抓</th><th>百度展现</th><th>必应展现</th><th>7 天访问</th></tr></thead><tbody>${(f.pages ?? []).map((p) => `<tr><td><a href="https://eryx.cn${esc0(p.url)}" target="_blank" rel="noopener">${esc0(p.url)}</a></td><td>${esc0(p.pushed || '-')}</td><td class="${p.crawled ? '' : 'muted'}">${esc0(p.crawled || '从没')}</td><td>${esc0(p.baiduImp ?? '-')}</td><td>${esc0(p.bingImp ?? '-')}</td><td>${esc0(p.visits7 ?? '-')}</td></tr>`).join('')}</tbody></table></div>
+</section>` : '';
+
 const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const csv = existsSync('plan/seo/keywords.csv') ? readFileSync('plan/seo/keywords.csv', 'utf8').trim().split('\n').map((l) => l.split(',')) : [];
 const log = existsSync('plan/seo/log.md') ? readFileSync('plan/seo/log.md', 'utf8') : '';
@@ -235,171 +245,58 @@ const taskRow = (t, i) => {
 };
 const cal = [1, 2, 3, 4, 5, 6, 0].map((d) => `<div class="day${d === weekday ? ' today' : ''}"><b>周${W[d]}</b>${(weekly[d] ?? []).map((t) => `<p>${esc(t.title)}</p>`).join('') || '<p class="muted">只做每天的三件事</p>'}</div>`).join('');
 
-const html = `<!doctype html>
-<html lang="zh-CN">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>冬瓜站 SEO 工作台</title>
-<meta name="description" content="eryx.cn 的 SEO / GEO 日常工作台：今天的清单、站内检查结果、关键词目标、周期安排和日志。每天 npm run seo:today 重新生成。" />
-<meta name="launchpad-group" content="AI 开发培训" />
-<style>
-  :root { --bg:#f8fafc; --card:#fff; --line:#e2e8f0; --ink:#0f172a; --muted:#64748b; --green:#059669; --green-soft:#ecfdf5; --red:#b91c1c; --red-soft:#fef2f2; --amber:#b45309; --amber-soft:#fef3c7; }
-  * { box-sizing:border-box; margin:0; padding:0; }
-  body { background:var(--bg); color:var(--ink); font:15px/1.7 -apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB",sans-serif; padding:24px 16px 60px; }
-  .wrap { max-width:1100px; margin:0 auto; }
-  header { display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; gap:12px; margin-bottom:18px; }
-  h1 { font-size:24px; font-weight:800; }
-  h1 small { font-size:13px; color:var(--muted); font-weight:500; margin-left:10px; }
-  .platforms { display:flex; flex-wrap:wrap; gap:6px; }
-  .platforms a { font-size:12.5px; font-weight:600; color:#334155; background:#fff; border:1px solid var(--line); border-radius:999px; padding:4px 11px; text-decoration:none; }
-  .platforms a:hover { border-color:var(--green); color:var(--green); }
-  .grid { display:grid; grid-template-columns:minmax(0,1.3fr) minmax(0,1fr); gap:16px; }
-  @media (max-width:860px) { .grid { grid-template-columns:1fr; } }
-  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px 20px; margin-bottom:16px; }
-  .card h2 { font-size:15px; font-weight:800; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; }
-  .card h2 span { font-size:12px; color:var(--muted); font-weight:500; }
-  .tasks { list-style:none; }
-  .task { padding:8px 0; border-bottom:1px dashed var(--line); display:flex; align-items:flex-start; gap:8px; flex-wrap:wrap; }
-  .task:last-child { border-bottom:0; }
-  .task label { display:flex; gap:10px; align-items:flex-start; cursor:pointer; flex:1; }
-  .task input { margin-top:6px; accent-color:var(--green); }
-  .task.done span { color:var(--muted); text-decoration:line-through; }
-  .task .go { font-size:12px; color:var(--green); font-weight:700; text-decoration:none; white-space:nowrap; margin-top:3px; }
-  .task code { font-size:12px; background:#f1f5f9; border-radius:5px; padding:1px 6px; }
-  .section-title { font-size:11px; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:#94a3b8; margin:12px 0 2px; }
-  .stat { display:flex; gap:10px; margin-bottom:12px; }
-  .stat div { flex:1; border-radius:10px; padding:10px 12px; background:#f8fafc; border:1px solid var(--line); }
-  .stat b { display:block; font-size:22px; }
-  .stat .bad b { color:var(--red); } .stat .warn b { color:var(--amber); } .stat .ok b { color:var(--green); }
-  .issues { list-style:none; font-size:13px; max-height:360px; overflow:auto; }
-  .issues li { padding:5px 8px; border-radius:6px; margin-bottom:4px; }
-  .issues .e { background:var(--red-soft); color:var(--red); } .issues .w { background:var(--amber-soft); color:var(--amber); }
-  .bars { display:flex; align-items:flex-end; gap:4px; height:60px; margin:6px 0 2px; }
-  .bars div { flex:1; background:#cbd5e1; border-radius:3px 3px 0 0; min-height:2px; position:relative; }
-  .bars div.today { background:var(--green); }
-  .bars div i { position:absolute; bottom:-18px; left:0; right:0; font-size:9px; color:#94a3b8; text-align:center; font-style:normal; }
-  table { width:100%; border-collapse:collapse; font-size:13px; }
-  th, td { text-align:left; padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
-  th { color:var(--muted); font-weight:600; font-size:12px; }
-  .cal { display:flex; flex-direction:column; gap:6px; }
-  .day { display:flex; gap:12px; align-items:flex-start; background:#f8fafc; border:1px solid var(--line); border-radius:10px; padding:8px 12px; font-size:12.5px; }
-  .day.today { border-color:var(--green); background:var(--green-soft); }
-  .day b { flex:0 0 34px; color:var(--ink); }
-  .day p { color:#475569; line-height:1.5; }
-  .muted { color:#94a3b8; }
-  .cycle li { font-size:13px; margin:0 0 4px 18px; }
-  .log h4 { font-size:13px; margin:10px 0 4px; color:var(--green); }
-  .log li { font-size:13px; margin-left:18px; } .log p { font-size:13px; }
-  .onetime .task.done { opacity:.6; }
-  .jump { font-size:12.5px; color:var(--muted); margin:-8px 0 14px; display:flex; flex-wrap:wrap; gap:4px 10px; }
-  .jump a { color:#2563eb; text-decoration:none; font-weight:600; } .jump a:hover { text-decoration:underline; }
-  html { scroll-behavior:smooth; }
-  .trend2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:4px 0 26px; }
-  .daily-lists details { margin-top:8px; } .daily-lists summary { cursor:pointer; font-size:13px; } .daily-lists .issues { margin-top:4px; max-height:240px; }
-  .daily-lists .issues li { background:#f8fafc; color:#334155; }
-  .how { font-size:12.5px; color:var(--muted); margin-top:4px; }
-  .how code { background:#f1f5f9; border-radius:5px; padding:1px 6px; }
-  .learn { grid-column:1 / -1; }
-  .mods { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
-  @media (max-width:1000px) { .mods { grid-template-columns:repeat(2,1fr); } }
-  @media (max-width:640px) { .mods { grid-template-columns:1fr; } }
-  .mod { border:1px solid var(--line); border-radius:12px; padding:12px 14px; background:#fbfcfd; }
-  .mod h3 { font-size:14px; font-weight:800; margin-bottom:6px; }
-  .mod h3 small { display:block; font-size:12px; color:var(--muted); font-weight:500; }
-  .mod ul { list-style:none; }
-  .mod li { padding:6px 0; border-top:1px dashed var(--line); font-size:12.5px; }
-  .mod li label { cursor:pointer; } .mod li input { accent-color:var(--green); margin-right:4px; }
-  .mod li.learned b { color:var(--muted); text-decoration:line-through; }
-  .mod li p { color:#475569; line-height:1.55; margin-top:2px; }
-  .mod li em { font-style:normal; color:var(--green); }
-  .mod li a { color:#2563eb; text-decoration:none; white-space:nowrap; }
-  .st { font-size:10.5px; font-weight:700; border-radius:999px; padding:0 7px; margin-left:6px; vertical-align:1px; }
-  .st.ok { background:var(--green-soft); color:var(--green); } .st.doing { background:#eff6ff; color:#2563eb; } .st.later { background:#f1f5f9; color:#64748b; } .st.skip { background:#f8fafc; color:#94a3b8; }
-  .learn-progress { font-size:12px; color:var(--muted); }
-  .kw { grid-column:1 / -1; }
-  .chips { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; }
-  .chip { display:inline-flex; flex-direction:column; font-size:12.5px; font-weight:600; color:var(--ink); background:#f8fafc; border:1px solid var(--line); border-radius:8px; padding:4px 10px; text-decoration:none; }
-  .chip small { font-size:10px; color:#94a3b8; font-weight:600; }
-  .chip:hover { border-color:var(--green); }
-  .kw-tools { display:flex; flex-wrap:wrap; align-items:center; gap:12px; font-size:12.5px; margin:4px 0 8px; }
-  .kw-tools input[type=search] { flex:1; min-width:180px; border:1px solid var(--line); border-radius:8px; padding:6px 10px; font:inherit; }
-  .kw-wrap { max-height:520px; overflow:auto; border:1px solid var(--line); border-radius:10px; }
-  #kw-table th { position:sticky; top:0; background:#f8fafc; }
-  #kw-table td small { color:var(--muted); }
-  #kw-table details { font-size:11.5px; color:var(--muted); margin-top:2px; } #kw-table summary { cursor:pointer; }
-  .lt { display:inline-block; border:1px dashed var(--line); border-radius:6px; padding:0 6px; margin:2px 4px 0 0; }
-  tr.hide { display:none; }
-  .tut-list { list-style:none; display:grid; grid-template-columns:repeat(3,1fr); gap:8px; counter-reset:ch; }
-  @media (max-width:1000px) { .tut-list { grid-template-columns:repeat(2,1fr); } }
-  @media (max-width:640px) { .tut-list { grid-template-columns:1fr; } }
-  .tut-list li { border:1px solid var(--line); border-radius:10px; padding:8px 12px; font-size:12.5px; background:#fbfcfd; counter-increment:ch; }
-  .tut-list li::before { content:counter(ch, decimal-leading-zero); font-size:10px; font-weight:800; color:#94a3b8; margin-right:6px; }
-  .tut-list li > a { font-weight:700; color:var(--ink); text-decoration:none; } .tut-list li > a:hover { color:var(--green); }
-  .tut-list li p { color:#475569; line-height:1.5; margin-top:2px; }
-</style>
-</head>
-<body><div class="wrap">
-<header>
-  <h1>冬瓜站 SEO 工作台 <small>${ymd} 周${W[weekday]} · 生成于 ${today.toTimeString().slice(0, 5)}</small></h1>
-  <nav class="platforms">${LINKS.map(([n, u]) => `<a href="${u}" target="_blank" rel="noopener">${n}</a>`).join('')}</nav>
-</header>
-<nav class="jump">跳到：<a href="/pages/aidev-seo-review.html"><b>审核台</b></a><a href="/pages/aidev-seo-distribute.html"><b>分发台</b></a><a href="#sec-daily">自动日报</a><a href="#sec-today">今天要做的</a><a href="#sec-check">站内检查</a><a href="#sec-week">本周</a><a href="#sec-kw">关键词目标</a><a href="#sec-log">日志</a>${kwHtml ? '<a href="#sec-bank">关键词库</a>' : ''}${lmap ? '<a href="#sec-learn">学习地图</a>' : ''}</nav>
-<div class="grid">
+
+const rankAll = existsSync('plan/seo/data/rank.json') ? JSON.parse(readFileSync('plan/seo/data/rank.json', 'utf8')) : { days: {} };
+const rankToday = rankAll.days[Object.keys(rankAll.days).sort().at(-1)] ?? {};
+const { shell } = await import('./seo/ui.mjs');
+const body = `
+${overviewHtml}
+<div class="grid2">
 <div>
-  ${dailyHtml}
   <section class="card" id="sec-today">
     <h2>今天要做的 <span>勾选只记在这台电脑的浏览器里；待办页里也有同样的事</span></h2>
     ${sections.filter(([, t]) => t.length).map(([name, tasks]) => `<p class="section-title">${esc(name)}</p><ul class="tasks">${tasks.map(taskRow).join('')}</ul>`).join('')}
-    <p class="how">重新生成这个页面：在项目目录运行 <code>npm run seo:today</code>（会先构建并检查）。</p>
+    ${oneTime.length ? `<p class="section-title">一次性准备 · ${oneTime.filter((x) => x.done).length} / ${oneTime.length}</p><ul class="tasks">${oneTime.map((x) => `<li class="task${x.done ? ' done' : ''}"><label><input type="checkbox" disabled ${x.done ? 'checked' : ''}/> <span>${esc(x.title)}</span></label>${x.link ? ` <a class="go" href="${esc(x.link)}" target="_blank" rel="noopener">打开 ↗</a>` : ''}</li>`).join('')}</ul>` : ''}
   </section>
+  ${findingsHtml}
+  ${pagesHtml}
   <section class="card" id="sec-check">
     <h2>站内检查 <span>${check.pages ?? 0} 页 · 规则见 plan/seo-playbook.md</span></h2>
-    <div class="stat">
-      <div class="${check.errors.length ? 'bad' : 'ok'}"><b>${check.errors.length}</b>必须改</div>
-      <div class="${check.warns.length ? 'warn' : 'ok'}"><b>${check.warns.length}</b>建议改</div>
-      <div class="ok"><b>${check.pages ?? 0}</b>页面</div>
-    </div>
-    <div class="bars">${last14.map((h) => `<div class="${h.date === ymd ? 'today' : ''}" style="height:${Math.max(4, Math.round(((h.errors + h.warns) / maxW) * 56))}px" title="${h.date}：${h.errors} 必须改 / ${h.warns} 建议改"><i>${h.date.slice(5)}</i></div>`).join('')}</div>
-    <p class="how" style="margin-top:22px">近 ${last14.length} 次检查的问题数走势，越矮越好。</p>
-    <ul class="issues" style="margin-top:10px">${check.errors.map((e) => `<li class="e">✗ ${esc(e)}</li>`).join('')}${check.warns.map((w) => `<li class="w">⚠ ${esc(w)}</li>`).join('') || '<li class="muted">全绿</li>'}</ul>
-  </section>
-  <section class="card onetime">
-    <h2>一次性准备 <span>在待办页勾完成；${oneTime.filter((x) => x.done).length} / ${oneTime.length}</span></h2>
-    <ul class="tasks">${oneTime.map((x) => `<li class="task${x.done ? ' done' : ''}"><label><input type="checkbox" disabled ${x.done ? 'checked' : ''}/> <span>${esc(x.title)}</span></label>${x.link ? ` <a class="go" href="${esc(x.link)}" target="_blank" rel="noopener">打开 ↗</a>` : ''}</li>`).join('') || '<li class="muted">没有</li>'}</ul>
+    <div class="tiles">${tile(check.errors.length, '必须改', check.errors.length ? 'bad' : 'ok')}${tile(check.warns.length, '建议改', check.warns.length ? 'warn' : 'ok')}${tile(check.pages ?? 0, '页面')}</div>
+    <p class="section-title">近 ${last14.length} 次的问题数走势，越矮越好</p>
+    <div class="bars">${last14.map((h) => `<div class="${h.date === ymd ? 'hi' : ''}" style="height:${Math.max(4, Math.round(((h.errors + h.warns) / maxW) * 56))}px" title="${h.date}：${h.errors} 必须改 / ${h.warns} 建议改"><i>${h.date.slice(5)}</i></div>`).join('')}</div>
+    <ul class="issues">${check.errors.map((e) => `<li class="e">✗ ${esc(e)}</li>`).join('')}${check.warns.map((w) => `<li class="w">⚠ ${esc(w)}</li>`).join('') || '<li>全绿</li>'}</ul>
   </section>
 </div>
 <div>
   <section class="card" id="sec-week">
-    <h2>本周安排 <span>每天固定三件事之外</span></h2>
+    <h2>本周安排 <span>每天固定的事之外</span></h2>
     <div class="cal">${cal}</div>
-  </section>
-  <section class="card">
-    <h2>每月 1 号 / 每季度</h2>
     <p class="section-title">每月 1 号</p><ul class="cycle">${monthly.map((t) => `<li>${esc(t.title)}</li>`).join('')}</ul>
     <p class="section-title">每季度（1、4、7、10 月）</p><ul class="cycle">${quarterly.map((t) => `<li>${esc(t.title)}</li>`).join('')}</ul>
   </section>
   <section class="card" id="sec-kw">
-    <h2>关键词目标 <span>plan/seo/keywords.csv · 每月填排名</span></h2>
-    <table><thead><tr>${(csv[0] ?? []).slice(0, 5).map((h) => `<th>${esc(h)}</th>`).join('')}</tr></thead>
-    <tbody>${csv.slice(1).map((r) => `<tr>${r.slice(0, 5).map((c, i) => `<td>${i === 2 ? `<a href="https://eryx.cn${esc(c)}" target="_blank" rel="noopener">${esc(c)}</a>` : esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table>
+    <h2>关键词目标 <span>plan/seo/keywords.csv · 排名由流水线每天查</span></h2>
+    <table><thead><tr><th>词</th><th>目标</th><th>百度</th><th>必应</th></tr></thead>
+    <tbody>${csv.slice(1).map((r) => { const rk = rankToday?.[r[0]?.trim()] ?? {}; const pos = (v) => (typeof v === 'number' ? `<b style="color:var(--green)">${v}</b>` : esc(v ?? '-')); return `<tr><td><a href="https://eryx.cn${esc(r[2])}" target="_blank" rel="noopener" title="${esc(r[1])} · ${esc(r[2])}">${esc(r[0])}</a><br><small class="muted">${esc(r[1])}</small></td><td>${esc(r[3])}</td><td>${pos(rk.baidu)}</td><td>${pos(rk.bing)}</td></tr>`; }).join('')}</tbody></table>
+    <p class="how">数字是 eryx.cn 在搜索结果里的位置；「>50」是前 50 没有；每天由流水线在 Ego 浏览器里查。</p>
   </section>
   <section class="card log" id="sec-log">
-    <h2>工作日志 <span>plan/seo/log.md</span></h2>
+    <h2>工作日志 <span>plan/seo/log.md · 周日流水线自动补两行</span></h2>
     ${logHtml || '<p class="muted">还没有</p>'}
   </section>
 </div>
 </div>
-${kwHtml ? `<section class="card kw" id="sec-bank"><h2>关键词库 <span>plan/topic-map.yaml · 改选题先改地图</span></h2>${kwHtml}</section>` : ''}
-${lmap ? `<section class="card learn" id="sec-learn">
-  <h2>SEO / GEO 学习地图 <span class="learn-progress">勾掉学过的，记在这台电脑的浏览器里 · <span id="learn-count"></span></span></h2>
-  <p class="how" style="margin-bottom:10px">来源：${esc(lmap.source)}。每条标了本站现状：<span class="st ok">已做</span><span class="st doing">在做</span><span class="st later">以后</span><span class="st skip">不需要</span>，点「↗」是学习资料。</p>
+${kwHtml ? `<section class="card" id="sec-bank"><h2>关键词库 <span>plan/topic-map.yaml · 改选题先改地图</span></h2>${kwHtml}</section>` : ''}
+${lmap ? `<section class="card" id="sec-learn">
+  <h2>SEO / GEO 学习地图 <span>勾掉学过的，记在这台电脑的浏览器里 · <span id="learn-count"></span></span></h2>
+  <p class="how" style="margin-bottom:10px">来源：${esc(lmap.source)}。每条标了本站现状：<span class="st ok">已做</span> <span class="st doing">在做</span> <span class="st later">以后</span> <span class="st skip">不需要</span>，点「↗」是学习资料。</p>
   <div class="mods">${learnHtml}</div>
   <h2 style="margin-top:18px">做法教程 <span>学习地图说「有哪些事」，这本说「怎么做」</span></h2>
   ${tutHtml}
 </section>` : ''}
-</div>
-<script>
+`;
+const pageScript = `
   const learnBoxes = document.querySelectorAll('input[data-learn]');
   const learnCount = () => { const el = document.getElementById('learn-count'); if (el) el.textContent = [...learnBoxes].filter((b) => b.checked).length + ' / ' + learnBoxes.length + ' 学过'; };
   for (const box of learnBoxes) {
@@ -414,10 +311,7 @@ ${lmap ? `<section class="card learn" id="sec-learn">
     const st = document.querySelector('input[name=kw-s]:checked')?.value ?? '';
     const p1 = document.getElementById('kw-p1')?.checked;
     let shown = 0;
-    for (const r of kwRowsEl) {
-      const ok = (!q || r.dataset.text.includes(q)) && (!st || r.dataset.status === st) && (!p1 || r.dataset.p === 'P1');
-      r.classList.toggle('hide', !ok); if (ok) shown++;
-    }
+    for (const r of kwRowsEl) { const ok = (!q || r.dataset.text.includes(q)) && (!st || r.dataset.status === st) && (!p1 || r.dataset.p === 'P1'); r.classList.toggle('hide', !ok); if (ok) shown++; }
     const n = document.getElementById('kw-n'); if (n) n.textContent = shown + ' / ' + kwRowsEl.length + ' 条';
   };
   for (const el of document.querySelectorAll('#kw-q, input[name=kw-s], #kw-p1')) el.addEventListener('input', kwFilter);
@@ -425,15 +319,18 @@ ${lmap ? `<section class="card learn" id="sec-learn">
   for (const box of document.querySelectorAll('input[data-key]')) {
     const k = 'seo-task:' + box.dataset.key;
     try { if (localStorage.getItem(k) === '1') { box.checked = true; box.closest('.task').classList.add('done'); } } catch {}
-    box.addEventListener('change', () => {
-      box.closest('.task').classList.toggle('done', box.checked);
-      try { localStorage.setItem(k, box.checked ? '1' : '0'); } catch {}
-    });
+    box.addEventListener('change', () => { box.closest('.task').classList.toggle('done', box.checked); try { localStorage.setItem(k, box.checked ? '1' : '0'); } catch {} });
   }
-</script>
-</body>
-</html>
 `;
+const html = shell({
+  title: '冬瓜站 SEO 工作台',
+  description: 'eryx.cn 的 SEO / GEO 工作台：总览、今天要做、要处理的事、页面状态、站内检查、关键词、学习地图。每天 7:30 流水线自动生成。',
+  crumb: ['冬瓜站 SEO', '工作台'],
+  headline: autoDaily ? (issuesN ? `有 ${issuesN} 件事要看一眼。` : (autoDaily.queue?.draft ? `有 ${autoDaily.queue.draft} 篇草稿等你审。` : '今天一切正常。')) : '先跑一遍流水线。',
+  sub: `${ymd} 周${W[weekday]} · 自动采集、分析、改站、写稿都跑完了，这页只放要你看和要你做的。`,
+  active: 'overview', page: 'console', body, script: pageScript,
+  actions: `<a class="btn small" href="/pages/aidev-seo-review.html">审核台</a><a class="btn small" href="/pages/aidev-seo-distribute.html">分发台</a>`,
+});
 mkdirSync(join(LAUNCHPAD, 'pages'), { recursive: true });
 writeFileSync(PAGE, html);
 try { execSync('node scripts/topic-map-page.mjs', { stdio: 'ignore' }); } catch {}

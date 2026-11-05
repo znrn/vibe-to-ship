@@ -13,7 +13,9 @@ const QUEUE = `${DATA}/queue.json`;
 const DIR = 'src/content/articles';
 const queue = readJson(QUEUE, []);
 const only = process.argv.slice(2).find((a) => !a.startsWith('--'));
-const targets = queue.filter((q) => q.type === 'article' && (only ? q.id === only : ['picked', 'rewrite'].includes(q.status)));
+// 一次最多写 2 篇（--max=N 改），免得一次排太多、审不过来
+const max = Number(process.argv.find((a) => a.startsWith('--max='))?.slice(6) ?? 2);
+const targets = queue.filter((q) => q.type === 'article' && (only ? q.id === only : ['picked', 'rewrite'].includes(q.status))).slice(0, only ? 1 : max);
 if (!targets.length) { console.log('写稿：队列里没有要写的'); process.exit(0); }
 const { merged, nodes } = loadTopicMap();
 const published = merged.filter((x) => x.status === 'published');
