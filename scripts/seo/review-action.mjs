@@ -38,7 +38,13 @@ if (action === 'posted') {
   process.exit(0);
 }
 
-if (action === 'write') { bg(['scripts/seo/pick-topic.mjs'], 'write.log'); setTimeout(() => bg(['scripts/seo/write.mjs'], 'write.log'), 3000); say('已在后台选题写稿，几分钟后看审核页'); refresh(); process.exit(0); }
+if (action === 'write') {
+  // 选题很快，同步跑完再把写稿放后台（之前用 setTimeout 再 exit，写稿根本没启动）
+  const r = spawnSync('node', ['scripts/seo/pick-topic.mjs'], { encoding: 'utf8', timeout: 60000 });
+  bg(['scripts/seo/write.mjs'], 'write.log');
+  say((r.stdout || '').trim() + '\n已在后台写稿（一次最多 2 篇），几分钟后看审核页');
+  refresh(); process.exit(0);
+}
 if (!q) { say(`队列里没有 ${id}`); process.exit(1); }
 
 if (action === 'approve') {
