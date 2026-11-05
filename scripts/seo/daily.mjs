@@ -64,7 +64,8 @@ run('analyze', '分析', 'analyze.mjs', 60);
 // ── 二期：自动改站 → 有改动就构建、部署、推送 ──
 if (!skip.has('fix') && online) {
   run('fix', '自动改站', 'fix.mjs', 120);
-  const dirty = execSync('git status --porcelain -- src public').toString().trim();
+  // 只看已跟踪文件的改动：草稿（draft: true，还没提交的新文件）不算，免得把待审稿提交进去
+  const dirty = execSync('git status --porcelain -- src public').toString().split('\n').filter((l) => l && !l.startsWith('??')).join('\n').trim();
   const needDeploy = dirty || hasFlag('--deploy');
   if (needDeploy) {
     console.log('\n== 构建并部署（有改动）');
