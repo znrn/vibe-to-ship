@@ -45,6 +45,9 @@ if (action === 'approve') {
   const file = `${DIR}/${id}.md`;
   if (!existsSync(file)) { say('草稿文件不存在'); process.exit(1); }
   let text = readFileSync(file, 'utf8');
+  // 闸门：还有「待冬瓜确认」就不发，除非意见框里写了「忽略待确认」
+  const todo = (text.match(/待冬瓜确认/g) ?? []).length;
+  if (todo && !/忽略待确认/.test(note)) { say(`还有 ${todo} 处「待冬瓜确认」没处理，不能发。在文件里把它们改成你的做法（或删掉标记），再点通过；确实要带着发，在意见框里写「忽略待确认」。`); process.exit(1); }
   text = text.replace(/^draft:.*\n?/m, '').replace(/^date:.*$/m, `date: ${TODAY}`);
   writeFileSync(file, text);
   const steps = [['构建', 'npm', ['run', 'build'], 300000], ['部署', 'bash', ['scripts/deploy.sh'], 600000], ['推送这篇', 'node', ['scripts/seo-push.mjs', `/articles/${id}/`], 60000]];
