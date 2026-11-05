@@ -26,7 +26,11 @@
     "seo:analyze": "node scripts/seo/analyze.mjs && node scripts/seo/report.mjs",
     "seo:rank": "node scripts/seo/collect-rank.mjs",
     "seo:geo": "node scripts/seo/collect-geo.mjs --force",
-    "seo:tongji-auth": "node scripts/seo/tongji-auth.mjs"
+    "seo:tongji-auth": "node scripts/seo/tongji-auth.mjs",
+    "seo:pick": "node scripts/seo/pick-topic.mjs",
+    "seo:write": "node scripts/seo/write.mjs",
+    "seo:review": "node scripts/seo/review-page.mjs",
+    "seo:approve": "node scripts/seo/review-action.mjs approve"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.19",

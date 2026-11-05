@@ -117,6 +117,8 @@ if (autoDaily?.date === ymd) {
   if ((f.notes ?? []).some((n) => /没登录百度站长/.test(n))) humanTasks.push({ title: '在 Ego 浏览器登录百度站长平台（任务空间 eryx seo baidu console），之后流量与关键词就能自动抓', link: 'https://ziyuan.baidu.com/' });
   if (f.deadSources?.length) humanTasks.push({ title: `${f.deadSources.length} 条参考来源打不开，看日报换新地址` });
   if (f.decline?.length) humanTasks.push({ title: `${f.decline.length} 页流量比上周少 30% 以上，看日报决定要不要更新` });
+  if (autoDaily.queue?.draft) humanTasks.push({ title: `审核 ${autoDaily.queue.draft} 篇自动写的草稿：看结论和来源，通过就上线`, link: 'http://localhost:8088/pages/aidev-seo-review.html' });
+  if (autoDaily.queue?.proposals) humanTasks.push({ title: `${autoDaily.queue.proposals} 条建议新增选题，采纳或忽略`, link: 'http://localhost:8088/pages/aidev-seo-review.html' });
   if ((f.opportunities ?? []).some((o) => o.action === '待写')) humanTasks.push({ title: `日报里有 ${f.opportunities.filter((o) => o.action === '待写').length} 个「待写」机会词，挑一个进选题地图` });
 }
 
@@ -140,7 +142,7 @@ const esc0 = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;')
 const dailyHtml = (() => {
   if (!autoDaily) return `<section class="card" id="sec-daily"><h2>自动日报 <span>还没跑过</span></h2><p class="how">运行 <code>npm run seo:daily</code>（launchd 每天 7:30 自动跑）后这里显示昨天的流量、蜘蛛、排名和要处理的事。</p></section>`;
   const f = autoDaily.findings ?? {};
-  const st = (n, label, cls = '') => `<div class="${cls}"><b>${esc0(n ?? '-')}</b>${label}</div>`;
+  const st = (n, label, cls = '') => `<div class="${cls}"><b>${typeof n === 'string' && n.startsWith('<a ') ? n : esc0(n ?? '-')}</b>${label}</div>`;
   const bars = (arr, cls) => { const max = Math.max(1, ...arr.map((x) => x.v ?? 0)); return `<div class="bars">${arr.map((x) => `<div class="${cls}" style="height:${Math.max(3, Math.round(((x.v ?? 0) / max) * 48))}px" title="${x.d}：${x.v ?? '-'}"><i>${x.d.slice(5)}</i></div>`).join('')}</div>`; };
   const list = (title, rows) => rows.length ? `<details${rows.length <= 6 ? ' open' : ''}><summary><b>${title}</b> ${rows.length}</summary><ul class="issues">${rows.map((r) => `<li class="${r[0]}">${esc0(r[1])}</li>`).join('')}</ul></details>` : '';
   const rows = [
@@ -164,6 +166,7 @@ const dailyHtml = (() => {
       ${st(autoDaily.baiduspider, '百度蜘蛛')}
       ${st(`${autoDaily.rankTop10?.baidu ?? 0}/${autoDaily.rankTop50?.baidu ?? 0}`, '百度前10/前50', autoDaily.rankTop10?.baidu ? 'ok' : '')}
       ${st(autoDaily.opportunities, '机会词', autoDaily.opportunities ? 'ok' : '')}
+      ${st(autoDaily.queue ? `<a href="/pages/aidev-seo-review.html" style="color:inherit;text-decoration:none">${autoDaily.queue.draft}</a>` : '-', '待审草稿', autoDaily.queue?.draft ? 'warn' : '')}
       ${st(autoDaily.leads28 ? `${autoDaily.leads28.咨询}/${autoDaily.leads28.报名}` : '-', '28 天咨询/报名', autoDaily.leads28?.报名 ? 'ok' : '')}
       ${st((autoDaily.spider404 ?? 0) + (autoDaily.deadSources ?? 0) + (autoDaily.decline ?? 0), '异常', (autoDaily.spider404 ?? 0) + (autoDaily.deadSources ?? 0) + (autoDaily.decline ?? 0) ? 'warn' : 'ok')}
     </div>
@@ -340,7 +343,7 @@ const html = `<!doctype html>
   <h1>冬瓜站 SEO 工作台 <small>${ymd} 周${W[weekday]} · 生成于 ${today.toTimeString().slice(0, 5)}</small></h1>
   <nav class="platforms">${LINKS.map(([n, u]) => `<a href="${u}" target="_blank" rel="noopener">${n}</a>`).join('')}</nav>
 </header>
-<nav class="jump">跳到：<a href="#sec-daily">自动日报</a><a href="#sec-today">今天要做的</a><a href="#sec-check">站内检查</a><a href="#sec-week">本周</a><a href="#sec-kw">关键词目标</a><a href="#sec-log">日志</a>${kwHtml ? '<a href="#sec-bank">关键词库</a>' : ''}${lmap ? '<a href="#sec-learn">学习地图</a>' : ''}</nav>
+<nav class="jump">跳到：<a href="/pages/aidev-seo-review.html"><b>审核台</b></a><a href="#sec-daily">自动日报</a><a href="#sec-today">今天要做的</a><a href="#sec-check">站内检查</a><a href="#sec-week">本周</a><a href="#sec-kw">关键词目标</a><a href="#sec-log">日志</a>${kwHtml ? '<a href="#sec-bank">关键词库</a>' : ''}${lmap ? '<a href="#sec-learn">学习地图</a>' : ''}</nav>
 <div class="grid">
 <div>
   ${dailyHtml}

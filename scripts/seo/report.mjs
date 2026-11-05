@@ -17,6 +17,9 @@ const fixManual = readJson(`${DATA}/fix-manual.json`, {}).items ?? [];
 // 转化回填：plan/seo/leads.csv（日期,类型,来源,备注），类型写 咨询 / 报名。意向事件在百度统计「事件分析」里看
 const leads = (() => { try { return readFileSync('plan/seo/leads.csv', 'utf8').trim().split('\n').slice(1).map((l) => l.split(',')).filter((r) => r[0]).map(([date, type, source, note]) => ({ date, type, source, note })); } catch { return []; } })();
 const leads28 = leads.filter((l) => l.date >= daysAgo(28));
+const queue = readJson(`${DATA}/queue.json`, []);
+const qCount = (st) => queue.filter((q) => q.type === 'article' && q.status === st).length;
+const qSummary = { draft: qCount('draft'), drafting: qCount('drafting') + qCount('picked') + qCount('rewrite'), failed: qCount('failed'), published: queue.filter((q) => q.status === 'published' && q.publishedAt >= daysAgo(28)).length, proposals: queue.filter((q) => q.type === 'proposal' && q.status === 'proposed').length };
 
 const y = crawl.days[YESTERDAY];
 const t = traffic.days[YESTERDAY];
@@ -41,6 +44,7 @@ const summary = {
   opportunities: findings.opportunities?.length ?? 0, lowCtr: findings.lowCtrPages?.length ?? 0, weakLinks: findings.weakLinks?.length ?? 0, decline: findings.decline?.length ?? 0,
   spider404: findings.crawl?.notFound?.length ?? 0, notCrawled: findings.crawl?.notCrawled?.length ?? 0, deadSources: findings.deadSources?.length ?? 0,
   steps: lastRun.steps ?? [],
+  queue: qSummary, drafts: queue.filter((q) => q.type === 'article' && q.status === 'draft').map((q) => ({ id: q.id, title: q.title ?? q.keyword, pass: q.checks?.pass, todo: q.checks?.todo ?? 0 })),
   liveProblems: live.problems ?? [], changesToday, fixManual, leads28: { 咨询: leads28.filter((l) => l.type === '咨询').length, 报名: leads28.filter((l) => l.type === '报名').length, total: leads.length },
   trend: { visits: week((d) => traffic.days[d]?.uv ?? crawl.days[d]?.human?.hits ?? null), baiduspider: week((d) => crawl.days[d]?.spiders?.Baiduspider?.hits ?? null) },
 };
@@ -68,6 +72,10 @@ sec('来源失效', (findings.deadSources ?? []).map((d) => `- ${d.url}（${d.st
 sec('线上巡检', (live.problems ?? []).map((p) => `- ${p.url}：${p.issue}`), live.date ? `正常（${live.date} 查了 ${live.checked} 页）` : '还没查');
 sec('脚本改了什么', changesToday.map((c) => `- 【${c.type}】${c.file.replace('src/content/articles/', '')}：${c.what}`), '今天没有自动改动');
 sec('待人工处理', fixManual.map((m) => `- ${m.file.replace('src/content/articles/', '')}：${m.what}`));
+L.push('## 内容流水线');
+L.push(`- 待审核 ${qSummary.draft} 篇，在写 ${qSummary.drafting} 篇，写失败 ${qSummary.failed} 篇，近 28 天发布 ${qSummary.published} 篇，建议新增选题 ${qSummary.proposals} 条 → http://localhost:8088/pages/aidev-seo-review.html`);
+for (const q of queue.filter((q) => q.type === 'article' && q.status === 'draft')) L.push(`- 待审：${q.title ?? q.keyword}（${q.id}，检查${q.checks?.pass ? '全过' : '有问题'}，待冬瓜确认 ${q.checks?.todo ?? 0} 处）`);
+L.push('');
 L.push('## 转化（近 28 天）');
 L.push(leads.length ? `- 咨询 ${leads28.filter((l) => l.type === '咨询').length}，报名 ${leads28.filter((l) => l.type === '报名').length}；来源：${Object.entries(leads28.reduce((o, l) => (o[l.source] = (o[l.source] ?? 0) + 1, o), {})).map(([k, v]) => `${k} ${v}`).join('、') || '-'}` : '- 还没有记录。有人加微信咨询或报名时，在 plan/seo/leads.csv 加一行：日期,咨询或报名,来源,备注');
 L.push('- 意向事件（看实训营、点二维码、复制微信号）在百度统计 → 事件分析里看，分类「意向」');

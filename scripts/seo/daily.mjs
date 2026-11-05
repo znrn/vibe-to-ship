@@ -4,10 +4,11 @@
 //       npm run seo:daily -- --skip=rank,geo,tongji
 //       npm run seo:daily -- --skip=fix    不自动改站、不自动部署
 //       npm run seo:daily -- --deploy      即使没有改动也部署一次
+//       npm run seo:daily -- --write       今天就选题写稿（默认每周一）；--skip=write 这周不写
 // 每步独立，一步失败不影响后面；每步的结果记在 plan/seo/data/last-run.json，日报里有「脚本执行」一栏。
 import { existsSync, writeFileSync, readFileSync, unlinkSync } from 'node:fs';
 import { spawnSync, execSync } from 'node:child_process';
-import { writeJson, TODAY, DATA, hasFlag, argValue, notify } from './lib.mjs';
+import { writeJson, TODAY, WEEKDAY, DATA, hasFlag, argValue, notify } from './lib.mjs';
 
 // 任务锁：上一次还没跑完（或 Mac 睡醒后 launchd 补跑撞上）就不重复跑；锁超过 3 小时视为残留
 const LOCK = `${DATA}/daily.lock`;
@@ -80,6 +81,13 @@ if (!skip.has('fix') && online) {
     if (!ok) notify('冬瓜站 SEO', '自动部署失败，看日报；回退：bash scripts/rollback.sh');
   }
 }
+
+// ── 三期：每周一自动选题、写稿到「待审」（或 --write）；审核页每天刷新 ──
+if ((WEEKDAY === 1 || hasFlag('--write')) && online && !skip.has('write')) {
+  run('pick', '选题', 'pick-topic.mjs', 60);
+  run('write', '写稿（Claude 无头）', 'write.mjs', 60 * 60);
+}
+run('review', '审核页', 'review-page.mjs', 60);
 
 run('report', '日报', 'report.mjs', 60);
 
