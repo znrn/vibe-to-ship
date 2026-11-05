@@ -15,14 +15,14 @@ EXT=${DEPLOY_NGINX_EXT:-/www/server/panel/vhost/nginx/extension/eryx.cn/vibe-to-
 [ -f dist/index.html ] || { echo "先 npm run build"; exit 1; }
 
 echo "1/3 备份服务器上的旧首页和 404"
-ssh -i $KEY $HOST "mkdir -p $ROOT-backup && cp -a $ROOT/index.html $ROOT/404.html $ROOT-backup/ 2>/dev/null || true"
+ssh -i ${KEY} ${HOST} "mkdir -p ${ROOT}-backup && cp -a ${ROOT}/index.html ${ROOT}/404.html ${ROOT}-backup/ 2>/dev/null || true"
 
-echo "2/3 同步 dist/ 到 $ROOT（不删除根目录里的其他内容）"
-rsync -az --no-perms --no-owner --no-group -e "ssh -i $KEY" dist/ $HOST:$ROOT/
-ssh -i $KEY $HOST "chown -R www:www $ROOT/_astro $ROOT/flow $ROOT/articles $ROOT/platforms $ROOT/topics $ROOT/images 2>/dev/null || true"
+echo "2/3 同步 dist/ 到 ${ROOT}（不删除根目录里的其他内容）"
+rsync -az --no-perms --no-owner --no-group -e "ssh -i ${KEY}" dist/ ${HOST}:${ROOT}/
+ssh -i ${KEY} ${HOST} "chown -R www:www ${ROOT}/_astro ${ROOT}/flow ${ROOT}/articles ${ROOT}/platforms ${ROOT}/topics ${ROOT}/images 2>/dev/null || true"
 
 echo "3/3 nginx 补充配置（.md 纯文本、llms.txt、旧网址 301）"
-ssh -i $KEY $HOST "cat > $EXT" <<'NGINX'
+ssh -i ${KEY} ${HOST} "cat > ${EXT}" <<'NGINX'
 # vibe-to-ship 静态站补充配置，由仓库 scripts/deploy.sh 写入，勿手改
 include /www/wwwroot/eryx.cn/redirects.nginx.conf;
 # nginx 的 mime.types 已把 .md 识别为 text/markdown，但它不在默认 charset_types 里，要单独声明才会带 charset=utf-8
@@ -30,7 +30,7 @@ location ~ \.md$ { charset utf-8; charset_types text/markdown; try_files $uri =4
 location = /llms.txt { default_type text/plain; charset utf-8; }
 location = /sitemap.xml { return 301 /sitemap-index.xml; }
 NGINX
-ssh -i $KEY $HOST "nginx -t && nginx -s reload"
+ssh -i ${KEY} ${HOST} "nginx -t && nginx -s reload"
 
 # 有百度推送 token 时，把新站点地图里的网址推给百度；IndexNow 通知必应（改过的页才提交）
 node scripts/seo-push.mjs || true
