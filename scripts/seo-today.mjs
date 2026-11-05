@@ -110,6 +110,16 @@ const idx = history.findIndex((h) => h.date === ymd);
 if (idx >= 0) history[idx] = rec; else history.push(rec);
 writeFileSync(HISTORY, JSON.stringify(history.slice(-90), null, 2) + '\n');
 
+// ── 自动流水线的日报（plan/seo/daily/latest.json，由 npm run seo:daily 生成）──
+const autoDaily = existsSync('plan/seo/daily/latest.json') ? JSON.parse(readFileSync('plan/seo/daily/latest.json', 'utf8')) : null;
+if (autoDaily?.date === ymd) {
+  const f = autoDaily.findings ?? {};
+  if ((f.notes ?? []).some((n) => /没登录百度站长/.test(n))) humanTasks.push({ title: '在 Ego 浏览器登录百度站长平台（任务空间 eryx seo baidu console），之后流量与关键词就能自动抓', link: 'https://ziyuan.baidu.com/' });
+  if (f.deadSources?.length) humanTasks.push({ title: `${f.deadSources.length} 条参考来源打不开，看日报换新地址` });
+  if (f.decline?.length) humanTasks.push({ title: `${f.decline.length} 页流量比上周少 30% 以上，看日报决定要不要更新` });
+  if ((f.opportunities ?? []).some((o) => o.action === '待写')) humanTasks.push({ title: `日报里有 ${f.opportunities.filter((o) => o.action === '待写').length} 个「待写」机会词，挑一个进选题地图` });
+}
+
 // ── 待办：写进 launchpad，同一天同一条不重复 ──
 let todos = existsSync(TODOS) ? JSON.parse(readFileSync(TODOS, 'utf8')) : [];
 if (!noTodo && existsSync(TODOS)) {
@@ -126,6 +136,36 @@ const oneTime = mine.filter((x) => !/^SEO 日常/.test(x.detail ?? ''));
 const todayTodos = mine.filter((x) => x.created === ymd && /^SEO 日常/.test(x.detail ?? ''));
 
 // ── 页面 ──
+const esc0 = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const dailyHtml = (() => {
+  if (!autoDaily) return `<section class="card"><h2>自动日报 <span>还没跑过</span></h2><p class="how">运行 <code>npm run seo:daily</code>（launchd 每天 7:30 自动跑）后这里显示昨天的流量、蜘蛛、排名和要处理的事。</p></section>`;
+  const f = autoDaily.findings ?? {};
+  const st = (n, label, cls = '') => `<div class="${cls}"><b>${esc0(n ?? '-')}</b>${label}</div>`;
+  const bars = (arr, cls) => { const max = Math.max(1, ...arr.map((x) => x.v ?? 0)); return `<div class="bars">${arr.map((x) => `<div class="${cls}" style="height:${Math.max(3, Math.round(((x.v ?? 0) / max) * 48))}px" title="${x.d}：${x.v ?? '-'}"><i>${x.d.slice(5)}</i></div>`).join('')}</div>`; };
+  const list = (title, rows) => rows.length ? `<details${rows.length <= 6 ? ' open' : ''}><summary><b>${title}</b> ${rows.length}</summary><ul class="issues">${rows.map((r) => `<li class="${r[0]}">${esc0(r[1])}</li>`).join('')}</ul></details>` : '';
+  const rows = [
+    list('机会词', (f.opportunities ?? []).slice(0, 20).map((o) => [o.action === '待写' ? 'w' : 'e', `【${o.action}】${o.word} ← ${o.source}${o.impressions != null ? `，展现 ${o.impressions} 点击 ${o.clicks ?? 0}` : ''}${o.rank ? `，排名 ${o.rank}` : ''}${o.page ? `，对应 ${o.page}` : ''}`])),
+    list('排名变化', (f.rankChanges ?? []).map((c) => ['w', `${c.word}：${c.engine} ${c.from} → ${c.to}`])),
+    list('弱内链', (f.weakLinks ?? []).map((w) => ['w', `${w.page}（${w.inbound} 条）${w.suggest?.length ? `，可从 ${w.suggest.join('、')} 链过来` : ''}`])),
+    list('衰退页', (f.decline ?? []).map((d) => ['e', `${d.page}：${d.before} → ${d.now}（${d.basis}）`])),
+    list('抓取异常', [...(f.crawl?.notFound ?? []).slice(0, 12).map((n) => ['w', `${n.spider} 抓到 404：${n.path}（${n.hits} 次）`]), ...(f.crawl?.notCrawled ?? []).map((u) => ['w', `7 天没被百度抓过：${u}`])]),
+    list('来源失效', (f.deadSources ?? []).map((d) => ['e', `${d.url}（${d.status}）出现在 ${d.in.join('、')}`])),
+    list('提醒', (f.notes ?? []).map((n) => ['w', n])),
+    list('脚本执行', (autoDaily.steps ?? []).map((s) => [s.ok ? '' : 'e', `${s.ok ? '✓' : '✗'} ${s.label}（${s.seconds}s）${s.summary ? `：${s.summary}` : ''}`])),
+  ].join('');
+  return `<section class="card">
+    <h2>自动日报 <span>${esc0(autoDaily.date)} 生成 · 数据到 ${esc0(autoDaily.for)} · plan/seo/daily/</span></h2>
+    <div class="stat">
+      ${st(autoDaily.visits ?? autoDaily.humanHits, autoDaily.visits != null ? '访客' : '页面请求')}
+      ${st(autoDaily.baiduspider, '百度蜘蛛')}
+      ${st(`${autoDaily.rankTop10?.baidu ?? 0}/${autoDaily.rankTop50?.baidu ?? 0}`, '百度前10/前50', autoDaily.rankTop10?.baidu ? 'ok' : '')}
+      ${st(autoDaily.opportunities, '机会词', autoDaily.opportunities ? 'ok' : '')}
+      ${st((autoDaily.spider404 ?? 0) + (autoDaily.deadSources ?? 0) + (autoDaily.decline ?? 0), '异常', (autoDaily.spider404 ?? 0) + (autoDaily.deadSources ?? 0) + (autoDaily.decline ?? 0) ? 'warn' : 'ok')}
+    </div>
+    <div class="trend2"><div><p class="section-title">访客 7 天</p>${bars(autoDaily.trend?.visits ?? [], 'today')}</div><div><p class="section-title">百度蜘蛛 7 天</p>${bars(autoDaily.trend?.baiduspider ?? [], '')}</div></div>
+    <div class="daily-lists">${rows || '<p class="muted">没有要处理的事</p>'}</div>
+  </section>`;
+})();
 const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const csv = existsSync('plan/seo/keywords.csv') ? readFileSync('plan/seo/keywords.csv', 'utf8').trim().split('\n').map((l) => l.split(',')) : [];
 const log = existsSync('plan/seo/log.md') ? readFileSync('plan/seo/log.md', 'utf8') : '';
@@ -241,6 +281,9 @@ const html = `<!doctype html>
   .log h4 { font-size:13px; margin:10px 0 4px; color:var(--green); }
   .log li { font-size:13px; margin-left:18px; } .log p { font-size:13px; }
   .onetime .task.done { opacity:.6; }
+  .trend2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:4px 0 26px; }
+  .daily-lists details { margin-top:8px; } .daily-lists summary { cursor:pointer; font-size:13px; } .daily-lists .issues { margin-top:4px; max-height:240px; }
+  .daily-lists .issues li { background:#f8fafc; color:#334155; }
   .how { font-size:12.5px; color:var(--muted); margin-top:4px; }
   .how code { background:#f1f5f9; border-radius:5px; padding:1px 6px; }
   .learn { grid-column:1 / -1; }
@@ -289,6 +332,7 @@ const html = `<!doctype html>
 </header>
 <div class="grid">
 <div>
+  ${dailyHtml}
   <section class="card">
     <h2>今天要做的 <span>勾选只记在这台电脑的浏览器里；待办页里也有同样的事</span></h2>
     ${sections.filter(([, t]) => t.length).map(([name, tasks]) => `<p class="section-title">${esc(name)}</p><ul class="tasks">${tasks.map(taskRow).join('')}</ul>`).join('')}

@@ -16,7 +16,17 @@
     "check:links": "node scripts/check-links.mjs",
     "seo:today": "node scripts/seo-today.mjs",
     "seo:check": "node scripts/seo-check.mjs",
-    "seo:push": "node scripts/seo-push.mjs"
+    "seo:push": "node scripts/seo-push.mjs",
+    "seo:auto": "node scripts/seo-auto/run-daily.mjs",
+    "seo:auto:today": "node scripts/seo-auto/today.mjs",
+    "seo:auto:check": "node scripts/seo-auto/check.mjs",
+    "seo:auto:push": "node scripts/seo-auto/push.mjs",
+    "seo:daily": "node scripts/seo/daily.mjs",
+    "seo:collect": "node scripts/seo/collect-crawl.mjs && node scripts/seo/collect-tongji.mjs && node scripts/seo/collect-bing.mjs && node scripts/seo/collect-baidu-console.mjs",
+    "seo:analyze": "node scripts/seo/analyze.mjs && node scripts/seo/report.mjs",
+    "seo:rank": "node scripts/seo/collect-rank.mjs",
+    "seo:geo": "node scripts/seo/collect-geo.mjs --force",
+    "seo:tongji-auth": "node scripts/seo/tongji-auth.mjs"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.19",
