@@ -22,6 +22,6 @@ export function pageHashes() {
   writeJson(FILE, store);
   return store;
 }
-// 自 date 以来改过没有（没有记录当作改过）
-export const changedSince = (url, date, hashes = pageHashes()) => !hashes[url] || hashes[url].since > date;
-export const changedUrls = (date, hashes = pageHashes()) => Object.keys(hashes).filter((u) => hashes[u].since > date);
+// 和上次记下的哈希快照比：没记过或哈希变了就算改过（同一天改两次也能认出来）
+export const changedAgainst = (snapshot, hashes = pageHashes()) => Object.keys(hashes).filter((u) => snapshot?.[u] !== hashes[u].hash);
+export const snapshotOf = (urls, hashes) => Object.fromEntries(urls.map((u) => [u, hashes[u]?.hash]));

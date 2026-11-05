@@ -39,8 +39,8 @@ const LINKS = [
 
 // ── 任务表：human = 要你亲自做（写进待办）；auto = 脚本做 ──
 const daily = [
-  { human: true, title: '百度站长「流量与关键词」：昨天有展现没点击的词，记到关键词表的待写区', link: 'https://ziyuan.baidu.com/' },
-  { human: true, title: '统计后台：昨天哪一页被看、从哪来', link: 'https://tongji.baidu.com/' },
+  { auto: 'npm run seo:daily', title: '站长后台的展现 / 点击 / 排名、蜘蛛日志、线上巡检：流水线每天 7:30 自动采集，结果在上面的「自动日报」' },
+  { human: true, title: '看一眼自动日报：机会词进选题地图、待人工处理的改掉', link: 'http://localhost:8088/pages/aidev-seo-console.html#sec-daily' },
   { human: true, title: '回复读者的问题，真实问题记进选题地图当选题' },
   { auto: 'npm run seo:push', title: '把还没推过的网址推给百度（每天配额 10 条，脚本自动挑）' },
 ];

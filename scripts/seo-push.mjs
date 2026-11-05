@@ -33,7 +33,9 @@ const rank = (u) => {
 const LOG = 'plan/seo/baidu-pushed.json';
 const pushedLog = existsSync(LOG) ? JSON.parse(readFileSync(LOG, 'utf8')) : {};
 const today = new Date().toISOString().slice(0, 10);
-const { pageHashes, changedSince } = await import('./seo/page-hash.mjs');
+const { pageHashes, snapshotOf } = await import('./seo/page-hash.mjs');
+const HASHLOG = 'plan/seo/data/pushed-hashes.json'; // url → 推送时的正文哈希
+const pushedHash = existsSync(HASHLOG) ? JSON.parse(readFileSync(HASHLOG, 'utf8')) : {};
 
 let urls = process.argv.slice(2).map((u) => (u.startsWith('http') ? u : SITE + u));
 const explicit = urls.length > 0;
@@ -42,7 +44,7 @@ if (!explicit) {
   const hashes = pageHashes();
   const all = [...readFileSync('dist/sitemap-0.xml', 'utf8').matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
   urls = all
-    .filter((u) => pushedLog[u] !== today && (!pushedLog[u] || changedSince(u, pushedLog[u], hashes)))
+    .filter((u) => pushedLog[u] !== today && (!pushedLog[u] || pushedHash[u] !== hashes[u]?.hash))
     .sort((a, b) => (pushedLog[a] ? 1 : 0) - (pushedLog[b] ? 1 : 0) || rank(a) - rank(b) || (pushedLog[a] ?? '').localeCompare(pushedLog[b] ?? ''));
   if (!urls.length) { console.log(`百度推送：${all.length} 个网址都推过，且推过之后没改动，今天不重复提交`); process.exit(0); }
 }
@@ -74,6 +76,7 @@ if (rest.length) {
 }
 const done = urls.slice(0, 1 + (restOk ? rest.length : 0));
 for (const u of done) pushedLog[u] = today;
+try { Object.assign(pushedHash, snapshotOf(done, pageHashes())); mkdirSync('plan/seo/data', { recursive: true }); writeFileSync(HASHLOG, JSON.stringify(pushedHash, null, 2) + '\n'); } catch {}
 mkdirSync('plan/seo', { recursive: true });
 writeFileSync(LOG, JSON.stringify(pushedLog, null, 2) + '\n');
 const never = urls.slice(done.length).filter((u) => !pushedLog[u]).length;
