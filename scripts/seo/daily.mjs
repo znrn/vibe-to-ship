@@ -5,6 +5,7 @@
 //       npm run seo:daily -- --skip=fix    不自动改站、不自动部署
 //       npm run seo:daily -- --deploy      即使没有改动也部署一次
 //       npm run seo:daily -- --write       今天就选题写稿（默认每周一）；--skip=write 这周不写
+//       npm run seo:daily -- --distribute  今天就生成分发稿（默认每周五）；--outreach 今天就扫外链（默认每月 1 号）
 // 每步独立，一步失败不影响后面；每步的结果记在 plan/seo/data/last-run.json，日报里有「脚本执行」一栏。
 import { existsSync, writeFileSync, readFileSync, unlinkSync } from 'node:fs';
 import { spawnSync, execSync } from 'node:child_process';
@@ -88,6 +89,11 @@ if ((WEEKDAY === 1 || hasFlag('--write')) && online && !skip.has('write')) {
   run('write', '写稿（Claude 无头）', 'write.mjs', 60 * 60);
 }
 run('review', '审核页', 'review-page.mjs', 60);
+
+// ── 四期：每周五给本周发布的文章生成分发稿；每月 1 号扫外链；分发页每天刷新 ──
+if ((WEEKDAY === 5 || hasFlag('--distribute')) && online && !skip.has('distribute')) run('distribute', '分发稿（Claude 无头）', 'distribute.mjs', 30 * 60);
+if ((new Date().getDate() === 1 || hasFlag('--outreach')) && online && !skip.has('outreach')) run('outreach', '外链扫描', 'outreach.mjs', 20 * 60);
+run('distpage', '分发页', 'distribute-page.mjs', 60);
 
 run('report', '日报', 'report.mjs', 60);
 

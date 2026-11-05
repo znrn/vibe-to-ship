@@ -32,7 +32,7 @@ try {
 }
 
 const RE = /^(\S+) \S+ \S+ \[[^\]]+\] "(\S+) (\S+)[^"]*" (\d{3}) (\S+) "([^"]*)" "([^"]*)"/;
-const rec = { date, total: 0, spiders: {}, human: { hits: 0, pages: {}, referrers: {}, engines: {}, notFound: {} } };
+const rec = { date, total: 0, spiders: {}, human: { hits: 0, pages: {}, referrers: {}, engines: {}, notFound: {}, channels: {} } };
 const inc = (o, k, n = 1) => { o[k] = (o[k] ?? 0) + n; };
 for (const line of raw.split('\n')) {
   const mm = line.match(RE);
@@ -52,6 +52,9 @@ for (const line of raw.split('\n')) {
     if (/\.(css|js|png|jpg|svg|ico|woff2?|xml|txt|webp)$/i.test(path) || path.startsWith('/_astro/')) continue;
     rec.human.hits++;
     if (status === '200' && method === 'GET') inc(rec.human.pages, path);
+    // 分发稿带的来源参数：?from=zhihu / xhs / v2ex / wechat，用来算哪个渠道来人
+    const ch = url.match(/[?&]from=([a-z0-9_-]+)/i)?.[1];
+    if (ch && status === '200') inc(rec.human.channels, ch.toLowerCase());
     if (status === '404') inc(rec.human.notFound, path);
     if (ref && ref !== '-') {
       try {

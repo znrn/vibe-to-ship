@@ -44,6 +44,7 @@ const summary = {
   opportunities: findings.opportunities?.length ?? 0, lowCtr: findings.lowCtrPages?.length ?? 0, weakLinks: findings.weakLinks?.length ?? 0, decline: findings.decline?.length ?? 0,
   spider404: findings.crawl?.notFound?.length ?? 0, notCrawled: findings.crawl?.notCrawled?.length ?? 0, deadSources: findings.deadSources?.length ?? 0,
   steps: lastRun.steps ?? [],
+  channels7, distPending: distPending.length,
   queue: qSummary, drafts: queue.filter((q) => q.type === 'article' && q.status === 'draft').map((q) => ({ id: q.id, title: q.title ?? q.keyword, pass: q.checks?.pass, todo: q.checks?.todo ?? 0 })),
   liveProblems: live.problems ?? [], changesToday, fixManual, leads28: { 咨询: leads28.filter((l) => l.type === '咨询').length, 报名: leads28.filter((l) => l.type === '报名').length, total: leads.length },
   trend: { visits: week((d) => traffic.days[d]?.uv ?? crawl.days[d]?.human?.hits ?? null), baiduspider: week((d) => crawl.days[d]?.spiders?.Baiduspider?.hits ?? null) },
@@ -75,6 +76,13 @@ sec('待人工处理', fixManual.map((m) => `- ${m.file.replace('src/content/art
 L.push('## 内容流水线');
 L.push(`- 待审核 ${qSummary.draft} 篇，在写 ${qSummary.drafting} 篇，写失败 ${qSummary.failed} 篇，近 28 天发布 ${qSummary.published} 篇，建议新增选题 ${qSummary.proposals} 条 → http://localhost:8088/pages/aidev-seo-review.html`);
 for (const q of queue.filter((q) => q.type === 'article' && q.status === 'draft')) L.push(`- 待审：${q.title ?? q.keyword}（${q.id}，检查${q.checks?.pass ? '全过' : '有问题'}，待冬瓜确认 ${q.checks?.todo ?? 0} 处）`);
+L.push('');
+const channels7 = {};
+for (const d of Array.from({ length: 7 }, (_, i) => daysAgo(i + 1))) for (const [k, v] of Object.entries(crawl.days[d]?.human?.channels ?? {})) channels7[k] = (channels7[k] ?? 0) + v;
+const dist = readJson(`${DATA}/distribution.json`, { articles: {} });
+const distPending = Object.values(dist.articles ?? {}).filter((a) => a.platforms && Object.keys(a.platforms).some((p) => !a.posted?.[p]));
+L.push('## 分发（近 7 天从分发链接来的人）');
+L.push(`- ${Object.keys(channels7).length ? Object.entries(channels7).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} ${v}`).join('、') : '还没有带 from= 参数的来访'}；待发的分发稿 ${distPending.length} 篇 → http://localhost:8088/pages/aidev-seo-distribute.html`);
 L.push('');
 L.push('## 转化（近 28 天）');
 L.push(leads.length ? `- 咨询 ${leads28.filter((l) => l.type === '咨询').length}，报名 ${leads28.filter((l) => l.type === '报名').length}；来源：${Object.entries(leads28.reduce((o, l) => (o[l.source] = (o[l.source] ?? 0) + 1, o), {})).map(([k, v]) => `${k} ${v}`).join('、') || '-'}` : '- 还没有记录。有人加微信咨询或报名时，在 plan/seo/leads.csv 加一行：日期,咨询或报名,来源,备注');

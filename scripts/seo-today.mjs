@@ -49,7 +49,7 @@ const weekly = {
   2: [{ human: true, title: '学习地图：读一个还没勾的知识点（工作台底部），顺手看看本站这一项该不该做' }],
   3: [{ human: true, title: '内链：本周新文章链到所属支柱页，支柱页反链回来；看检查结果里的孤立页' }],
   4: [],
-  5: [{ human: true, title: '分发：知乎 / V2EX / 即刻 / 小红书各发一条，带原文链接，记下哪个渠道来人' }],
+  5: [{ human: true, title: '分发：分发台里本周文章的四平台稿子已写好，复制或预填后你点发布，发完标记已发', link: 'http://localhost:8088/pages/aidev-seo-distribute.html' }],
   6: [],
   0: [
     { human: true, title: '收录：site:eryx.cn 和站长平台索引量，没收录的页手动提交', link: 'https://ziyuan.baidu.com/' },
@@ -59,7 +59,7 @@ const weekly = {
 const monthly = [
   { human: true, title: '关键词表填当月排名；进前 20 的词加内链、更新内容' },
   { human: true, title: '流量最高的 3 页精修：补 FAQ、补来源、更新日期' },
-  { human: true, title: '外链：找 2～3 个相关站点、公众号互推或投稿' },
+  { human: true, title: '外链：分发台底部有本月扫到的提及和候选私信草稿，挑 2～3 个发', link: 'http://localhost:8088/pages/aidev-seo-distribute.html' },
   { human: true, title: 'GEO 核对：豆包 / Kimi / Perplexity / ChatGPT 各问一遍站点主词和 3 个支柱词，记录是否引用、引用哪页' },
   { auto: 'npm run check:links', title: '外链死链检查（要联网，约 1 分钟）' },
 ];
@@ -118,6 +118,7 @@ if (autoDaily?.date === ymd) {
   if (f.deadSources?.length) humanTasks.push({ title: `${f.deadSources.length} 条参考来源打不开，看日报换新地址` });
   if (f.decline?.length) humanTasks.push({ title: `${f.decline.length} 页流量比上周少 30% 以上，看日报决定要不要更新` });
   if (autoDaily.queue?.draft) humanTasks.push({ title: `审核 ${autoDaily.queue.draft} 篇自动写的草稿：看结论和来源，通过就上线`, link: 'http://localhost:8088/pages/aidev-seo-review.html' });
+  if (autoDaily.distPending) humanTasks.push({ title: `${autoDaily.distPending} 篇文章的分发稿还没发完，去分发台复制或预填后发布`, link: 'http://localhost:8088/pages/aidev-seo-distribute.html' });
   if (autoDaily.queue?.proposals) humanTasks.push({ title: `${autoDaily.queue.proposals} 条建议新增选题，采纳或忽略`, link: 'http://localhost:8088/pages/aidev-seo-review.html' });
   if ((f.opportunities ?? []).some((o) => o.action === '待写')) humanTasks.push({ title: `日报里有 ${f.opportunities.filter((o) => o.action === '待写').length} 个「待写」机会词，挑一个进选题地图` });
 }
@@ -343,7 +344,7 @@ const html = `<!doctype html>
   <h1>冬瓜站 SEO 工作台 <small>${ymd} 周${W[weekday]} · 生成于 ${today.toTimeString().slice(0, 5)}</small></h1>
   <nav class="platforms">${LINKS.map(([n, u]) => `<a href="${u}" target="_blank" rel="noopener">${n}</a>`).join('')}</nav>
 </header>
-<nav class="jump">跳到：<a href="/pages/aidev-seo-review.html"><b>审核台</b></a><a href="#sec-daily">自动日报</a><a href="#sec-today">今天要做的</a><a href="#sec-check">站内检查</a><a href="#sec-week">本周</a><a href="#sec-kw">关键词目标</a><a href="#sec-log">日志</a>${kwHtml ? '<a href="#sec-bank">关键词库</a>' : ''}${lmap ? '<a href="#sec-learn">学习地图</a>' : ''}</nav>
+<nav class="jump">跳到：<a href="/pages/aidev-seo-review.html"><b>审核台</b></a><a href="/pages/aidev-seo-distribute.html"><b>分发台</b></a><a href="#sec-daily">自动日报</a><a href="#sec-today">今天要做的</a><a href="#sec-check">站内检查</a><a href="#sec-week">本周</a><a href="#sec-kw">关键词目标</a><a href="#sec-log">日志</a>${kwHtml ? '<a href="#sec-bank">关键词库</a>' : ''}${lmap ? '<a href="#sec-learn">学习地图</a>' : ''}</nav>
 <div class="grid">
 <div>
   ${dailyHtml}
