@@ -107,6 +107,18 @@ if (prevDay) for (const [word, r] of Object.entries(todayRank)) for (const eng o
   if ((num(a) > 10) !== (num(b) > 10) || Math.abs(num(a) - num(b)) >= 3) findings.rankChanges.push({ word, engine: eng === 'baidu' ? '百度' : '必应', from: a, to: b });
 }
 
+// ── 页面状态表：每页「推过没、最近被百度抓是哪天、有没有展现」，分清「提交了」和「收录了」──
+const pushedLog = readJson('plan/seo/baidu-pushed.json', {});
+const lastCrawl = {};
+for (const d of Object.keys(crawl.days).sort()) for (const p of Object.keys(crawl.days[d]?.spiders?.Baiduspider?.pages ?? {})) lastCrawl[p] = d;
+const impByPage = {};
+for (const p of bing.latest?.pages ?? []) impByPage[p.page] = (impByPage[p.page] ?? 0) + (p.impressions ?? 0);
+const landing7 = {};
+for (const d of last7) for (const x of traffic.days[d]?.landing ?? []) landing7[x.name] = (landing7[x.name] ?? 0) + x.visits;
+findings.pages = sitemapUrls().map((u) => ({ url: u, pushed: pushedLog[`https://eryx.cn${u === '/' ? '/' : u}`] ?? pushedLog[`https://eryx.cn${u}`] ?? '', crawled: lastCrawl[u] ?? '', bingImp: impByPage[u] ?? null, visits7: landing7[u] ?? null }));
+findings.pageStats = { total: findings.pages.length, pushed: findings.pages.filter((p) => p.pushed).length, crawled7: findings.pages.filter((p) => p.crawled && p.crawled >= daysAgo(7)).length, neverCrawled: findings.pages.filter((p) => !p.crawled).length };
+
 if (console_.loginNeeded) findings.notes.push('Ego 浏览器里没登录百度站长平台，流量与关键词拿不到；也可以导出 CSV 放进 plan/seo/inbox/');
 writeJson(`${DATA}/findings.json`, findings);
+console.log(`页面：${findings.pageStats.total} 个，推过 ${findings.pageStats.pushed}，7 天内被百度抓过 ${findings.pageStats.crawled7}，有记录以来从没被抓 ${findings.pageStats.neverCrawled}`);
 console.log(`分析：机会词 ${findings.opportunities.length}（待写 ${findings.opportunities.filter((o) => o.action === '待写').length}），弱内链 ${findings.weakLinks.length}，衰退页 ${findings.decline.length}，蜘蛛 404 ${findings.crawl.notFound.length}，7 天没被百度抓的重要页 ${findings.crawl.notCrawled.length}，排名变化 ${findings.rankChanges.length}，来源失效 ${findings.deadSources.length}`);

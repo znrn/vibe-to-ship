@@ -56,6 +56,13 @@ sec('抓取异常', [
   ...(findings.crawl?.notCrawled ?? []).map((u) => `- 7 天没被百度抓过：${u}`),
 ]);
 sec('来源失效', (findings.deadSources ?? []).map((d) => `- ${d.url}（${d.status}）出现在 ${d.in.join('、')}`), sources.date ? `没有（${sources.date} 查了 ${sources.checked} 个链接）` : '还没查');
+if (findings.pageStats) {
+  const ps = findings.pageStats;
+  L.push(`## 页面状态（${ps.total} 页：推过 ${ps.pushed}，7 天内被百度抓过 ${ps.crawled7}，从没被抓 ${ps.neverCrawled}）`);
+  L.push('| 页面 | 最近推送 | 最近被百度抓 | 必应展现 | 7 天访问 |', '| --- | --- | --- | --- | --- |');
+  for (const p of findings.pages) L.push(`| ${p.url} | ${p.pushed || '-'} | ${p.crawled || '从没'} | ${p.bingImp ?? '-'} | ${p.visits7 ?? '-'} |`);
+  L.push('');
+}
 if (findings.notes?.length) sec('提醒', findings.notes.map((n) => `- ${n}`));
 sec('脚本执行', (lastRun.steps ?? []).map((s) => `- ${s.ok ? '✓' : '✗'} ${s.label}（${s.seconds}s）${s.summary ? `：${s.summary}` : ''}`));
 
@@ -69,4 +76,12 @@ if (summary.deadSources) alerts.push(`${summary.deadSources} 个来源打不开`
 if (summary.decline) alerts.push(`${summary.decline} 页流量下滑`);
 const failed = (lastRun.steps ?? []).filter((s) => !s.ok && !s.skipped);
 if (failed.length) alerts.push(`${failed.map((s) => s.label).join('、')}失败`);
+// 可选：把日报推到企业微信 / 飞书群机器人（deploy.env 里 DAILY_WEBHOOK_URL=，企业微信和飞书的 markdown 格式都支持）
+const { loadEnv } = await import('./lib.mjs');
+const hook = loadEnv().DAILY_WEBHOOK_URL;
+if (hook) {
+  const md = L.slice(0, 40).join('\n');
+  const body = /feishu|lark/.test(hook) ? { msg_type: 'text', content: { text: md } } : { msgtype: 'markdown', markdown: { content: md.slice(0, 4000) } };
+  await fetch(hook, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body), signal: AbortSignal.timeout(15000) }).then((r) => console.log(`日报推群：${r.status}`)).catch((e) => console.log('日报推群失败：' + e.message));
+}
 notify('冬瓜站 SEO 日报', alerts.length ? alerts.join('；') : `正常。机会词 ${summary.opportunities}，百度蜘蛛 ${summary.baiduspider ?? '-'} 次`);

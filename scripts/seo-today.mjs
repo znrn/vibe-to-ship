@@ -138,7 +138,7 @@ const todayTodos = mine.filter((x) => x.created === ymd && /^SEO 日常/.test(x.
 // ── 页面 ──
 const esc0 = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const dailyHtml = (() => {
-  if (!autoDaily) return `<section class="card"><h2>自动日报 <span>还没跑过</span></h2><p class="how">运行 <code>npm run seo:daily</code>（launchd 每天 7:30 自动跑）后这里显示昨天的流量、蜘蛛、排名和要处理的事。</p></section>`;
+  if (!autoDaily) return `<section class="card" id="sec-daily"><h2>自动日报 <span>还没跑过</span></h2><p class="how">运行 <code>npm run seo:daily</code>（launchd 每天 7:30 自动跑）后这里显示昨天的流量、蜘蛛、排名和要处理的事。</p></section>`;
   const f = autoDaily.findings ?? {};
   const st = (n, label, cls = '') => `<div class="${cls}"><b>${esc0(n ?? '-')}</b>${label}</div>`;
   const bars = (arr, cls) => { const max = Math.max(1, ...arr.map((x) => x.v ?? 0)); return `<div class="bars">${arr.map((x) => `<div class="${cls}" style="height:${Math.max(3, Math.round(((x.v ?? 0) / max) * 48))}px" title="${x.d}：${x.v ?? '-'}"><i>${x.d.slice(5)}</i></div>`).join('')}</div>`; };
@@ -153,7 +153,7 @@ const dailyHtml = (() => {
     list('提醒', (f.notes ?? []).map((n) => ['w', n])),
     list('脚本执行', (autoDaily.steps ?? []).map((s) => [s.ok ? '' : 'e', `${s.ok ? '✓' : '✗'} ${s.label}（${s.seconds}s）${s.summary ? `：${s.summary}` : ''}`])),
   ].join('');
-  return `<section class="card">
+  return `<section class="card" id="sec-daily">
     <h2>自动日报 <span>${esc0(autoDaily.date)} 生成 · 数据到 ${esc0(autoDaily.for)} · plan/seo/daily/</span></h2>
     <div class="stat">
       ${st(autoDaily.visits ?? autoDaily.humanHits, autoDaily.visits != null ? '访客' : '页面请求')}
@@ -163,7 +163,9 @@ const dailyHtml = (() => {
       ${st((autoDaily.spider404 ?? 0) + (autoDaily.deadSources ?? 0) + (autoDaily.decline ?? 0), '异常', (autoDaily.spider404 ?? 0) + (autoDaily.deadSources ?? 0) + (autoDaily.decline ?? 0) ? 'warn' : 'ok')}
     </div>
     <div class="trend2"><div><p class="section-title">访客 7 天</p>${bars(autoDaily.trend?.visits ?? [], 'today')}</div><div><p class="section-title">百度蜘蛛 7 天</p>${bars(autoDaily.trend?.baiduspider ?? [], '')}</div></div>
-    <div class="daily-lists">${rows || '<p class="muted">没有要处理的事</p>'}</div>
+    <div class="daily-lists">${rows || '<p class="muted">没有要处理的事</p>'}
+    ${f.pageStats ? `<details><summary><b>页面状态</b> ${f.pageStats.total} 页：推过 ${f.pageStats.pushed}，7 天内被百度抓过 ${f.pageStats.crawled7}，从没被抓 ${f.pageStats.neverCrawled}</summary><div class="kw-wrap" style="max-height:320px;margin-top:6px"><table><thead><tr><th>页面</th><th>最近推送</th><th>最近被百度抓</th><th>必应展现</th><th>7 天访问</th></tr></thead><tbody>${(f.pages ?? []).map((p) => `<tr><td><a href="https://eryx.cn${esc0(p.url)}" target="_blank" rel="noopener">${esc0(p.url)}</a></td><td>${esc0(p.pushed || '-')}</td><td class="${p.crawled ? '' : 'muted'}">${esc0(p.crawled || '从没')}</td><td>${esc0(p.bingImp ?? '-')}</td><td>${esc0(p.visits7 ?? '-')}</td></tr>`).join('')}</tbody></table></div></details>` : ''}
+    </div>
   </section>`;
 })();
 const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -281,6 +283,9 @@ const html = `<!doctype html>
   .log h4 { font-size:13px; margin:10px 0 4px; color:var(--green); }
   .log li { font-size:13px; margin-left:18px; } .log p { font-size:13px; }
   .onetime .task.done { opacity:.6; }
+  .jump { font-size:12.5px; color:var(--muted); margin:-8px 0 14px; display:flex; flex-wrap:wrap; gap:4px 10px; }
+  .jump a { color:#2563eb; text-decoration:none; font-weight:600; } .jump a:hover { text-decoration:underline; }
+  html { scroll-behavior:smooth; }
   .trend2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:4px 0 26px; }
   .daily-lists details { margin-top:8px; } .daily-lists summary { cursor:pointer; font-size:13px; } .daily-lists .issues { margin-top:4px; max-height:240px; }
   .daily-lists .issues li { background:#f8fafc; color:#334155; }
@@ -330,15 +335,16 @@ const html = `<!doctype html>
   <h1>冬瓜站 SEO 工作台 <small>${ymd} 周${W[weekday]} · 生成于 ${today.toTimeString().slice(0, 5)}</small></h1>
   <nav class="platforms">${LINKS.map(([n, u]) => `<a href="${u}" target="_blank" rel="noopener">${n}</a>`).join('')}</nav>
 </header>
+<nav class="jump">跳到：<a href="#sec-daily">自动日报</a><a href="#sec-today">今天要做的</a><a href="#sec-check">站内检查</a><a href="#sec-week">本周</a><a href="#sec-kw">关键词目标</a><a href="#sec-log">日志</a>${kwHtml ? '<a href="#sec-bank">关键词库</a>' : ''}${lmap ? '<a href="#sec-learn">学习地图</a>' : ''}</nav>
 <div class="grid">
 <div>
   ${dailyHtml}
-  <section class="card">
+  <section class="card" id="sec-today">
     <h2>今天要做的 <span>勾选只记在这台电脑的浏览器里；待办页里也有同样的事</span></h2>
     ${sections.filter(([, t]) => t.length).map(([name, tasks]) => `<p class="section-title">${esc(name)}</p><ul class="tasks">${tasks.map(taskRow).join('')}</ul>`).join('')}
     <p class="how">重新生成这个页面：在项目目录运行 <code>npm run seo:today</code>（会先构建并检查）。</p>
   </section>
-  <section class="card">
+  <section class="card" id="sec-check">
     <h2>站内检查 <span>${check.pages ?? 0} 页 · 规则见 plan/seo-playbook.md</span></h2>
     <div class="stat">
       <div class="${check.errors.length ? 'bad' : 'ok'}"><b>${check.errors.length}</b>必须改</div>
@@ -355,7 +361,7 @@ const html = `<!doctype html>
   </section>
 </div>
 <div>
-  <section class="card">
+  <section class="card" id="sec-week">
     <h2>本周安排 <span>每天固定三件事之外</span></h2>
     <div class="cal">${cal}</div>
   </section>
@@ -364,19 +370,19 @@ const html = `<!doctype html>
     <p class="section-title">每月 1 号</p><ul class="cycle">${monthly.map((t) => `<li>${esc(t.title)}</li>`).join('')}</ul>
     <p class="section-title">每季度（1、4、7、10 月）</p><ul class="cycle">${quarterly.map((t) => `<li>${esc(t.title)}</li>`).join('')}</ul>
   </section>
-  <section class="card">
+  <section class="card" id="sec-kw">
     <h2>关键词目标 <span>plan/seo/keywords.csv · 每月填排名</span></h2>
     <table><thead><tr>${(csv[0] ?? []).slice(0, 5).map((h) => `<th>${esc(h)}</th>`).join('')}</tr></thead>
     <tbody>${csv.slice(1).map((r) => `<tr>${r.slice(0, 5).map((c, i) => `<td>${i === 2 ? `<a href="https://eryx.cn${esc(c)}" target="_blank" rel="noopener">${esc(c)}</a>` : esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table>
   </section>
-  <section class="card log">
+  <section class="card log" id="sec-log">
     <h2>工作日志 <span>plan/seo/log.md</span></h2>
     ${logHtml || '<p class="muted">还没有</p>'}
   </section>
 </div>
 </div>
-${kwHtml ? `<section class="card kw"><h2>关键词库 <span>plan/topic-map.yaml · 改选题先改地图</span></h2>${kwHtml}</section>` : ''}
-${lmap ? `<section class="card learn">
+${kwHtml ? `<section class="card kw" id="sec-bank"><h2>关键词库 <span>plan/topic-map.yaml · 改选题先改地图</span></h2>${kwHtml}</section>` : ''}
+${lmap ? `<section class="card learn" id="sec-learn">
   <h2>SEO / GEO 学习地图 <span class="learn-progress">勾掉学过的，记在这台电脑的浏览器里 · <span id="learn-count"></span></span></h2>
   <p class="how" style="margin-bottom:10px">来源：${esc(lmap.source)}。每条标了本站现状：<span class="st ok">已做</span><span class="st doing">在做</span><span class="st later">以后</span><span class="st skip">不需要</span>，点「↗」是学习资料。</p>
   <div class="mods">${learnHtml}</div>

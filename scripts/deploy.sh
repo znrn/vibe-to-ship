@@ -28,11 +28,13 @@ include /www/wwwroot/eryx.cn/redirects.nginx.conf;
 # nginx 的 mime.types 已把 .md 识别为 text/markdown，但它不在默认 charset_types 里，要单独声明才会带 charset=utf-8
 location ~ \.md$ { charset utf-8; charset_types text/markdown; try_files $uri =404; }
 location = /llms.txt { default_type text/plain; charset utf-8; }
+location = /sitemap.xml { return 301 /sitemap-index.xml; }
 NGINX
 ssh -i $KEY $HOST "nginx -t && nginx -s reload"
 
-# 有百度推送 token 时，把新站点地图里的网址推给百度
+# 有百度推送 token 时，把新站点地图里的网址推给百度；IndexNow 通知必应（改过的页才提交）
 node scripts/seo-push.mjs || true
+node scripts/seo/indexnow.mjs || true
 
 echo "自查"
 for u in / /flow/deploy/ /articles/ /step2/ /v3/ /not-exist/ /flow/deploy.md /llms.txt /sitemap-index.xml; do
