@@ -67,7 +67,9 @@ if (action === 'approve') {
     }
   }
   spawnSync('git', ['add', file, 'plan/topic-map.yaml'], { stdio: 'ignore' });
-  spawnSync('git', ['commit', '-q', '-m', `发布「${q.title ?? q.keyword}」（${id}）：自动写稿，冬瓜审核通过`], { stdio: 'ignore' });
+  const by = q.autoTries !== undefined || /自动/.test(note) || process.env.SEO_AUTO ? '检查和事实核查全过，自动发布' : '冬瓜审核通过';
+  spawnSync('git', ['commit', '-q', '-m', `发布「${q.title ?? q.keyword}」（${id}）：自动写稿，${by}`], { stdio: 'ignore' });
+  spawnSync('git', ['push', '-q'], { stdio: 'ignore', timeout: 60000 }); // 失败不影响发布，下次提交时一起推
   try { spawnSync('node', ['scripts/topic-map-page.mjs'], { stdio: 'ignore' }); } catch {}
   Object.assign(q, { status: 'published', publishedAt: TODAY });
   writeJson(QUEUE, queue); refresh();

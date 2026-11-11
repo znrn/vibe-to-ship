@@ -77,18 +77,20 @@ if (!skip.has('fix') && online) {
       process.stdout.write((r.stdout || '').split('\n').map((l) => '  ' + l).join('\n') + '\n');
       ok = r.status === 0;
       msg = ok ? '已部署并通过线上巡检' : '部署或巡检失败：' + ((r.stdout || '') + (r.stderr || '')).trim().split('\n').pop()?.slice(0, 120);
-      if (ok && dirty) execSync(`git add -A src public && git commit -q -m "自动改站 ${TODAY}：$(node -e "const c=require('./plan/seo/data/changes.json').filter(x=>x.date==='${TODAY}');console.log(c.map(x=>x.type+' '+x.what).join('；').slice(0,180))")" --author="SEO 流水线 <seo@eryx.cn>"`, { stdio: 'ignore' });
+      if (ok && dirty) execSync(`git add -A src public && git commit -q -m "自动改站 ${TODAY}：$(node -e "const c=require('./plan/seo/data/changes.json').filter(x=>x.date==='${TODAY}');console.log(c.map(x=>x.type+' '+x.what).join('；').slice(0,180))")" --author="SEO 流水线 <seo@eryx.cn>" && (git push -q || true)`, { stdio: 'ignore' });
     } catch (e) { msg = '构建失败：' + (e.stderr?.toString() || e.message).trim().split('\n').pop()?.slice(0, 120); }
     rec('构建部署', ok, Math.round((Date.now() - s) / 1000), msg);
     if (!ok) notify('冬瓜站 SEO', '自动部署失败，看日报；回退：bash scripts/rollback.sh');
   }
 }
 
-// ── 三期：每周一自动选题、写稿到「待审」（或 --write）；审核页每天刷新 ──
+// ── 三期：每周一自动选题、写稿（或 --write）；之后自动发布；审核页每天刷新，只用来看记录 ──
 if ((WEEKDAY === 1 || hasFlag('--write')) && online && !skip.has('write')) {
   run('pick', '选题', 'pick-topic.mjs', 60);
-  run('write', '写稿（Claude 无头）', 'write.mjs', 60 * 60);
+  run('write', '写稿（Claude 无头）', 'write.mjs', 150 * 60);
 }
+// 全自动：待审草稿检查全过就发布，没过自动重写（最多 2 次），还不过就放弃；不等人审核
+if (online && !skip.has('autopub')) run('autopub', '自动发布', 'auto-publish.mjs', 150 * 60);
 run('review', '审核页', 'review-page.mjs', 60);
 
 // ── 四期：每周五给本周发布的文章生成分发稿；每月 1 号扫外链；分发页每天刷新 ──

@@ -8,6 +8,7 @@ import { spawnSync } from 'node:child_process';
 import { parse } from 'yaml';
 import { readJson, writeJson, TODAY, DATA, UA, hasFlag } from './lib.mjs';
 import { loadTopicMap } from '../lib/topic-map.mjs';
+import { factCheck } from './factcheck.mjs';
 
 const QUEUE = `${DATA}/queue.json`;
 const DIR = 'src/content/articles';
@@ -38,7 +39,8 @@ ${nodeYaml}
 - frontmatter 必须有：title、description、intent、keyword、covers、stage、kind: question、platforms、topics、date: ${TODAY}、reviewed: ${TODAY}、answer、steps（带 who）、sources、faq、draft: true、sample: false。字段含义照样板文章。
 - intent / keyword / stage / platforms 照节点写，不要改；covers 可以在节点基础上增删。
 - 事实核对：每个数字、规则、费用、时限都先用 WebSearch 找官方页面（平台官方文档、帮助中心、政府网站），再用 WebFetch 打开核对原文。sources 只列你实际打开过的官方页面，title 写「平台：页面名」。核对不到的不写，不编。
-- 冬瓜的做法（怎么交给 AI、提示词怎么写）拿不准的地方，用 <mark class="todo">待冬瓜确认</mark> 在正文里标出来，不要自己编一个做法。
+- 这篇写完会自动检查后**直接上线，没人审核**。冬瓜的做法（怎么交给 AI、提示词怎么写）拿不准的地方，按写作标准里的通用做法写（新建项目 → 说想法 → 交给 Claude / Codex 处理）；还拿不准就不写这一段。不要留「待冬瓜确认」标记（这条优先于下面写作标准里的说法）。
+- 写完会有另一个 AI 只对照你列的 sources 逐句核对：sources 页面上找不到依据的数字、规则、费用、时限会被拦下，所以没核对到的宁可不写。
 - 正文必须链到这些已发布文章（链接文字用它的标题）：${mustLink.length ? mustLink.map((p) => `[${p.title}](/articles/${p.id}/)`).join('、') : '（没有）'}。其他已发布文章可以链：${published.filter((p) => !mustLink.includes(p)).map((p) => `${p.id}（${p.keyword}）`).join('、')}。不要链还没发布的文章。
 - 正文和 frontmatter 里不要出现这些词：${banned.join('、')}。
 - 不写教人绕开服务商地区限制的内容。${curation ? '\n' + curation : ''}
@@ -97,8 +99,11 @@ for (const q of targets) {
   checks.todo = (parsed.body.match(/待冬瓜确认/g) ?? []).length;
   checks.words = parsed.body.replace(/\s/g, '').length;
   checks.pass = checks.keywords.ok && !checks.banned.length && !checks.sources.dead.length && checks.build.ok && checks.sources.count > 0;
+  // 机器检查都过了、也没有待确认标记，才花钱跑独立事实核查；没过就记为不通过
+  checks.facts = checks.pass && !checks.todo ? factCheck(q.id) : null;
+  checks.pass = checks.pass && !checks.todo && checks.facts?.ok === true;
   Object.assign(q, { status: 'draft', draftedAt: TODAY, minutes: Math.round((Date.now() - t0) / 60000), title: parsed.fm.title, answer: parsed.fm.answer, checks, note: undefined });
   writeJson(QUEUE, queue);
-  console.log(`  草稿好了（${q.minutes} 分钟，正文 ${checks.words} 字，来源 ${checks.sources.count} 条，待冬瓜确认 ${checks.todo} 处）：检查${checks.pass ? '全过' : '有问题：' + [!checks.keywords.ok && '撞词', checks.banned.length && `AI 味词 ${checks.banned.join('/')}`, checks.sources.dead.length && `来源打不开 ${checks.sources.dead.length}`, !checks.build.ok && '构建失败', !checks.sources.count && '没有来源'].filter(Boolean).join('，')}`);
+  console.log(`  草稿好了（${q.minutes} 分钟，正文 ${checks.words} 字，来源 ${checks.sources.count} 条，待冬瓜确认 ${checks.todo} 处）：检查${checks.pass ? '全过' : '有问题：' + [!checks.keywords.ok && '撞词', checks.banned.length && `AI 味词 ${checks.banned.join('/')}`, checks.sources.dead.length && `来源打不开 ${checks.sources.dead.length}`, !checks.build.ok && '构建失败', !checks.sources.count && '没有来源', checks.todo && `待确认 ${checks.todo} 处`, checks.facts && !checks.facts.ok && `事实核查 ${checks.facts.issues.filter((i) => i.severity === 'high').length} 处`].filter(Boolean).join('，')}`);
 }
 try { spawnSync('node', ['scripts/seo/review-page.mjs'], { stdio: 'ignore' }); } catch {}
