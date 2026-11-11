@@ -140,7 +140,7 @@ sample: false
 - **域名离到期日要大于 45 天**。
 - **只给主域名备案**，下面的子域名不用另外备案。
 
-完整的备案步骤见 [ICP 备案流程](/articles/icp-filing-process/)。
+还没买域名的，先看[域名在哪里购买](/articles/domain-register/)：在哪家买、选哪个后缀能备案、怎么实名。完整的备案步骤见 [ICP 备案流程](/articles/icp-filing-process/)。
 
 ## <span class="role-tag ai">🤖 交给 AI</span> 让 AI 帮你看看域名现在的状态
 

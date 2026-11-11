@@ -5,7 +5,7 @@
 //   - 缺 intent / keyword / stage / platforms，或 links 指向不存在的节点
 // 提示：
 //   - 两个词字面上很像：搜一下，前 10 条结果重合多就并成一篇；
-//     确认意图不同的，在地图节点的 distinct 里登记，之后不再提示
+//     确认意图不同的，在地图节点的 distinct 里登记，之后不再提示（形态页写成 platform:<slug>，如 platform:miniprogram）
 //   - 地图里写的流程步骤 / 形态 / 文章主词和文章 frontmatter 不一致
 //   - 某一步有两篇流程页文章；哪几步还没有流程页文章
 //   - 两篇都已发布，但正文里没按 links 链过去
@@ -38,7 +38,10 @@ for (const n of merged) {
   if (n.status === 'published' && !(articles.get(n.id).data.sources ?? []).length) {
     warnings.push(`${n.id}: 还没有 sources，规则、费用、流程类的说法要附官方来源`);
   }
-  for (const to of n.distinct) if (!nodes.has(to)) errors.push(`${n.id}: distinct 里的 ${to} 在地图里不存在`);
+  for (const to of n.distinct) {
+    const platform = to.startsWith('platform:') ? to.slice('platform:'.length) : null;
+    if (platform ? !PLATFORM_SLUGS.includes(platform) : !nodes.has(to)) errors.push(`${n.id}: distinct 里的 ${to} 在地图里不存在`);
+  }
   for (const to of n.links) {
     if (!nodes.has(to)) errors.push(`${n.id}: links 里的 ${to} 在地图里不存在`);
     else if (n.status !== 'planned' && articles.has(to) && !articles.get(to).data.draft) {
@@ -90,8 +93,10 @@ const owners = [
   ...merged.filter((n) => !supersededFlowDraft(n)).map((n) => ({ id: n.id, words: [n.keyword, ...n.covers] })),
 ];
 // distinct 登记过的配对，不再提示相似
+// distinct 里的 platform:<slug> 对应形态页（owners 里的 id 是「形态页 <slug>」）
+const distinctOwner = (to) => (to.startsWith('platform:') ? `形态页 ${to.slice('platform:'.length)}` : to);
 const distinctPairs = new Set([
-  ...merged.flatMap((n) => n.distinct.flatMap((to) => [`${n.id}|${to}`, `${to}|${n.id}`])),
+  ...merged.flatMap((n) => n.distinct.map(distinctOwner).flatMap((to) => [`${n.id}|${to}`, `${to}|${n.id}`])),
   // 站点主词（首页）也可以登记 distinct
   ...(map.site?.distinct ?? []).flatMap((to) => [`首页|${to}`, `${to}|首页`]),
 ]);
