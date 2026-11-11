@@ -32,7 +32,8 @@ function run(key, label, file, timeoutSec) {
   if (skip.has(key)) { console.log(`\n== ${label}：跳过`); rec(label, true, 0, '跳过', true); return; }
   console.log(`\n== ${label}`);
   const s = Date.now();
-  const r = spawnSync('node', [`scripts/seo/${file}`], { encoding: 'utf8', timeout: timeoutSec * 1000, maxBuffer: 64 * 1024 * 1024 });
+  const [script, ...args] = file.split(' ');
+  const r = spawnSync('node', [`scripts/seo/${script}`, ...args], { encoding: 'utf8', timeout: timeoutSec * 1000, maxBuffer: 64 * 1024 * 1024 });
   const out = ((r.stdout || '') + (r.stderr || '')).trim();
   if (out) console.log(out.split('\n').map((l) => '  ' + l).join('\n'));
   const seconds = Math.round((Date.now() - s) / 1000);
@@ -84,10 +85,13 @@ if (!skip.has('fix') && online) {
   }
 }
 
-// ── 三期：每周一自动选题、写稿（或 --write）；之后自动发布；审核页每天刷新，只用来看记录 ──
-if ((WEEKDAY === 1 || hasFlag('--write')) && online && !skip.has('write')) {
-  run('pick', '选题', 'pick-topic.mjs', 60);
-  run('write', '写稿（Claude 无头）', 'write.mjs', 150 * 60);
+// ── 三期：每天自动选题、写稿（每天 3 篇，约每周 20 篇）；之后自动发布；审核页每天刷新，只用来看记录 ──
+// 待写节点不够就先扩充选题地图；有展现没文章的词自动采纳成新节点（每天最多 2 条，会直接写稿）
+if (online && !skip.has('write')) {
+  run('expand', '扩充选题地图', 'expand-map.mjs', 35 * 60);
+  run('proposals', '采纳建议选题', 'accept-proposals.mjs', 90 * 60);
+  run('pick', '选题', 'pick-topic.mjs --n=3', 60);
+  run('write', '写稿（Claude 无头）', 'write.mjs --max=3', 150 * 60);
 }
 // 全自动：待审草稿检查全过就发布，没过自动重写（最多 2 次），还不过就放弃；不等人审核
 if (online && !skip.has('autopub')) run('autopub', '自动发布', 'auto-publish.mjs', 150 * 60);
