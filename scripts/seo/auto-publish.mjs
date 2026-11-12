@@ -32,6 +32,7 @@ const ids = load().filter((q) => q.type === 'article' && q.status === 'draft').m
 if (!ids.length) { console.log('自动发布：没有待发布的草稿'); process.exit(0); }
 const result = [];let failures=0;
 for (const id of ids) {
+  if(load().filter(q=>q.status==='published'&&q.publishedAt===TODAY).length>=3){console.log('今天已发3篇，其余草稿下次处理');break;}
   for (;;) {
     let queue = load();
     let q = queue.find((x) => x.id === id);

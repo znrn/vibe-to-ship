@@ -30,7 +30,7 @@ if (after.length) {
   queue.push({ type: 'article', id, keyword: node.keyword, stage: node.stage, status: 'picked', pickedAt: TODAY, reason: `采纳建议选题「${p.word}」（${p.source}，展现 ${p.impressions}）` });
   writeJson(QUEUE, queue);
   console.log(`已登记节点 ${id}，开始写稿`);
-  spawnSync('node', ['scripts/seo/write.mjs', id], { stdio: 'inherit' });
+  if(!process.env.SEO_SKIP_WRITE){const w=spawnSync('node', ['scripts/seo/write.mjs', id], { stdio: 'inherit' });if(w.status!==0)process.exitCode=1;}
 } else if (dup) {
   p.nodeId = dup; p.note = `已有节点 ${dup} 覆盖了这个意图`;
   writeJson(QUEUE, queue);

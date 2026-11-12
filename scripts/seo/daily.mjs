@@ -9,7 +9,7 @@
 // 每步独立，一步失败不影响后面；每步的结果记在 plan/seo/data/last-run.json，日报里有「脚本执行」一栏。
 import { existsSync, writeFileSync, readFileSync, unlinkSync } from 'node:fs';
 import { spawnSync, execSync } from 'node:child_process';
-import { writeJson, TODAY, WEEKDAY, DATA, hasFlag, argValue, notify } from './lib.mjs';
+import { readJson, writeJson, TODAY, WEEKDAY, DATA, hasFlag, argValue, notify } from './lib.mjs';
 
 // 任务锁：上一次还没跑完（或 Mac 睡醒后 launchd 补跑撞上）就不重复跑；锁超过 3 小时视为残留
 const LOCK = `${DATA}/daily.lock`;
@@ -89,9 +89,11 @@ if (!skip.has('fix') && online) {
 // 待写节点不够就先扩充选题地图；有展现没文章的词自动采纳成新节点（每天最多 2 条，会直接写稿）
 if (online && !skip.has('write')) {
   run('expand', '扩充选题地图', 'expand-map.mjs', 35 * 60);
+  process.env.SEO_SKIP_WRITE='1';
   run('proposals', '采纳建议选题', 'accept-proposals.mjs', 90 * 60);
-  run('pick', '选题', 'pick-topic.mjs --n=3', 60);
-  run('write', '写稿（Codex）', 'write.mjs --max=3', 150 * 60);
+  const publishedToday=readJson(`${DATA}/queue.json`,[]).filter(q=>q.status==='published'&&q.publishedAt===TODAY).length;
+  const remaining=Math.max(0,3-publishedToday);
+  if(remaining){run('pick', '选题', `pick-topic.mjs --n=${remaining}`, 60);run('write', '写稿（Codex）', `write.mjs --max=${remaining}`,150*60);}else console.log('今天已达3篇，不重复写稿');
 }
 // 全自动：待审草稿检查全过就发布，没过自动重写（最多 2 次），还不过就放弃；不等人审核
 if (online && !skip.has('autopub')) run('autopub', '自动发布', 'auto-publish.mjs', 150 * 60);
