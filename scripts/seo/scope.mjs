@@ -1,8 +1,9 @@
 // 确定性预检只抓明确偏题；模糊边界交独立编辑按 docs/content-scope.md 审查。
 import {parse} from 'yaml';
+import {createHash} from 'node:crypto';
 import {readFileSync,readdirSync} from 'node:fs';
 import {pathToFileURL} from 'node:url';
-export const SCOPE_VERSION = 'visitor-2026-11-12';
+export const SCOPE_VERSION = createHash('sha256').update(readFileSync(new URL('../../docs/content-scope.md', import.meta.url))).digest('hex');
 export function scopeErrors(node = {}) {
  const text = [node.title,node.keyword,node.intent].filter(Boolean).join(' ');
  const errors = [];
