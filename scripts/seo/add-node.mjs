@@ -35,5 +35,5 @@ if (after.length) {
   p.nodeId = dup; p.note = `已有节点 ${dup} 覆盖了这个意图`;
   writeJson(QUEUE, queue);
   console.log(p.note);
-} else { p.status = 'proposed'; p.error = out.split('\n').pop()?.slice(0, 160); writeJson(QUEUE, queue); console.log('登记失败：' + p.error); }
+} else { p.status = 'proposed'; p.error = out.split('\n').pop()?.slice(0, 160); writeJson(QUEUE, queue); console.log('登记失败：' + p.error); process.exitCode=1; }
 spawnSync('node', ['scripts/seo/review-page.mjs'], { stdio: 'ignore' });

@@ -52,10 +52,11 @@ ${a.raw}
 for (const a of targets) {
   console.log(`分发稿：${a.fm.title}…`);
   const r = runAI(prompt(a), {readOnly:true,timeout:15 * 60 * 1000});
+  if(r.status!==0||r.error){console.error('Codex分发稿失败',r.stderr);process.exitCode=1;continue;}
   const out = (r.stdout || '').trim();
   const json = out.match(/```json\s*([\s\S]*?)```/)?.[1] ?? out.match(/\{[\s\S]*\}/)?.[0];
   let pkg;
-  try { pkg = JSON.parse(json); } catch { console.log('  解析失败：' + out.slice(-200)); continue; }
+  try { pkg = JSON.parse(json); } catch { process.exitCode=1; console.log('  解析失败：' + out.slice(-200)); continue; }
   for (const [k, code] of [['zhihu', 'zhihu'], ['xiaohongshu', 'xhs'], ['v2ex', 'v2ex'], ['wechat', 'wechat']]) if (pkg[k]) pkg[k].link = `${SITE}/articles/${a.id}/?from=${code}`;
   dist.articles[a.id] = { title: a.fm.title, url: `${SITE}/articles/${a.id}/`, date: String(a.fm.date).slice(0, 10), generatedAt: TODAY, platforms: pkg, posted: dist.articles[a.id]?.posted ?? {} };
   writeJson(FILE, dist);
