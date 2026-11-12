@@ -1,3 +1,4 @@
+import { runAI } from './ai.mjs';
 // 选题地图自动扩充：待写的节点少于 MIN 个时，让 Claude 找真实问法，追加 ADD 个新节点。
 // 每个节点 = 一个独立的搜索意图（同一意图的不同问法放进 covers，不单独成篇）。
 // 加完跑撞词检查（check-keywords），不过就整份还原，保证不会把构建搞坏。
@@ -35,9 +36,8 @@ const prompt = `你在维护 eryx.cn（冬瓜站：教不会写代码的人靠 A
 ${curation ? '\n站点范围说明（plan/research/CURATION.md 节选）：\n' + curation : ''}
 最后一行只回复：ADDED <新增个数>`;
 
-const r = spawnSync('claude', ['-p', '--output-format', 'text', '--permission-mode', 'acceptEdits', '--allowedTools', 'Read', 'Edit', 'Grep', 'Glob', 'WebSearch', 'WebFetch'], {
-  input: prompt, encoding: 'utf8', timeout: 30 * 60 * 1000, maxBuffer: 16 * 1024 * 1024, env: { ...process.env, CLAUDE_CODE_DISABLE_AUTO_MEMORY: '1' },
-});
+const r = runAI(prompt, {readOnly:false,timeout:30 * 60 * 1000});
+if(r.status !== 0 || r.error){ console.error('Codex执行失败', (r.stderr||'').slice(-300));process.exit(1); }
 const out = ((r.stdout || '') + (r.stderr || '')).trim();
 writeFileSync(`${DATA}/expand-map.log`, out + '\n');
 let added = [];

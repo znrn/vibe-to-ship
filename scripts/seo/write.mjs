@@ -1,3 +1,4 @@
+import { runAI } from './ai.mjs';
 // 写稿：用本机 Claude Code 无头模式（claude -p）按 plan/WRITING.md 给队列里的节点写草稿（draft: true），
 // 然后过检查：frontmatter 能解析、撞词检查（check-keywords）、AI 味词、来源链接存活、构建通过。
 // 用法：node scripts/seo/write.mjs            写队列里所有 picked / rewrite 的
@@ -17,6 +18,7 @@ const only = process.argv.slice(2).find((a) => !a.startsWith('--'));
 // 一次最多写 2 篇（--max=N 改），免得一次排太多、审不过来
 const max = Number(process.argv.find((a) => a.startsWith('--max='))?.slice(6) ?? 2);
 const targets = queue.filter((q) => q.type === 'article' && (only ? q.id === only : ['picked', 'rewrite'].includes(q.status))).slice(0, only ? 1 : max);
+let failures=0;
 if (!targets.length) { console.log('写稿：队列里没有要写的'); process.exit(0); }
 const { merged, nodes } = loadTopicMap();
 const published = merged.filter((x) => x.status === 'published');
@@ -73,13 +75,13 @@ for (const q of targets) {
   q.status = 'drafting'; q.draftingAt = new Date().toISOString(); writeJson(QUEUE, queue);
   console.log(`写稿：${q.id}「${q.keyword}」${q.note ? '（按退回意见改）' : ''}…`);
   const t0 = Date.now();
-  const r = spawnSync('claude', ['-p', '--output-format', 'text', '--permission-mode', 'acceptEdits', '--allowedTools', 'WebSearch', 'WebFetch', 'Read', 'Write', 'Edit', 'Glob', 'Grep'], { input: p, encoding: 'utf8', timeout: 30 * 60 * 1000, maxBuffer: 64 * 1024 * 1024, env: { ...process.env, CLAUDE_CODE_DISABLE_AUTO_MEMORY: '1' } });
+  const r = runAI(p, {readOnly:false,timeout:30 * 60 * 1000});
   const out = ((r.stdout || '') + (r.stderr || '')).trim();
   writeFileSync(`${DATA}/write-${q.id}.log`, out + '\n');
   const file = `${DIR}/${q.id}.md`;
-  const parsed = existsSync(file) ? fmOf(readFileSync(file, 'utf8')) : null;
+  const parsed = r.status === 0 && !r.error && existsSync(file) ? fmOf(readFileSync(file, 'utf8')) : null;
   if (!parsed?.fm) {
-    q.status = 'failed'; q.error = r.error?.code === 'ETIMEDOUT' ? '超时（30 分钟）' : (out.split('\n').pop() ?? '').slice(0, 200);
+    failures++; q.status = 'failed'; q.error = r.error?.code === 'ETIMEDOUT' ? '超时（30 分钟）' : (out.split('\n').pop() ?? '').slice(0, 200);
     writeJson(QUEUE, queue);
     console.log(`  失败：${q.error}（日志 ${DATA}/write-${q.id}.log）`);
     continue;
@@ -107,3 +109,5 @@ for (const q of targets) {
   console.log(`  草稿好了（${q.minutes} 分钟，正文 ${checks.words} 字，来源 ${checks.sources.count} 条，待冬瓜确认 ${checks.todo} 处）：检查${checks.pass ? '全过' : '有问题：' + [!checks.keywords.ok && '撞词', checks.banned.length && `AI 味词 ${checks.banned.join('/')}`, checks.sources.dead.length && `来源打不开 ${checks.sources.dead.length}`, !checks.build.ok && '构建失败', !checks.sources.count && '没有来源', checks.todo && `待确认 ${checks.todo} 处`, checks.facts && !checks.facts.ok && `事实核查 ${checks.facts.issues.filter((i) => i.severity === 'high').length} 处`].filter(Boolean).join('，')}`);
 }
 try { spawnSync('node', ['scripts/seo/review-page.mjs'], { stdio: 'ignore' }); } catch {}
+
+if(failures)process.exitCode=1;

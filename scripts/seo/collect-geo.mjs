@@ -6,7 +6,7 @@ import { readJson, DATA } from './lib.mjs';
 const geo = readJson(`${DATA}/geo.json`, { weeks: {} });
 const last = Object.keys(geo.weeks).sort().at(-1);
 if (!last) { console.log('GEO：还没有数据（等 ~/.config/geo-probe.env 填好 key，每周一 06:20 自动跑）'); process.exit(0); }
-const cells = Object.values(geo.weeks[last]).flatMap((w) => Object.values(w)).filter((c) => !c.error);
+const cells = Object.values(geo.weeks[last]).flatMap((w) => Object.values(w)).filter((c) => !c.error && c.kind !== 'search' && !c.branded && (c.grounded ?? 1) > 0);
 const hits = cells.reduce((s, c) => s + (c.hits ?? (c.cited ? 1 : 0)), 0);
 const of = cells.reduce((s, c) => s + (c.of ?? 1), 0);
-console.log(`GEO（${last}）：${Object.keys(geo.weeks[last]).join('、')}，共问 ${of} 次，提到本站 ${hits} 次；详情 http://localhost:8088/pages/geo-probe.html`);
+console.log(`GEO（${last}）：${Object.keys(geo.weeks[last]).join('、')}，非品牌 AI 问答 ${of} 次，提到本站 ${hits} 次（引用、搜索证据见明细）；详情 http://localhost:8088/pages/geo-probe.html`);

@@ -1,3 +1,4 @@
+import { runAI } from './ai.mjs';
 // 分发稿：给最近发布的文章生成知乎回答、小红书文案、V2EX 帖、公众号推文（Claude 无头），存 plan/seo/data/distribution.json。
 // 发布由人点（分发页一键复制 / 预填），公众号可以直接推进草稿箱。
 // 用法：node scripts/seo/distribute.mjs            近 7 天发布、还没生成过的文章
@@ -50,7 +51,7 @@ ${a.raw}
 
 for (const a of targets) {
   console.log(`分发稿：${a.fm.title}…`);
-  const r = spawnSync('claude', ['-p', '--output-format', 'text', '--permission-mode', 'default', '--allowedTools', ''], { input: prompt(a), encoding: 'utf8', timeout: 15 * 60 * 1000, maxBuffer: 32 * 1024 * 1024 });
+  const r = runAI(prompt(a), {readOnly:true,timeout:15 * 60 * 1000});
   const out = (r.stdout || '').trim();
   const json = out.match(/```json\s*([\s\S]*?)```/)?.[1] ?? out.match(/\{[\s\S]*\}/)?.[0];
   let pkg;

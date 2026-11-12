@@ -1,3 +1,4 @@
+import { runAI } from './ai.mjs';
 // 采纳「建议新增选题」：让 Claude 把这个词登记成选题地图的节点（id、stage、platforms、intent、keyword、covers），
 // 再把新节点加进队列并写稿。用法：node scripts/seo/add-node.mjs <proposal-id>
 import { readFileSync } from 'node:fs';
@@ -17,7 +18,8 @@ const prompt = `读者在百度搜「${p.word}」看到了 eryx.cn 但没点进�
 地图文件开头的说明：
 ${head}
 最后一行只回复：ADDED <新节点 id> 或 DUPLICATE <已有节点 id>`;
-const r = spawnSync('claude', ['-p', '--output-format', 'text', '--permission-mode', 'acceptEdits', '--allowedTools', 'Read', 'Edit', 'Write', 'Grep', 'Glob'], { input: prompt, encoding: 'utf8', timeout: 10 * 60 * 1000 });
+const r = runAI(prompt, {readOnly:false,timeout:10 * 60 * 1000 });
+if(r.status !== 0 || r.error){ console.error('Codex执行失败', (r.stderr||'').slice(-300));process.exit(1); }
 const out = ((r.stdout || '') + (r.stderr || '')).trim();
 const after = loadTopicMap().merged.map((n) => n.id).filter((i) => !before.has(i));
 const dup = out.match(/DUPLICATE\s+([\w-]+)/)?.[1];

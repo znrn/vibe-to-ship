@@ -1,3 +1,4 @@
+import { runAI } from './ai.mjs';
 // 外链（每月）：1）谁提到了本站（必应搜「eryx.cn」和站名），有没有带链接；2）候选站点（plan/seo/outreach-seeds.txt）；
 // 3）给每个候选写一条私信 / 邮件草稿（Claude），你决定发不发。结果写 plan/seo/data/outreach.json，分发页里显示。
 // 用法：node scripts/seo/outreach.mjs [--force]
@@ -55,7 +56,7 @@ const candidates = [...seeds.map((s) => ({ ...s, kind: 'seed' })), ...mentions.f
 for (const c of candidates) {
   const old = (prev.candidates ?? []).find((x) => x.site === c.site);
   if (old?.draft) { c.draft = old.draft; continue; }
-  const r = spawnSync('claude', ['-p', '--output-format', 'text', '--allowedTools', ''], { input: `给「${c.site}」写一条 120 字以内的私信（${c.why}）。我是冬瓜，做 eryx.cn（写给非程序员的 AI 独立开发手册，开源、可转载注明出处）。目的：${c.kind === 'mention' ? '感谢提到本站，请他们把站名改成可点的链接 https://eryx.cn' : '互相推荐或投稿一篇实操文章'}。语气平实，不吹，不求人，一个具体请求。只输出私信正文。`, encoding: 'utf8', timeout: 120000 });
+  const r = runAI(`给「${c.site}」写一条 120 字以内的私信（${c.why}）。我是冬瓜，做 eryx.cn（写给非程序员的 AI 独立开发手册，开源、可转载注明出处）。目的：${c.kind === 'mention' ? '感谢提到本站，请他们把站名改成可点的链接 https://eryx.cn' : '互相推荐或投稿一篇实操文章'}。语气平实，不吹，不求人，一个具体请求。只输出私信正文。`, {readOnly:true,timeout:120000 });
   c.draft = (r.stdout || '').trim().slice(0, 400);
 }
 writeJson(FILE, { date: TODAY, mentions, candidates });

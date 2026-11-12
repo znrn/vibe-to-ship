@@ -44,7 +44,7 @@ const summary = {
   baiduspider: y?.spiders?.Baiduspider?.hits ?? null, baiduPages: Object.keys(y?.spiders?.Baiduspider?.pages ?? {}).length,
   bingIndexed: b?.indexed ?? null,
   rankTop10: { baidu: top10('baidu').length, bing: top10('bing').length }, rankTop50: { baidu: top50('baidu'), bing: top50('bing') }, rankWords: Object.keys(rankDay).length,
-  geo: geoWeek ? Object.values(geoWeek).flatMap((w) => Object.values(w)).filter((x) => x.cited).length : null,
+  geo: geoWeek ? Object.values(geoWeek).flatMap((w) => Object.values(w)).filter((x) => x.kind !== 'search' && !x.branded && !x.error && x.cited).length : null,
   opportunities: findings.opportunities?.length ?? 0, lowCtr: findings.lowCtrPages?.length ?? 0, weakLinks: findings.weakLinks?.length ?? 0, decline: findings.decline?.length ?? 0,
   spider404: findings.crawl?.notFound?.length ?? 0, notCrawled: findings.crawl?.notCrawled?.length ?? 0, deadSources: findings.deadSources?.length ?? 0,
   steps: lastRun.steps ?? [],
@@ -61,7 +61,12 @@ L.push(`- 访客：${t ? `${fmt(t.uv)} 人 / ${fmt(t.pv)} PV（百度统计）` 
 L.push(`- 蜘蛛：${spiders.map(([k, v]) => `${k} ${v.hits} 次 / ${Object.keys(v.pages).length} 页${v.status['404'] ? `（404 ${v.status['404']}）` : ''}`).join('；') || '昨天没有蜘蛛记录'}`);
 L.push(`- 排名：${summary.rankWords} 个词，百度前 10 的 ${summary.rankTop10.baidu} 个、前 50 的 ${summary.rankTop50.baidu} 个；必应前 10 的 ${summary.rankTop10.bing} 个、前 50 的 ${summary.rankTop50.bing} 个${top10('baidu').length ? `。百度前 10：${top10('baidu').join('、')}` : ''}`);
 if (b) L.push(`- Bing：索引 ${fmt(b.indexed)} 页，抓取 ${fmt(b.crawled)}，外链 ${fmt(b.inbound)}，展现 ${fmt(b.impressions)} / 点击 ${fmt(b.clicks)}`);
-if (geoWeek) L.push(`- GEO（本周）：${Object.entries(geoWeek).map(([p, w]) => `${p} ${Object.values(w).filter((x) => x.cited).length}/${Object.keys(w).length}`).join('、')} 题提到本站`);
+if (geoWeek) L.push(`- GEO（最近一次）：${Object.entries(geoWeek).map(([p, w]) => {
+  const cells = Object.values(w);
+  if (cells[0]?.kind === 'search') return `${p}：仅检索，单独展示`;
+  const eligible = cells.filter(x => !x.branded && !x.error && (x.grounded ?? 1) > 0);
+  return eligible.length ? `${p}：${eligible.filter(x => x.cited).length}/${eligible.length} 题有本站引用` : `${p}：暂无可用联网证据`;
+}).join('；')}。品牌题和失败不计入自然问法统计`);
 L.push('');
 const sec = (title, rows, empty = '没有') => { L.push(`## ${title}`); if (!rows.length) L.push(`- ${empty}`); else L.push(...rows); L.push(''); };
 sec('机会词', (findings.opportunities ?? []).slice(0, 20).map((o) => `- 【${o.action}】${o.word} ← ${o.source}${o.impressions != null ? `，展现 ${o.impressions} 点击 ${o.clicks ?? 0}` : ''}${o.rank ? `，排名 ${o.rank}` : ''}${o.page ? `，对应 ${o.page}` : ''}`), '没有新的机会词（需要百度站长、Bing 或排名数据）');

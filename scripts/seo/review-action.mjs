@@ -68,8 +68,10 @@ if (action === 'approve') {
   }
   spawnSync('git', ['add', file, 'plan/topic-map.yaml'], { stdio: 'ignore' });
   const by = q.autoTries !== undefined || /自动/.test(note) || process.env.SEO_AUTO ? '检查和事实核查全过，自动发布' : '冬瓜审核通过';
-  spawnSync('git', ['commit', '-q', '-m', `发布「${q.title ?? q.keyword}」（${id}）：自动写稿，${by}`], { stdio: 'ignore' });
-  spawnSync('git', ['push', '-q'], { stdio: 'ignore', timeout: 60000 }); // 失败不影响发布，下次提交时一起推
+  const commit=spawnSync('git', ['commit', '-q', '-m', `发布「${q.title ?? q.keyword}」（${id}）：Codex 写稿，${by}`], { stdio: 'inherit' });
+  if(commit.status!==0){say('Git提交失败，不能记作发布成功');process.exit(1);}
+  const push=spawnSync('git', ['push', '-q'], { stdio: 'inherit', timeout: 60000 });
+  if(push.status!==0){say('Git推送失败，线上可能已更新，但本轮失败');process.exit(1);} // 失败不影响发布，下次提交时一起推
   try { spawnSync('node', ['scripts/topic-map-page.mjs'], { stdio: 'ignore' }); } catch {}
   Object.assign(q, { status: 'published', publishedAt: TODAY });
   writeJson(QUEUE, queue); refresh();

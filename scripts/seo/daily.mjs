@@ -91,14 +91,14 @@ if (online && !skip.has('write')) {
   run('expand', '扩充选题地图', 'expand-map.mjs', 35 * 60);
   run('proposals', '采纳建议选题', 'accept-proposals.mjs', 90 * 60);
   run('pick', '选题', 'pick-topic.mjs --n=3', 60);
-  run('write', '写稿（Claude 无头）', 'write.mjs --max=3', 150 * 60);
+  run('write', '写稿（Codex）', 'write.mjs --max=3', 150 * 60);
 }
 // 全自动：待审草稿检查全过就发布，没过自动重写（最多 2 次），还不过就放弃；不等人审核
 if (online && !skip.has('autopub')) run('autopub', '自动发布', 'auto-publish.mjs', 150 * 60);
 run('review', '审核页', 'review-page.mjs', 60);
 
 // ── 四期：每周五给本周发布的文章生成分发稿；每月 1 号扫外链；分发页每天刷新 ──
-if ((WEEKDAY === 5 || hasFlag('--distribute')) && online && !skip.has('distribute')) run('distribute', '分发稿（Claude 无头）', 'distribute.mjs', 30 * 60);
+if ((WEEKDAY === 5 || hasFlag('--distribute')) && online && !skip.has('distribute')) run('distribute', '分发稿（Codex）', 'distribute.mjs', 30 * 60);
 if ((new Date().getDate() === 1 || hasFlag('--outreach')) && online && !skip.has('outreach')) run('outreach', '外链扫描', 'outreach.mjs', 20 * 60);
 run('distpage', '分发页', 'distribute-page.mjs', 60);
 
@@ -109,3 +109,6 @@ console.log('\n== 工作台（seo-today）');
 const r = spawnSync('node', ['scripts/seo-today.mjs'], { stdio: 'inherit', timeout: 600000 });
 rec('工作台', r.status === 0, 0, r.status === 0 ? '完成' : '失败');
 console.log(`\n全部完成，用时 ${Math.round((Date.now() - t0) / 60000)} 分钟。失败的步骤：${steps.filter((s) => !s.ok).map((s) => s.label).join('、') || '无'}`);
+
+const failedSteps=steps.filter(s=>!s.ok);
+if(failedSteps.length){notify('冬瓜站 SEO 失败',failedSteps.map(s=>s.label).join('、'));process.exitCode=1;}

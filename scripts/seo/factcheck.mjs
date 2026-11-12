@@ -1,3 +1,4 @@
+import { runAI } from './ai.mjs';
 // 发布前事实核查：另起一个只读的 Claude（claude -p），对照文章自己列的官方来源逐条核对。
 // 文章无人审核直接上线，这是最后一道关；输出解析不了一律当不通过（fail closed）。
 // 用法：node scripts/seo/factcheck.mjs <id>      打印结果 JSON
@@ -32,12 +33,10 @@ const prompt = (file) => `你是 eryx.cn（冬瓜站）的发布前事实核查�
 export function factCheck(id) {
   const file = `${DIR}/${id}.md`;
   if (!existsSync(file)) return { ok: false, issues: [{ severity: 'high', quote: '', problem: '文章文件不存在' }] };
-  const r = spawnSync('claude', ['-p', '--output-format', 'text', '--allowedTools', 'Read', 'Glob', 'Grep', 'WebFetch'], {
-    input: prompt(file), encoding: 'utf8', timeout: 20 * 60 * 1000, maxBuffer: 16 * 1024 * 1024,
-    env: { ...process.env, CLAUDE_CODE_DISABLE_AUTO_MEMORY: '1' },
-  });
+  const r = runAI(prompt(file), {readOnly:true,timeout:20 * 60 * 1000});
   const raw = ((r.stdout || '') + (r.stderr || '')).trim();
   writeFileSync(`${DATA}/factcheck-${id}.log`, raw + '\n');
+  if(r.status !== 0 || r.error)return {ok:false,invalid:true,issues:[{severity:'high',quote:'',problem:'Codex 核查执行失败：'+raw.slice(-200)}]};
   let data = null;
   try { data = JSON.parse(raw.match(/\{[\s\S]*\}/)?.[0] ?? ''); } catch {}
   if (!data || typeof data !== 'object') return { ok: false, issues: [{ severity: 'high', quote: '', problem: `事实核查没有给出有效结果：${raw.split('\n').pop()?.slice(0, 120) ?? ''}` }], invalid: true };

@@ -30,7 +30,7 @@ function problems(c = {}) {
 
 const ids = load().filter((q) => q.type === 'article' && q.status === 'draft').map((q) => q.id);
 if (!ids.length) { console.log('自动发布：没有待发布的草稿'); process.exit(0); }
-const result = [];
+const result = [];let failures=0;
 for (const id of ids) {
   for (;;) {
     let queue = load();
@@ -48,6 +48,7 @@ for (const id of ids) {
       const r = action('approve', id);
       console.log(`${id}：${r.out}`);
       result.push(r.ok ? `已发布 ${id}` : `${id} 发布失败，明天重试`);
+      if (!r.ok) failures++;
       if (!r.ok) notify('冬瓜站 SEO', `${id} 自动发布失败：${r.out.slice(0, 80)}`);
       break;
     }
@@ -67,7 +68,9 @@ for (const id of ids) {
     console.log(`${id}：检查没过，自动重写第 ${tries + 1} 次（${note.length} 个问题）…`);
     spawnSync('node', ['scripts/seo/write.mjs', id], { stdio: 'inherit', timeout: 60 * 60 * 1000 });
     queue = load(); q = queue.find((x) => x.id === id);
-    if (q?.status === 'failed') { console.log(`${id}：重写失败（${q.error}）`); result.push(`${id} 重写失败`); break; }
+    if (q?.status === 'failed') { failures++; console.log(`${id}：重写失败（${q.error}）`); result.push(`${id} 重写失败`); break; }
   }
 }
 console.log(`自动发布：${result.join('；')}`);
+
+if(failures)process.exitCode=1;
