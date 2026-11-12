@@ -1,3 +1,6 @@
+import {articleScope, SCOPE_VERSION} from './scope.mjs';
+import {readFileSync} from 'node:fs';
+import {createHash} from 'node:crypto';
 import { runAI } from './ai.mjs';
 // 发布前事实核查：另起一个只读的 Claude（claude -p），对照文章自己列的官方来源逐条核对。
 // 文章无人审核直接上线，这是最后一道关；输出解析不了一律当不通过（fail closed）。
@@ -13,7 +16,10 @@ const prompt = (file) => `你是 eryx.cn（冬瓜站）的发布前事实核查�
 
 先用 Read 读这篇文章（frontmatter 和正文都要看）。frontmatter 里的 sources 是作者声称核对过的官方页面。
 
+先读取 docs/content-scope.md，按全文判断文章服务谁、解决哪一个产品上线卡点，不能只看关键词或文末推广。
+
 ## 判定为 high（必须拦下）
+- 受众或主题偏离内容边界：专业技术深水区、通用工商财税、泛创业营销、泛 AI 新闻；没有具体产品任务，只在结尾硬加 AI 或本站链接。新手 DNS/SSH/备案等实际卡点可以写，但步骤必须适合新手执行。
 - 数字、费用、时限、规则、条件、流程步骤：用 WebFetch 打开 sources 里对应的官方页面核对，页面上找不到依据，或和页面矛盾。页面打不开的，这句话也算没有依据。只核对 sources 里的页面，不要自己去搜别的来源。
 - 编造的数据或来源：没有出处的百分比、调查、用户数、收入数字、案例、媒体报道。
 - 对某个产品、平台、公司的具体断言（功能、价格、限制、缺点），sources 里没有它的官方页面支撑。
@@ -33,15 +39,18 @@ const prompt = (file) => `你是 eryx.cn（冬瓜站）的发布前事实核查�
 export function factCheck(id) {
   const file = `${DIR}/${id}.md`;
   if (!existsSync(file)) return { ok: false, issues: [{ severity: 'high', quote: '', problem: '文章文件不存在' }] };
+  const text=readFileSync(file,'utf8'), scope=articleScope(text);
+  if(scope.length)return {ok:false,issues:scope.map(problem=>({severity:'high',quote:'',problem}))};
+  const contentHash=createHash('sha256').update(text).digest('hex');
   const r = runAI(prompt(file), {readOnly:true,timeout:20 * 60 * 1000});
   const raw = ((r.stdout || '') + (r.stderr || '')).trim();
   writeFileSync(`${DATA}/factcheck-${id}.log`, raw + '\n');
   if(r.status !== 0 || r.error)return {ok:false,invalid:true,issues:[{severity:'high',quote:'',problem:'Codex 核查执行失败：'+raw.slice(-200)}]};
   let data = null;
   try { data = JSON.parse(raw.match(/\{[\s\S]*\}/)?.[0] ?? ''); } catch {}
-  if (!data || typeof data !== 'object') return { ok: false, issues: [{ severity: 'high', quote: '', problem: `事实核查没有给出有效结果：${raw.split('\n').pop()?.slice(0, 120) ?? ''}` }], invalid: true };
+  if (!data || typeof data.pass !== 'boolean' || !Array.isArray(data.issues) || data.issues.some(i => !i || !['high','low'].includes(i.severity) || typeof i.problem !== 'string')) return { ok: false, issues: [{ severity: 'high', quote: '', problem: `事实核查没有给出有效结果：${raw.split('\n').pop()?.slice(0, 120) ?? ''}` }], invalid: true };
   const issues = Array.isArray(data.issues) ? data.issues : [];
-  return { ok: data.pass === true && !issues.some((i) => i.severity === 'high'), issues };
+  return { scopeVersion:SCOPE_VERSION, contentHash, ok: data.pass === true && !issues.some((i) => i.severity === 'high'), issues };
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

@@ -1,3 +1,6 @@
+import {articleScope, SCOPE_VERSION} from './scope.mjs';
+import {factCheck} from './factcheck.mjs';
+import {createHash} from 'node:crypto';
 // 审核动作（审核页按钮和命令行都走这里）：
 //   approve <id>          去掉 draft、构建、部署（含巡检、推送、IndexNow）、提交 Git
 //   reject <id> <意见>    退回，Claude 在后台按意见改一稿
@@ -51,6 +54,12 @@ if (action === 'approve') {
   const file = `${DIR}/${id}.md`;
   if (!existsSync(file)) { say('草稿文件不存在'); process.exit(1); }
   let text = readFileSync(file, 'utf8');
+  const scope=articleScope(text);
+  if(scope.length){say('定位检查未通过：'+scope.join('；'));process.exit(1);}
+  const contentHash=createHash('sha256').update(text).digest('hex');
+  q.checks ??= {};
+  if(q.checks.facts?.scopeVersion!==SCOPE_VERSION || q.checks.facts?.contentHash!==contentHash){q.checks.facts=factCheck(id);writeJson(QUEUE,queue);}
+  if(!q.checks.facts?.ok){say('独立定位/事实核查未通过，禁止发布');process.exit(1);}
   // 闸门：还有「待冬瓜确认」就不发，除非意见框里写了「忽略待确认」
   const todo = (text.match(/待冬瓜确认/g) ?? []).length;
   if (todo && !/忽略待确认/.test(note)) { say(`还有 ${todo} 处「待冬瓜确认」没处理，不能发。在文件里把它们改成你的做法（或删掉标记），再点通过；确实要带着发，在意见框里写「忽略待确认」。`); process.exit(1); }

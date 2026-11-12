@@ -1,3 +1,4 @@
+import {scopeErrors, articleScope} from './scope.mjs';
 import { runAI } from './ai.mjs';
 // 写稿：用本机 Claude Code 无头模式（claude -p）按 plan/WRITING.md 给队列里的节点写草稿（draft: true），
 // 然后过检查：frontmatter 能解析、撞词检查（check-keywords）、AI 味词、来源链接存活、构建通过。
@@ -37,6 +38,9 @@ function prompt(q) {
 ## 节点（选题地图 plan/topic-map.yaml）
 ${nodeYaml}
 
+## 内容定位（必须先读 docs/content-scope.md；偏题即停止，不生成草稿）
+冬瓜站只服务非程序员借助 AI 把自己的产品上线、收款和维护。不能写专业源码教程或泛创业营销文；每篇必须对应真实上线卡点。
+
 ## 硬性要求
 - frontmatter 必须有：title、description、intent、keyword、covers、stage、kind: question、platforms、topics、date: ${TODAY}、reviewed: ${TODAY}、answer、steps（带 who）、sources、faq、draft: true、sample: false。字段含义照样板文章。
 - intent / keyword / stage / platforms 照节点写，不要改；covers 可以在节点基础上增删。
@@ -70,6 +74,8 @@ async function checkSources(fm) {
 }
 
 for (const q of targets) {
+  const scope = scopeErrors(nodes.get(q.id) || q);
+  if (scope.length) { failures++; q.status='blocked'; q.error=scope.join('；'); writeJson(QUEUE,queue); continue; }
   const p = prompt(q);
   if (hasFlag('--dry')) { console.log(p); continue; }
   q.status = 'drafting'; q.draftingAt = new Date().toISOString(); writeJson(QUEUE, queue);
@@ -89,7 +95,7 @@ for (const q of targets) {
   // 草稿标记兜底
   if (parsed.fm.draft !== true) { writeFileSync(file, readFileSync(file, 'utf8').replace(/^draft:.*$/m, 'draft: true').replace(/^(---\n[\s\S]*?)(\n---)/, (m, a, b) => (/^draft:/m.test(a) ? m : `${a}\ndraft: true${b}`))); parsed.fm.draft = true; }
   // ── 检查 ──
-  const checks = {};
+  const checks = {scope: articleScope(readFileSync(file, 'utf8'))};
   const kw = spawnSync('node', ['scripts/check-keywords.mjs'], { encoding: 'utf8' });
   const kwLines = ((kw.stdout || '') + (kw.stderr || '')).split('\n').filter((l) => l.includes(q.id));
   checks.keywords = { ok: kw.status === 0 && !kwLines.some((l) => /^✗|错误|报错/.test(l)), notes: kwLines.slice(0, 8) };
@@ -100,7 +106,7 @@ for (const q of targets) {
   checks.build = { ok: b.status === 0, note: b.status === 0 ? '' : ((b.stderr || '') + (b.stdout || '')).trim().split('\n').filter((l) => /error|Error|错误/.test(l)).slice(-3).join(' ').slice(0, 300) };
   checks.todo = (parsed.body.match(/待冬瓜确认/g) ?? []).length;
   checks.words = parsed.body.replace(/\s/g, '').length;
-  checks.pass = checks.keywords.ok && !checks.banned.length && !checks.sources.dead.length && checks.build.ok && checks.sources.count > 0;
+  checks.pass = !checks.scope.length && checks.keywords.ok && !checks.banned.length && !checks.sources.dead.length && checks.build.ok && checks.sources.count > 0;
   // 机器检查都过了、也没有待确认标记，才花钱跑独立事实核查；没过就记为不通过
   checks.facts = checks.pass && !checks.todo ? factCheck(q.id) : null;
   checks.pass = checks.pass && !checks.todo && checks.facts?.ok === true;

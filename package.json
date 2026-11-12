@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "node scripts/check-keywords.mjs && astro build",
+    "build": "node scripts/seo/scope.mjs && node scripts/check-keywords.mjs && astro build",
     "preview": "astro preview",
     "astro": "astro",
     "check:keywords": "node scripts/check-keywords.mjs",

@@ -1,3 +1,4 @@
+import {scopeErrors} from './scope.mjs';
 import { runAI } from './ai.mjs';
 // 选题地图自动扩充：待写的节点少于 MIN 个时，让 Claude 找真实问法，追加 ADD 个新节点。
 // 每个节点 = 一个独立的搜索意图（同一意图的不同问法放进 covers，不单独成篇）。
@@ -19,7 +20,8 @@ if (left.length >= MIN && !hasFlag('--force')) { console.log(`选题地图：待
 
 const before = readFileSync(MAP, 'utf8');
 const curation = existsSync('plan/research/CURATION.md') ? readFileSync('plan/research/CURATION.md', 'utf8').slice(0, 4000) : '';
-const prompt = `你在维护 eryx.cn（冬瓜站：教不会写代码的人靠 AI 一个人把网站、小程序、App 做到上线并收到钱）的选题地图 ${MAP}。
+const prompt = `先读取并严格遵守 docs/content-scope.md。只添加非程序员借助 AI 把产品上线、收款、维护的具体卡点；没有相关需求就不新增，不为凑数量扩题。
+你在维护 eryx.cn（冬瓜站：教不会写代码的人靠 AI 一个人把网站、小程序、App 做到上线并收到钱）的选题地图 ${MAP}。
 现在待写的节点只剩 ${left.length} 个，请新增 ${ADD} 个节点。
 
 步骤：
@@ -47,7 +49,7 @@ try {
   added = now.filter((i) => !old.has(i));
 } catch (e) { added = null; }
 const kw = spawnSync('node', ['scripts/check-keywords.mjs'], { encoding: 'utf8' });
-if (added === null || kw.status !== 0) {
+if (added === null || kw.status !== 0 || loadTopicMap().merged.some(n => added.includes(n.id) && scopeErrors(n).length)) {
   writeFileSync(MAP, before);
   console.log(`选题地图：扩充后检查没过，已还原（${((kw.stdout || '') + (kw.stderr || '')).trim().split('\n').slice(-2).join(' ').slice(0, 200)}）`);
   process.exit(1);
