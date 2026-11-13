@@ -2,7 +2,7 @@
 // 用法：npm run check:links
 // 要联网，所以不放进 npm run build。官方文档经常改地址，建议每月跑一次。
 //   ✗ 打不开：404、410、域名解析失败、超时 —— 去找新地址或换来源
-//   ? 被拦截：403、429、5xx 等，常见于拒绝脚本访问的网站，用浏览器手动打开确认
+//   ? 待复核：403、429、5xx 等，可能是脚本校验、访问限制或服务异常，需用浏览器确认
 import { readdirSync, readFileSync } from 'node:fs';
 import { parse } from 'yaml';
 import { checkSourceLink } from './lib/check-source-link.mjs';
@@ -31,8 +31,8 @@ await Promise.all(
 );
 
 const dead = results.filter((r) => !r.ok && r.dead);
-const blocked = results.filter((r) => !r.ok && !r.dead);
+const needsReview = results.filter((r) => !r.ok && !r.dead);
 for (const r of dead) console.log(`✗ ${r.status}  ${r.url}\n    出现在：${r.in.join('、')}`);
-for (const r of blocked) console.log(`? ${r.status}  ${r.url}\n    出现在：${r.in.join('、')}（可能拒绝脚本访问，用浏览器确认）`);
-console.log(`\n检查 ${results.length} 个链接：正常 ${results.length - dead.length - blocked.length}，打不开 ${dead.length}，被拦截待确认 ${blocked.length}`);
+for (const r of needsReview) console.log(`? HTTP ${r.status}  ${r.url}\n    出现在：${r.in.join('、')}（HTTP结果需浏览器复核，不能据此认定链接失效）`);
+console.log(`\n检查 ${results.length} 个链接：HTTP正常 ${results.length - dead.length - needsReview.length}，确认失效 ${dead.length}，需浏览器复核 ${needsReview.length}`);
 process.exit(dead.length ? 1 : 0);
