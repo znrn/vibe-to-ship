@@ -12,8 +12,8 @@ const canonical = new URL('/camp/', Astro.site);
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>48 小时 AI 独立开发线下实战营：两天把产品做上线并收到钱 - 冬瓜</title><link rel="canonical" href={canonical} />
-  <meta name="description" content="杭州线下小班，6～10 人，两天时间，主讲和助教在旁边陪你把自己的产品做出来、放上网、配好域名和 HTTPS、收到第一笔钱。首期 9800 元，结业后 30 天继续答疑。">
+  <title>48 小时 AI 独立开发线下实战营：第一版上线与支付流程实操 - 冬瓜</title><link rel="canonical" href={canonical} />
+  <meta name="description" content="杭州线下小班，6～10 人，两天时间，主讲和助教在旁边陪你把自己的产品做出来、放上网、配好域名和 HTTPS，检查真实收款或沙盒测试流程。首期 9800 元，结业后 30 天继续答疑。">
   <meta name="launchpad-group" content="AI 开发培训">
   {SITE.baiduTongji && (
     <script is:inline set:html={`var _hmt = _hmt || [];(function(){var hm=document.createElement("script");hm.src="https://hm.baidu.com/hm.js?${SITE.baiduTongji}";var s=document.getElementsByTagName("script")[0];s.parentNode.insertBefore(hm,s);})();`} />
@@ -317,10 +317,10 @@ const canonical = new URL('/camp/', Astro.site);
       </div>
       <h1 class="hero-h1">
         48 小时脱产实训：<br>
-        带你亲手把第一个产品<span class="hl">推上公网并收到钱</span>
+        带你亲手把第一个产品<span class="hl">完成上线与支付流程实操</span>
       </h1>
       <p class="hero-desc">
-        不讲理论，不背语法。两天时间，在现场手把手把你的想法做成一个能用的产品。离开教室时，手机上能打开你自己的网站，带 HTTPS，能收到钱。
+        围绕一个核心功能第一版，在现场练习需求拆分、AI 协作、部署与验收。目标是检查公网访问、HTTPS 与支付流程；准入条件齐全时验证真实交易，否则使用沙盒测试，不承诺两天完成外部审核或获得客户付款。
       </p>
 
       <div class="hero-cta-box">
@@ -341,7 +341,7 @@ const canonical = new URL('/camp/', Astro.site);
         </div>
         <div class="trust-item">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-          <span>真实收钱：微信支付 / 聚合免资质收款</span>
+          <span>支付验收：满足准入条件的真实交易 / 沙盒测试</span>
         </div>
       </div>
     </div>
@@ -376,7 +376,7 @@ const canonical = new URL('/camp/', Astro.site);
           <ul class="why-list">
             <li><span class="ico-v">✓</span> <div><strong>现场有人看</strong>：主讲和助教就在你电脑旁边，卡你三天的问题当场解决。</div></li>
             <li><span class="ico-v">✓</span> <div><strong>两天只做这一件事</strong>：放下日常琐事，48 小时都用在你自己的产品上。</div></li>
-            <li><span class="ico-v">✓</span> <div><strong>一定能上线</strong>：不满足于 localhost 演示，结业时手机必须能访问你的公网域名（带 HTTPS）。</div></li>
+            <li><span class="ico-v">✓</span> <div><strong>按公网结果验收</strong>：检查手机访问与 HTTPS；是否可正式对外服务，还需核对备案、资质和平台审核条件。</div></li>
             <li><span class="ico-v">✓</span> <div><strong>同学群</strong>：认识第一批同样在做一人公司的人，之后互相帮忙。</div></li>
           </ul>
         </div>
@@ -391,20 +391,20 @@ const canonical = new URL('/camp/', Astro.site);
         <span class="sec-tag">带走什么</span>
         <h2 class="sec-title">两天结束时你能带走什么</h2>
         <p class="sec-desc">
-          不承诺学完能赚多少钱，只承诺做出来的东西。按课前准备的程度分两档。
+          这是围绕一个核心功能第一版开展的线下操作实训，适合愿意亲自操作和验收的非程序员。交付按课前准备分档；备案、开户、平台审核和客户购买不由课程单方面决定。
         </p>
       </div>
 
       <div class="promise-card">
         <div class="promise-grid">
           <div class="promise-col">
-            <span class="p-tier-badge base">基础档 · 人人能达到</span>
-            <h3 class="promise-h3">周日结业时一定带走的交付物</h3>
-            <p class="promise-premise"><strong>前提条件：</strong>零基础、无任何营业执照、只要带笔记本电脑出席。</p>
+            <span class="p-tier-badge base">基础档 · 按课前清单准备</span>
+            <h3 class="promise-h3">基础档的交付与验收内容</h3>
+            <p class="promise-premise"><strong>前提条件：</strong>按课前清单准备电脑、所需工具和账号，并确认项目范围；不具备真实支付准入条件时，支付部分使用沙盒测试。</p>
             <ul class="promise-items">
               <li>
                 <span class="check-mark">✓</span>
-                <div><strong>公网域名与 HTTPS 绿锁</strong>：拥有属于自己的独立域名，公网任何人手机打开秒级访问。</div>
+                <div><strong>公网域名与 HTTPS 绿锁</strong>：拥有属于自己的独立域名，用真实设备检查公网访问、域名和证书；访问体验仍受网络与托管环境影响。</div>
               </li>
               <li>
                 <span class="check-mark">✓</span>
@@ -412,11 +412,11 @@ const canonical = new URL('/camp/', Astro.site);
               </li>
               <li>
                 <span class="check-mark">✓</span>
-                <div><strong>真实商业收款通道跑通</strong>：现场接入免资质第三方收款平台（或支付沙盒联调），现场真实扫码收到第一笔钱。</div>
+                <div><strong>支付流程验收</strong>：满足实际业务、主体和平台准入条件时检查真实交易；条件不齐时完成沙盒联调。沙盒成功不是实际入账，也不证明已有付费客户。</div>
               </li>
               <li>
                 <span class="check-mark">✓</span>
-                <div><strong>后续自主更新能力</strong>：掌握 Git 快照与模块化迭代法，后续改动再也不怕把代码改崩。</div>
+                <div><strong>后续自主更新能力</strong>：掌握 Git 快照与模块化迭代法，把改动切小、逐步测试，分别保留代码版本和数据备份。</div>
               </li>
             </ul>
           </div>
@@ -428,7 +428,7 @@ const canonical = new URL('/camp/', Astro.site);
             <ul class="promise-items">
               <li>
                 <span class="check-mark">✓</span>
-                <div><strong>自有微信支付直连商户号</strong>：款项直接结算到你的个人银行卡；微信支付按每笔 0.6% 左右收费，没有其他中间费用。</div>
+                <div><strong>自有微信支付直连商户号</strong>：按已获批的商户类型与产品接入，结算账户、费率和费用以实际签约及平台规则为准。</div>
               </li>
               <li>
                 <span class="check-mark">✓</span>
@@ -436,11 +436,11 @@ const canonical = new URL('/camp/', Astro.site);
               </li>
               <li>
                 <span class="check-mark">✓</span>
-                <div><strong>微信小程序现场提交官方审核</strong>：避开敏感类目卡审，周日下午现场完成提审，课后跟踪直至上线。</div>
+                <div><strong>微信小程序现场提交官方审核</strong>：按真实业务核对类目、备案和材料；条件齐全后提交申请，是否通过与何时上线以平台审核为准。</div>
               </li>
               <li>
                 <span class="check-mark">✓</span>
-                <div><strong>出海 Stripe 美元收款</strong>：出海形态学员现场跑通国际信用卡订阅与 Webhook 自动化。</div>
+                <div><strong>出海 Stripe 美元收款</strong>：先确认主体、地区和业务是否受支持；已有获批账号时检查订阅与 Webhook，其他情况使用沙盒测试，不承诺开户获批。</div>
               </li>
             </ul>
           </div>
@@ -544,14 +544,14 @@ const canonical = new URL('/camp/', Astro.site);
               <div class="task-time">14:00 - 17:00</div>
               <div class="task-body">
                 <strong>模块四：商业收款通路接入与平台合规提审</strong>
-                <p>接微信支付/免资质商业收款，真机现场扫码验证；小程序项目现场核对类目提交审核，避开所有被拒大坑。</p>
+                <p>核对支付准入后检查真实交易或沙盒流程；小程序项目按真实业务核对类目、备案与材料，条件齐全再提审，不保证审核结果。</p>
               </div>
             </div>
             <div class="task-row">
               <div class="task-time">17:00 - 18:30</div>
               <div class="task-body">
                 <strong>模块五：学员产品现场路演与结业证书颁发</strong>
-                <p>每位学员上台演示自己的公网产品，现场首笔扫码支付留念；加入冬瓜独立开发者终身校友群。</p>
+                <p>学员展示第一版及验收记录，支付演示明确标注真实交易或沙盒测试；加入冬瓜独立开发者校友群。</p>
               </div>
             </div>
           </div>
@@ -583,7 +583,7 @@ const canonical = new URL('/camp/', Astro.site);
           <div class="aud-ico">🚀</div>
           <div class="aud-role">创业者 / 个体老板</div>
           <div class="aud-pain">痛点：外包报价动辄数万且拖延几个月，还不确定有没有人买单。</div>
-          <div class="aud-gain">收获：两天跑通极简可收费版本，在极低试错成本下验证真实用户的付费意愿。</div>
+          <div class="aud-gain">收获：先做一个核心功能的第一版；满足准入条件后验证真实付费，沙盒测试只验证支付流程。</div>
         </div>
 
         <div class="aud-card">
@@ -614,7 +614,7 @@ const canonical = new URL('/camp/', Astro.site);
           <div class="coach-tag">非程序员的一人公司实践者 · AI 独立开发</div>
           <p class="coach-desc">
             和你一样不是计算机科班出身，做过的每一个产品代码全都交由 AI 编写。经历过海外服务器被封、国内 ICP 备案反复驳回、小程序敏感类目卡审、Stripe 支付沙盒联调等所有痛点。<br>
-            不讲空泛理论，只做亲手把产品做上线、收到钱这件事。
+            围绕亲手完成第一版、上线验收与支付流程展开，不以沙盒演示替代真实收入。
           </p>
           <div class="coach-stats">
             <div class="stat-pill">底层代码：<strong>0 行手写</strong></div>
@@ -646,7 +646,7 @@ const canonical = new URL('/camp/', Astro.site);
         <details class="faq-item">
           <summary>我没有营业执照，周日现场能真实收到钱吗？</summary>
           <div class="faq-ans">
-            <strong>完全可以。</strong> 我们为你准备了成熟的个人免资质收款方案（如小报童、第三方聚合结算或沙盒演示通道）。一人公司起步期最关键的是验证“有人愿意为此付费”，而不是为了收 20 块钱先花一个月去办对公账户。等你业务月流水稳定后，再按指南升级为正式企业商户。
+            <strong>不能只凭是否有执照判断。</strong> 先按实际业务核对主体、地区、服务类目和支付平台的准入材料；第三方工具与私下收款不等于免资质。准入条件不齐时可做沙盒演示，但沙盒不产生真实入账，也不能替代真实付费验证。具体边界见<a href="https://pay.wechatpay.cn/doc/v2/partner/4014115330">微信支付小微商户说明</a>，该通道有适用行业限制。
           </div>
         </details>
 
@@ -687,7 +687,7 @@ const canonical = new URL('/camp/', Astro.site);
           <li><span class="check-mark">✓</span> <div><strong>周末 2 天全天脱产高强度实操</strong>（含双日商务午餐与茶歇）</div></li>
           <li><span class="check-mark">✓</span> <div><strong>主讲冬瓜 + 专职助教全场驻点</strong>（平均 1 位老师指导 3~4 人）</div></li>
           <li><span class="check-mark">✓</span> <div><strong>T-21 天课前一对一资质与账号筹备指导</strong></div></li>
-          <li><span class="check-mark">✓</span> <div><strong>结业时有自己的域名、HTTPS 和一条能收钱的通道</strong></div></li>
+          <li><span class="check-mark">✓</span> <div><strong>结业时有自己的域名、HTTPS 和一套支付验收记录（准入齐全时为真实交易，否则为沙盒测试）</strong></div></li>
           <li><span class="check-mark">✓</span> <div><strong>课后 30 天答疑和同学群</strong></div></li>
         </ul>
 
