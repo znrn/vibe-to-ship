@@ -43,7 +43,7 @@ function run(key, label, file, timeoutSec) {
 }
 
 // 候选导入失败时阻止本轮写稿，并由原有运行记录/包装任务报警。
-const grokImport=spawnSync(process.execPath,['/Volumes/sn850/code/onlinepray/tools/grok_bridge/bridge.mjs','--site=eryx'],{encoding:'utf8',timeout:35*60000});
+const grokImport=spawnSync(process.execPath,['/Volumes/sn850/code/seogeo/grok/bridge.mjs','--site=eryx'],{encoding:'utf8',timeout:35*60000});
 rec('Grok选题准入',grokImport.status===0,0,(grokImport.stdout||grokImport.stderr||'').slice(-1200));
 if(grokImport.status!==0){notify('冬瓜站SEO','Grok选题准入失败，已阻止本轮写稿');console.error(grokImport.stderr||grokImport.stdout);process.exit(1);}
 console.log(`${TODAY} 冬瓜站 SEO 自动流水线${online ? '' : '（离线：跳过采集和推送）'}`);
