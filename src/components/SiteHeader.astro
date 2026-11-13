@@ -46,6 +46,7 @@ import { SITE } from '../data/site';
    导航样式方案 B（正式采纳）：宽幅高质感悬浮药丸灵动岛 (Floating Island Nav)
    ══════════════════════════════════════════════════════════════ */
 .nav-plan-b-wrapper {
+  box-sizing: border-box;
   position: sticky;
   top: 18px;
   z-index: 100;
@@ -55,6 +56,7 @@ import { SITE } from '../data/site';
   padding: 0 20px;
 }
 .nav-pill-b {
+  box-sizing: border-box;
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -161,5 +163,12 @@ import { SITE } from '../data/site';
 @media (max-width: 860px) {
   .nav-menu-b { display: none; }
   .nav-plan-b-wrapper { padding: 0 12px; }
+}
+@media (max-width: 560px) {
+  .nav-pill-b { flex-wrap: wrap; justify-content: center; gap: 10px; padding: 12px; border-radius: 22px; }
+  .brand-b { flex: 1 1 100%; justify-content: center; font-size: 14px; white-space: nowrap; }
+  .brand-dot-b { flex-shrink: 0; }
+  .nav-actions-b { width: 100%; justify-content: center; }
+  .nav-gh-pill-b, .nav-camp-pill-b { white-space: nowrap; }
 }
 </style>
