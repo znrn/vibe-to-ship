@@ -1,6 +1,6 @@
 ---
 title: 苹果个人开发者注册：怎么申请、每年多少钱、付款失败怎么查
-description: 个人上架 iOS App，可以用本人身份加入 Apple Developer Program。中国大陆通过 Apple Developer App 注册，官方列示每年 688 元；先确认是否接受公开真实姓名，再完成身份验证和购买，最后检查会员资格是否生效。
+description: 个人上架 iOS App，怎么注册苹果开发者账号？说明中国大陆个人注册的身份验证、每年 688 元费用、真实姓名展示，以及付款失败后的检查方法。
 intent: 个人想上架 iOS App，要注册苹果开发者账号，想知道流程和费用
 keyword: 苹果个人开发者注册
 covers:
