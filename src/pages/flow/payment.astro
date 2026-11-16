@@ -1,254 +1,73 @@
 ---
-// 第 7 步 · payment：/flow/payment/。版式、侧栏、目录、上一步下一步都在 PillarLayout 里，这里只写正文。
+// 第7步：保留现有路由及布局，按实际产品与主体选择支付通道。
 import PillarLayout from '../../layouts/PillarLayout.astro';
-
 const toc = [
-  {"id": "sec-header-conclusion", "label": "先说结论", "kind": "conclusion"},
-  {"id": "sec-part1", "label": "没有营业执照，第一笔钱怎么收？", "num": "01"},
-  {"id": "sec-part2", "label": "从人工收款到接入微信支付，一共分 4 步", "num": "02"},
-  {"id": "sec-warning", "label": "这一步的规矩", "kind": "warn"},
-  {"id": "sec-faq", "label": "常见问题 FAQ", "kind": "faq"},
+  {id:'sec-header-conclusion',label:'先选适用通道',kind:'conclusion'},
+  {id:'sec-personal',label:'个人小程序虚拟支付',num:'01'},
+  {id:'sec-prepare',label:'准备与接入',num:'02'},
+  {id:'sec-check',label:'付款到交付验收',num:'03'},
+  {id:'sec-faq',label:'常见问题',kind:'faq'},
 ];
 ---
-
-<PillarLayout
-  slug="payment"
-  title="个人开发者怎么收款：没有营业执照先收第一笔钱，再接微信支付（第 7 步）"
-  description="验证期不办执照：用现成收款工具或加微信人工转账先收到第一笔钱，顺便和前 10 个付费用户聊清楚他们为什么买。有稳定付款后再办个体工商户、申请微信支付商户号，让 AI 接入时密钥和证书不进对话框。"
-  toc={toc}
->
-      <!-- 顶部 Hero 卡片 -->
-      <header class="header-card" id="sec-header-conclusion">
-        <div class="header-meta-row">
-          <div class="header-pill-group">
-            <span class="phase-pill-dark">9 步上线流程</span>
-            <span class="step-pill-emerald">第 7 步 · 商业收款与微信支付</span>
-          </div>
-          <span class="header-status-indicator">
-            <span class="status-dot-pulse"></span>
-            <span>核心交付：从首笔人工验证到自动化商户收银闭环</span>
-          </span>
-        </div>
-
-        <h1 class="header-main-h1">
-          没有营业执照怎么收<span class="hl">第一笔钱</span>？独立开发从人工收款到接入微信支付要分几步？
-        </h1>
-
-        <!-- 先说结论 -->
-        <div class="header-conclusion-inner">
-          <div class="hci-badge-pill">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
-            </svg>
-            <span>先说结论</span>
-          </div>
-          <p class="hci-text">
-            <strong>验证期坚决不办营业执照！</strong>第一阶段采用「贴微信赞赏码/个人收款码 + AI 自动弹窗加群发放激活码」的半自动模式，哪怕只有 10 个人真金白银付款，也足以证明商业价值。等稳定产生现金流后，再去政务网零元办个体工商户执照，申请微信支付官方商户号，由 AI 接入原生扫码与 JSAPI 支付SDK。
-          </p>
-        </div>
-
-        <!-- 核心三栏指标 (SEO / GEO 结构化信息) -->
-        <div class="header-meta-grid">
-          <div class="meta-tag-card">
-            <div class="meta-tag-icon-box">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
-            </div>
-            <div class="meta-tag-content">
-              <span class="meta-tag-label">核心动作:</span>
-              <span>人工冷启动收款验证 ➔ 个体户自动商户支付</span>
-            </div>
-          </div>
-          <div class="meta-tag-card">
-            <div class="meta-tag-icon-box">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-            </div>
-            <div class="meta-tag-content">
-              <span class="meta-tag-label">交付用时:</span>
-              <span>冷启动 1 小时 / 正规商户 2~3 天</span>
-            </div>
-          </div>
-          <div class="meta-tag-card">
-            <div class="meta-tag-icon-box">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
-            </div>
-            <div class="meta-tag-content">
-              <span class="meta-tag-label">阶段产物:</span>
-              <span>线上商业收款闭环（真金白银进账）</span>
-            </div>
-          </div>
-        </div>
-      </header>
-      <article class="main-article-card">
-        
-      <!-- 导言 方案 A -->
-      <div class="lead-box">
-        <div class="lead-warning-tag">
-          <span>⚠️</span>
-          <span>新手最易踩的坑</span>
-        </div>
-        <p>产品刚上线、还不确定有没有人愿意掏钱时，<strong>千万不要一上来就去办营业执照、开公司、写支付接口</strong>。办执照、申商户号、调代码动辄花掉好几周，如果注册了有限责任公司还要承担每年两三千元的记账报税成本，万一产品没人买，注销更是繁琐漫长。</p>
-        <p>独立开发最稳妥的策略是<strong>「先用最小成本验证付费意愿，等收到钱、确定要长期做了，再补齐资质接自动支付」</strong>。</p>
+<PillarLayout slug="payment" title="个人开发者怎么收款：先核对主体和支付通道（第7步）" description="个人开发者收款先区分网站、小程序与 App：符合条件的个人小程序可申请虚拟支付，其他场景另核对准入。说明开通条件、月限额、本人操作、AI 接入分工，以及订单到账、交付与退款的验收方法。" toc={toc}>
+  <header class="header-card" id="sec-header-conclusion">
+    <p class="phase-pill-dark">第7步 · 收款</p>
+    <h1 class="header-main-h1">个人开发者怎么收款？先核对主体，再选支付通道</h1>
+    <p class="hci-text">先写清你卖什么、在哪个平台卖、用什么主体。符合条件的个人主体微信小程序已有虚拟支付通道；它不能直接替网站收款。网站接商户支付、App 内购买也各有准入要求。先确认适用通道，再让 AI 写订单和交付逻辑，避免做完付款按钮才发现不能开通。</p>
+  </header>
+  <article class="main-article-card">
+    <div class="lead-box">
+      <p><strong>按使用场景选路：</strong>个人工具类小程序卖虚拟商品，先看下面的个人虚拟支付条件；网站或其他需要商户支付的产品，先到所选支付平台核对主体、商品和支付产品是否获准；iPhone App 内数字权益，先看<a href="/articles/ios-in-app-purchase/">苹果内购的适用范围与例外</a>。没有确认准入前，可以先做免费体验、需求访谈或意向登记，不必先开收费入口。</p>
+    </div>
+    <section class="step-card-wrap" id="sec-personal">
+      <div class="card-top-tag"><h2 class="step-heading-h2">一、个人小程序什么情况下能开虚拟支付？</h2></div>
+      <div class="step-inner-content">
+        <p>截至2026年11月17日核对的<a href="https://developers.weixin.qq.com/miniprogram/dev/platform-capabilities/business-capabilities/virtual-payment/person.html" target="_blank" rel="noopener noreferrer">微信官方个人虚拟支付文档</a>，申请需同时满足：</p>
+        <ul class="bullet-list-custom">
+          <li>小程序为个人主体，开发者持有居民身份证。</li>
+          <li>服务类目包含「工具」。</li>
+          <li>已经完成小程序认证与备案。</li>
+        </ul>
+        <p>官方列出的个人主体小程序<strong>月支付限额为10万元</strong>。这只是该通道的支付限额，不能据此推导税务或经营登记结论。需要电信业务相关资质的服务不在支持范围，例如电子邮件、语音信箱、储存转发、信息发布平台、信息搜索查询等；不能只把名称改成工具就申请。</p>
+        <p>这条通道有自己的开通、商品与密钥配置，<strong>不能把它当作已取得通用微信支付商户号，也不能照搬到网站扫码收款</strong>。实际开通与可售商品以后台审核和当前协议为准。后台没有入口时，先逐项核对主体、类目、认证与备案状态，再按平台帮助反馈。</p>
+        <p>例如，一个准备销售工具功能使用次数的个人小程序，先核对实际类目和已完成的认证、备案，再确认商品是否适用；只有「我是个人开发者」这一条还不够。备案卡住时看<a href="/platforms/miniprogram/#filing">小程序备案入口与驳回处理</a>。</p>
       </div>
-        
-      <!-- Section 1 -->
-      <section class="step-card-wrap" id="sec-part1">
-        <div class="card-top-tag">
-          <h2 class="step-heading-h2">一、 没有营业执照，第一笔钱怎么收？</h2>
-        </div>
-        <div class="step-inner-content">
-<p>纯个人没有营业执照，无法直接申请微信支付官方商户号，但你可以通过以下 <strong>2 种零成本方式</strong> 马上收下第一笔钱：</p>
-<ol class="num-list-custom">
-  <li><strong>现成的第三方创作者收款工具（如小报童、爱发电）</strong>
-<ul class="bullet-list-custom">
-  <li><strong>做法</strong>：直接用个人身份证实名注册，在平台上创建商品卡片或付费链接，挂到你的网页上。</li>
-  <li><strong>优点</strong>：用户可以直接用微信或支付宝付款，平台负责合规结算并提现到你的个人账户，无需营业执照。</li>
-</ul></li>
-  <li><strong>加微信私聊，人工转账收款（最推荐早期使用）</strong>
-<ul class="bullet-list-custom">
-  <li><strong>做法</strong>：在页面显眼处放上你的个人微信号或企业微信二维码，注明<em>“内测期特惠，加作者微信付款，5 分钟内人工开通/发兑换码”</em>。</li>
-  <li><strong>核心价值</strong>：真正痛点被戳中的用户绝不会嫌加微信麻烦。更重要的是，人工收款能让你和前 10 个种子付费用户直接对话，搞清楚<strong>“他为什么愿意付钱、最看重哪个功能”</strong>，帮你直接筛掉口头夸奖的“伪需求”。</li>
-</ul></li>
-</ol>
-        </div>
-      </section>
-      <!-- Section 2 -->
-      <section class="step-card-wrap" id="sec-part2">
-        <div class="card-top-tag">
-          <h2 class="step-heading-h2">二、 从人工收款到接入微信支付，一共分 4 步</h2>
-        </div>
-        <div class="step-inner-content">
-<h3 style="font-size:15px;font-weight:750;color:#0f172a;margin:22px 0 10px;">第 1 步：选定冷启动收款方式（你来做）</h3>
-<p>先按自身阶段做判断：</p>
-<ul class="bullet-list-custom">
-  <li><strong>还没人付过钱 / 刚上线测试</strong>：直接选「第三方收款工具链接」或「加微信人工转账」，不办执照、不写支付代码、不做复杂订单后台。</li>
-  <li><strong>已经有稳定陌生人付款（如月入破千）</strong>：说明需求已被真金白银验证，直接跳到<strong>第 4 步</strong>办执照接官方支付。</li>
-</ul>
-<h3 style="font-size:15px;font-weight:750;color:#0f172a;margin:22px 0 10px;">第 2 步：让 AI 搭建页面购买区与手工台账（交给 AI）</h3>
-<p>用户掏钱前最怕三件事：<strong>怕贵、怕买错不知道给什么、怕付完钱找不到人</strong>。让 AI 在网页上加一个清晰的购买区，并用 Excel/飞书表格记账即可：</p>
-<ul class="bullet-list-custom">
-  <li><strong>给 AI 的「购买区」指令模板：</strong></li>
-</ul>
-<div class="prompt-terminal-box">
-  <div class="ptb-header">
-    <span>实操 Prompt（可直接复制）：</span>
-    <button class="ptb-copy-btn" onclick="navigator.clipboard.writeText(this.closest('.prompt-terminal-box').querySelector('.ptb-code').innerText); this.innerText='已复制！'; setTimeout(()=>this.innerText='复制', 2000);">复制</button>
-  </div>
-  <div class="ptb-code">我的产品是 [一句话说明功能]，价格 [具体价格]，付款后用户能得到 [具体交付内容/权益]。
-现在先不接在线支付，收款方式是 [收款工具链接 / 加我微信私聊付款]。
-帮我在页面上加一个购买区：写清楚价格、买了能得到什么、怎么付款、付完多久交付（附上微信二维码弹窗与一键复制微信号功能）。手机和电脑上都要能正常显示。</div>
-</div>
-<ul class="bullet-list-custom">
-  <li><strong>给 AI 的「手工订单表」指令模板：</strong></li>
-</ul>
-<div class="prompt-terminal-box">
-  <div class="ptb-header">
-    <span>实操 Prompt（可直接复制）：</span>
-    <button class="ptb-copy-btn" onclick="navigator.clipboard.writeText(this.closest('.prompt-terminal-box').querySelector('.ptb-code').innerText); this.innerText='已复制！'; setTimeout(()=>this.innerText='复制', 2000);">复制</button>
-  </div>
-  <div class="ptb-code">我现在是人工收款、人工交付。帮我设计一张极简订单表格，列出必记字段（订单编号、付款时间、金额、付款渠道、用户联系方式、交付状态等），给我一份能直接导入表格软件的文件，再写一段收到钱后发给用户的确认消息模板。</div>
-</div>
-<h3 style="font-size:15px;font-weight:750;color:#0f172a;margin:22px 0 10px;">第 3 步：真付一笔，跑通全流程闭环（你来做）</h3>
-<p>在把链接发给真用户之前，<strong>自己掏手机或找朋友真付一笔（比如 1 分钱或 1 块钱）</strong>，从头到尾走一遍：</p>
-<ol class="num-list-custom">
-  <li>点击购买跳转是否顺畅？手机端排版有没有乱？</li>
-  <li>微信或收款平台有没有立刻收到到账提醒？</li>
-  <li>按承诺把权限或兑换码发过去，测试账号能不能正常使用？</li>
-  <li>表格里的记录能不能和到账金额一一对上？</li>
-</ol>
-<h3 style="font-size:15px;font-weight:750;color:#0f172a;margin:22px 0 10px;">第 4 步：确定长期做，再办个体户执照、接微信支付（你办资质，AI 接入）</h3>
-<p>当人工收款忙不过来、确定产品要长期运营时，再转入正规军路线：</p>
-<ol class="num-list-custom">
-  <li><strong>办营业执照（首选「个体工商户」）</strong>
-<ul class="bullet-list-custom">
-  <li>微信支付不支持纯个人，但支持<strong>个体工商户</strong>和企业。</li>
-  <li>个人开发者首选办<strong>个体工商户</strong>：直接在当地政务服务网/市场监管局官网免费线上申办（通常 3 个工作日下电子照），无需高额注册资金，后续报税维护成本极低。</li>
-</ul></li>
-  <li><strong>申请微信支付商户号</strong>
-<ul class="bullet-list-custom">
-  <li>在微信支付商户平台提交：个体户营业执照、法人身份证、<strong>法人个人银行储蓄卡</strong>（个体户可直接结算到个人储蓄卡，无需去银行花钱开对公账户）。</li>
-  <li>申请免费，交易成功平台按每笔 <code>0.6%～1%</code> 左右抽成。</li>
-  <li><em>注：如果做微信小程序，需先完成微信认证才能接支付（个人主体小程序不支持认证，需升级或新注册为个体户/企业主体）。</em></li>
-</ul></li>
-  <li><strong>让 AI 安全接入微信支付代码</strong></li>
-</ol>
-<p>拿到商户号后，发指令让 AI 写下单和回调验签逻辑：</p>
-<div class="prompt-terminal-box">
-  <div class="ptb-header">
-    <span>实操 Prompt（可直接复制）：</span>
-    <button class="ptb-copy-btn" onclick="navigator.clipboard.writeText(this.closest('.prompt-terminal-box').querySelector('.ptb-code').innerText); this.innerText='已复制！'; setTimeout(()=>this.innerText='复制', 2000);">复制</button>
-  </div>
-  <div class="ptb-code">我已经开通了微信支付商户号，要在 [网站 / 小程序] 里接入微信支付，项目在 [项目文件夹路径]。
-先别动手，用大白话告诉我：我这种情况该用哪种支付方式（如 Native 扫码 / JSAPI）、需要在商户平台准备哪些参数和证书、哪些要我自己在后台操作。
-商户的 API 密钥和证书不要让我贴到对话里，告诉我放在服务器哪个环境变量或配置文件里。
-接好后先用最低金额（1 分钱）测试，付款后订单能自动变成「已支付」，并且走通一笔「退款」才算完成。</div>
-</div>
-        </div>
-      </section>
-        
-      <!-- 规矩 -->
-      <section class="danger-summary-box" id="sec-warning">
-        <div class="danger-header">
-          <span class="danger-badge-icon">🚫</span>
-          <h2 class="danger-title">千万别这么做：这一步要守住的几条规矩</h2>
-        </div>
-        <div>
-          
-        <div style="margin-bottom:14px;">
-          <h3 style="font-size:15px;font-weight:750;color:#9a3412;margin-bottom:8px;">三、 必须守住的 2 条规矩（避坑备忘）</h3>
-          <div><ol class="num-list-custom">
-  <li><strong>移动端 App 的支付铁律</strong>：
-<ul class="bullet-list-custom">
-  <li>如果你做的是 <strong>iPhone (iOS) App</strong>，在 App 内解锁虚拟功能、会员或数字内容，<strong>必须使用苹果官方的「App 内购买 (IAP)」</strong>（《App Store 审核指南》3.1.1），严禁私下塞入微信/支付宝扫码，否则会被直接拒审或封号；只有 App 外使用的实体商品或线下服务（如外卖、门票）才允许用第三方支付（3.1.3(e)）。</li>
-</ul></li>
-  <li><strong>资金与密钥安全底线</strong>：
-<ul class="bullet-list-custom">
-  <li><strong>绝不交出密码和密钥</strong>：商户平台的登录密码、操作密码、APIv3 密钥、支付证书，绝对不要发给 AI 对话框，也不要硬编码传到 GitHub 等公开代码库。</li>
-  <li><strong>动钱的事自己干</strong>：退款、改价、提现等涉及资金流出的操作，一律由你本人在微信商户平台后台手动操作；切勿借用他人的执照或商户号代收款。</li>
-</ul></li>
-</ol></div>
-        </div>
-        </div>
-      </section>
-        
-      <!-- 常见问题答疑 FAQ -->
-      <section class="faq-section-wrap" id="sec-faq">
-        <h2 class="faq-heading-h2">第 7 步常见问题答疑</h2>
-        
-        <details class="faq-accordion-item" open>
-          <summary>没有营业执照，真的能合法收钱吗？</summary>
-          <div class="faq-accordion-body">
-            能。纯个人虽然申请不了微信支付官方商户号，但有两条零成本的路：一是用小报童、爱发电这类创作者收款工具，个人身份证实名就能创建付费链接，平台负责合规结算；二是页面上放微信二维码，<strong>加微信人工转账、人工开通</strong>。验证期先用这两种，等收到钱、确定要长期做，再办执照接官方支付。
-          </div>
-        </details>
-        
-        <details class="faq-accordion-item">
-          <summary>人工收款显得不专业，用户会不会因此不付钱？</summary>
-          <div class="faq-accordion-body">
-            真正痛点被戳中的用户不会嫌加微信麻烦，嫌麻烦的往往是本来就不会付钱的人。人工收款最大的价值是让你和前 10 个付费用户直接对话，搞清楚他为什么愿意掏钱、最看重哪个功能，这些信息比一个自动支付按钮值钱得多。让 AI 在购买区把<strong>价格、买了得到什么、怎么付、多久交付</strong>写清楚，用户的顾虑就解决了大半。
-          </div>
-        </details>
-        
-        <details class="faq-accordion-item">
-          <summary>什么时候该去办营业执照、接微信支付？</summary>
-          <div class="faq-accordion-body">
-            一个信号：已经有稳定的陌生人付款（比如月入破千），人工收款开始忙不过来。这时首选办<strong>个体工商户</strong>：在当地政务服务网免费线上申办，通常 3 个工作日下电子照，没有注册资金要求，报税维护成本极低，而且商户号可以直接结算到你的个人储蓄卡，不用去银行开对公账户。
-          </div>
-        </details>
-        
-        <details class="faq-accordion-item">
-          <summary>让 AI 接微信支付，商户的密钥和证书要发给它吗？</summary>
-          <div class="faq-accordion-body">
-            不要。APIv3 密钥、支付证书、商户平台的登录和操作密码，<strong>绝不发进 AI 对话框，也绝不硬编码推到 GitHub</strong>。让 AI 告诉你该放在服务器的哪个环境变量或配置文件里，由你自己放进去。接好后先用 1 分钱测试，订单能自动变成「已支付」、再走通一笔退款，才算完成。
-          </div>
-        </details>
-        
-        <details class="faq-accordion-item">
-          <summary>我做的是 iPhone App，能在 App 里放微信收款码吗？</summary>
-          <div class="faq-accordion-body">
-            不能。iOS App 内解锁会员、虚拟功能或数字内容，必须用苹果官方的「App 内购买」，这是《App Store 审核指南》3.1.1 的硬性规定，私下塞微信或支付宝扫码会被直接拒审甚至封号。只有外卖、门票这类在 App 外使用的实体商品或线下服务，才允许用第三方支付。<strong>动钱的操作，比如退款、改价、提现，也一律由你本人在商户后台手动做。</strong>
-          </div>
-        </details>
-      </section>
-        
-      </article>
+    </section>
+    <section class="step-card-wrap" id="sec-prepare">
+      <div class="card-top-tag"><h2 class="step-heading-h2">二、本人准备什么，交给 AI 做什么？</h2></div>
+      <div class="step-inner-content">
+        <ol class="num-list-custom">
+          <li><strong>你先确认准入。</strong>写下产品形态、主体类型、商品内容、销售地区和目标设备，逐项对照所选通道的官方要求。网站还要核对<a href="/articles/personal-filing-commercial/">备案主体与收费业务是否匹配</a>；不能靠换收款码解决资质不匹配。</li>
+          <li><strong>你在官方后台开通。</strong>个人小程序按官方文档从「支付与交易 → 虚拟支付」办理，阅读协议、填写本人身份及提现账户等资料，审核通过后完成签约。再配置并发布商品，记下 AppID、OfferID 和商品信息；密钥放到服务器安全配置，不贴进 AI 对话。iOS 端另有小程序简称与苹果 IAP 支付配置要求，按同页当前指引处理。</li>
+          <li><strong>AI 接订单和交付。</strong>让它先说明订单如何保存、谁确认已付款、重复通知如何防止重复发货，以及通知漏掉时怎样查单补发。官方个人虚拟支付指引明确，前端成功回调不能作为发货的唯一依据。</li>
+          <li><strong>你验收再开放收费。</strong>先用平台支持的测试方式检查；需要真实付款、签约或退款的步骤由你本人完成。没有可用的测试通道时，先确定获准商品和平台允许的测试金额，不擅自把任何商品定成一分钱。</li>
+        </ol>
+        <p>给 AI 的接入说明可以这样写，方括号由你填真实信息：</p>
+        <div class="prompt-terminal-box"><div class="ptb-header"><span>接入说明</span></div><div class="ptb-code">产品是[网站/微信小程序/App]，主体是[实际主体]，卖的是[商品或权益]，已获准的支付通道是[后台显示的通道]。
+先核对官方接入文档和现有订单代码，列出本人要在后台做的设置。密钥只从服务器安全配置读取，不放进对话或前端。
+接入后覆盖待支付、取消、失败、已支付、已交付、退款等状态。重复通知只交付一次；支付确认不能只信前端弹窗。列出可由我逐项验证的测试步骤。</div></div>
+      </div>
+    </section>
+    <section class="step-card-wrap" id="sec-check">
+      <div class="card-top-tag"><h2 class="step-heading-h2">三、怎样确认从付款到交付真的走通？</h2></div>
+      <div class="step-inner-content">
+        <ul class="bullet-list-custom">
+          <li>付款前能看清价格、具体权益、交付时间、联系方式和退款说明。</li>
+          <li>取消或支付失败时不开放收费权益；支付成功后，后台订单与平台交易能对应。</li>
+          <li>同一笔支付被重复通知时不重复加次数或发兑换码；通知遗漏能通过查单恢复。</li>
+          <li>换设备或重新进入后，已购买权益仍符合商品约定。</li>
+          <li>适用的退款测试完成后，订单和权益变化与既定退款规则一致。</li>
+        </ul>
+        <p>检查表可按「订单号、平台单号、金额、支付状态、交付状态、退款状态、异常原因」记录。假设一笔工具次数包已付款但次数没增加，先用平台单号查到账与订单记录，再查交付日志；不要直接让用户重复付款。</p>
+      </div>
+    </section>
+    <section class="faq-section-wrap" id="sec-faq">
+      <h2 class="faq-heading-h2">收款常见问题</h2>
+      <details class="faq-accordion-item" open><summary>个人主体小程序不能认证、不能收费，这个说法还对吗？</summary><div class="faq-accordion-body">不能一概而论。当前个人虚拟支付文档把已完成认证、备案列为开通条件，并限定主体、工具类目及服务范围。符合要求再申请，不能推导所有个人小程序都能收费。</div></details>
+      <details class="faq-accordion-item"><summary>没有营业执照，能直接用个人收款码验证付费吗？</summary><div class="faq-accordion-body">不能仅凭有没有执照判断。先核对实际业务、平台规则和主体要求；第三方工具或人工收款不会自动替你解决这些条件。尚未确认时先做免费体验或意向登记。需要办哪种主体，也应从业务准入倒推，不能等到某个收入数字才开始核对。</div></details>
+      <details class="faq-accordion-item"><summary>个人小程序的虚拟支付，可以给我的网站用吗？</summary><div class="faq-accordion-body">本文介绍的是微信小程序个人虚拟支付。网站需要另外核对适用支付产品和商户准入，不能把小程序的开通结果当作网站已经获准收款。</div></details>
+      <details class="faq-accordion-item"><summary>iPhone App 可以直接放微信收款码解锁会员吗？</summary><div class="faq-accordion-body">App 内数字功能、会员或内容通常应走 Apple 内购；特定业务和商店地区另有规则。先查<a href="https://developer.apple.com/app-store/review/guidelines/#payments" target="_blank" rel="noopener noreferrer">Apple 支付审核条款</a>及<a href="/articles/ios-in-app-purchase/">本站内购说明</a>，不能照抄网站的收款方式。</div></details>
+      <details class="faq-accordion-item"><summary>支付密钥和证书要发给 AI 吗？</summary><div class="faq-accordion-body">不要。让 AI 说明服务器配置位置，由你保存密钥；不放到前端、对话或公开仓库。开通协议、身份核验、真实支付和退款由本人操作。</div></details>
+    </section>
+  </article>
 </PillarLayout>
