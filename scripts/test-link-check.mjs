@@ -39,3 +39,23 @@ test('GET access restrictions stay distinct from dead links', async () => {
   const f = fixture([404, 521]);
   assert.deepEqual(await checkSourceLink('https://example.com', f), { ok: false, status: 521, dead: false });
 });
+
+test('a HEAD timeout recovers through GET, as with WeChat documentation', async () => {
+  const timeout = Object.assign(new Error('request timed out'), { name: 'TimeoutError' });
+  const f = fixture([timeout, 200]);
+  assert.deepEqual(await checkSourceLink('https://example.com', f), { ok: true, status: 200 });
+  assert.deepEqual(f.methods, ['HEAD', 'GET']);
+});
+
+test('HEAD and GET timeouts remain blocked', async () => {
+  const timeout = Object.assign(new Error('request timed out'), { name: 'TimeoutError' });
+  const f = fixture([timeout, timeout]);
+  assert.deepEqual(await checkSourceLink('https://example.com', f), { ok: false, status: '超时', dead: true });
+});
+
+test('a GET denial or server error is not a successful source check', async () => {
+  for (const status of [403, 500, 503]) {
+    const f = fixture([405, status]);
+    assert.deepEqual(await checkSourceLink('https://example.com', f), { ok: false, status, dead: false });
+  }
+});

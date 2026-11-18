@@ -8,9 +8,10 @@ import { runAI } from './ai.mjs';
 import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { parse } from 'yaml';
-import { readJson, writeJson, TODAY, DATA, UA, hasFlag } from './lib.mjs';
+import { readJson, writeJson, TODAY, DATA, hasFlag } from './lib.mjs';
 import { loadTopicMap } from '../lib/topic-map.mjs';
 import { factCheck } from './factcheck.mjs';
+import { checkSourceLink } from '../lib/check-source-link.mjs';
 
 const QUEUE = `${DATA}/queue.json`;
 const DIR = 'src/content/articles';
@@ -64,11 +65,10 @@ ${sample}
 async function checkSources(fm) {
   const dead = [];
   for (const s of fm.sources ?? []) {
-    try {
-      let res = await fetch(s.url, { method: 'HEAD', redirect: 'follow', headers: { 'user-agent': UA }, signal: AbortSignal.timeout(15000) });
-      if ([403, 405, 501].includes(res.status)) res = await fetch(s.url, { redirect: 'follow', headers: { 'user-agent': UA }, signal: AbortSignal.timeout(15000) });
-      if ([404, 410].includes(res.status)) dead.push(`${s.url} ${res.status}`);
-    } catch (e) { dead.push(`${s.url} ${e.name === 'TimeoutError' ? '超时' : e.cause?.code ?? e.message}`); }
+    // HEAD timeout/404 is provisional. GET must also fail before blocking;
+    // access restrictions remain unverified and cannot pass the source gate.
+    const result = await checkSourceLink(s.url);
+    if (!result.ok) dead.push(`${s.url} ${result.status}${result.dead ? '' : '（访问受限或响应异常，未核验）'}`);
   }
   return dead;
 }
