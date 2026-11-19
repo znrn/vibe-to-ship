@@ -100,7 +100,9 @@ if (check.warns.length > 12) console.log(`  … 还有 ${check.warns.length - 12
 if (!check.errors.length && !check.warns.length) console.log('  站内检查全绿');
 
 // ── 百度推送：每天的配额用在没推过的网址上 ──
-try { console.log('  ' + execSync('node scripts/seo-push.mjs').toString().trim().split('\n')[0]); } catch (e) { console.log('  百度推送出错：' + (e.stdout?.toString().trim() || e.message)); }
+if (!process.argv.includes('--no-push')) {
+  try { console.log('  ' + execSync('node scripts/seo-push.mjs').toString().trim().split('\n')[0]); } catch (e) { console.log('  百度推送出错：' + (e.stdout?.toString().trim() || e.message)); }
+}
 
 // ── 历史：每天一条，同一天覆盖 ──
 mkdirSync('plan/seo', { recursive: true });
@@ -152,7 +154,7 @@ const overviewHtml = autoDaily ? `<section class="card" id="sec-daily">
   <div class="tiles">
     ${tile(autoDaily.visits ?? autoDaily.humanHits, autoDaily.visits != null ? '昨天访客' : '昨天页面请求')}
     ${tile(autoDaily.baiduspider, '百度蜘蛛来了几次')}
-    ${tile(`${autoDaily.rankTop10?.baidu ?? 0} / ${autoDaily.rankTop50?.baidu ?? 0}`, '百度前 10 / 前 50 的词', autoDaily.rankTop10?.baidu ? 'ok' : '')}
+    ${tile(`${autoDaily.rankTop10?.baidu ?? '未核验'} / ${autoDaily.rankTop50?.baidu ?? '未核验'}`, `百度前 10 / 前 50 的词（数据 ${autoDaily.rankDate ?? '未知'}）`, autoDaily.rankTop10?.baidu ? 'ok' : '')}
     ${tile(autoDaily.opportunities, '机会词', autoDaily.opportunities ? 'accent' : '')}
     ${tile(autoDaily.queue ? `<a href="/pages/aidev-seo-review.html">${autoDaily.queue.draft}</a>` : '-', '待审草稿', autoDaily.queue?.draft ? 'warn' : '')}
     ${tile(autoDaily.leads28 ? `${autoDaily.leads28.咨询} / ${autoDaily.leads28.报名}` : '-', '28 天咨询 / 报名', autoDaily.leads28?.报名 ? 'ok' : '')}

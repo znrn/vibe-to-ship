@@ -3,6 +3,7 @@
 // 两家都走 Ego 浏览器（任务空间「eryx seo rank」）：脚本直接请求百度查 8 个词就被拦，必应干脆不给结果。
 // 用法：node scripts/seo/collect-rank.mjs [--limit=10] [--only=bing|baidu]
 import { readJson, writeJson, pruneDays, TODAY, DATA, loadKeywords, argValue, egoRun } from './lib.mjs';
+import { rankSummary } from './rank-summary.mjs';
 
 const FILE = `${DATA}/rank.json`;
 const limit = Number(argValue('limit') ?? 60);
@@ -25,8 +26,11 @@ const todo = ${JSON.stringify(todo)};
 const task = await taskSpace("eryx seo rank");
 const page = task.page("p1");
 const out = { baidu: {}, bing: {} };
+const deadline = Date.now() + 20 * 60 * 1000;
+let baiduFails = 0;
 const rest = (a, b) => page.waitForTimeout(a + Math.random() * b);
 for (const w of todo.baidu) {
+  if (baiduFails >= 3 || Date.now() > deadline - 45000) { out.baidu[w] = { skipped: true }; continue; }
   try {
     await page.goto("https://www.baidu.com/s?wd=" + encodeURIComponent(w) + "&rn=50&ie=utf-8", { timeout: 30000 });
     await page.waitForTimeout(2000);
@@ -36,13 +40,14 @@ for (const w of todo.baidu) {
       return { urls: [...document.querySelectorAll('#content_left > div')].map(d => d.getAttribute('mu') || d.querySelector('h3 a')?.href || '').filter(u => /^https?:\\/\\//.test(u) && !/nourl\\.ubs\\.baidu|recommend_list\\.baidu/.test(u)) };
     });
     out.baidu[w] = r;
-  } catch (e) { out.baidu[w] = { error: String(e).slice(0, 80) }; }
+    baiduFails = r.urls?.length ? 0 : baiduFails + 1;
+  } catch (e) { out.baidu[w] = { error: String(e).slice(0, 80) }; baiduFails++; }
   await rest(4000, 4000);
 }
 // 必应查太快会断连接（ERR_CONNECTION_CLOSED），所以只查前 20 名、每个词隔 8～15 秒、连续失败 3 次就停
 let bingFails = 0;
 for (const w of todo.bing) {
-  if (bingFails >= 3) { out.bing[w] = { skipped: true }; continue; }
+  if (bingFails >= 3 || Date.now() > deadline - 90000) { out.bing[w] = { skipped: true }; continue; }
   const urls = [];
   try {
     for (const first of [1, 11]) {
@@ -61,8 +66,10 @@ for (const w of todo.bing) {
 }
 console.log("RANK_JSON " + JSON.stringify(out));`;
 
+let collectionError = null;
 try {
-  const out = egoRun(script, 30 * 60 * 1000);
+  // Below daily.mjs's 25-minute limit so failures are saved before the parent kills us.
+  const out = egoRun(script, 23 * 60 * 1000);
   const line = out.split('\n').find((l) => l.startsWith('RANK_JSON '));
   if (!line) throw new Error('浏览器没有返回结果');
   const got = JSON.parse(line.slice(10));
@@ -71,11 +78,14 @@ try {
     day[w][eng] = r.skipped ? undefined : r.blocked ? 'blocked' : r.error && !r.urls?.length ? 'error' : !r.urls?.length ? 'blocked' : posOf(r.urls) ?? `>${r.urls.length}`;
     console.log(`  ${eng === 'baidu' ? '百度' : '必应'} ${w}：${day[w][eng] ?? '没查（前面连续失败，明天再查）'}${r.error ? `  ${r.error}` : ''}`);
   }
-} catch (e) { console.log('  排名查询没成功（需要 Ego 浏览器）：' + e.message.slice(0, 160)); }
+} catch (e) { collectionError = e.message.slice(0, 160); console.log('  排名查询没成功（需要 Ego 浏览器）：' + collectionError); }
+
+const incomplete = Object.entries(todo).some(([eng, ws]) => ws.some(w => !done(day[w][eng])));
+(all.attempts ??= {})[TODAY] = { at: new Date().toISOString(), status: collectionError ? 'failed' : incomplete ? 'partial' : 'success', error: collectionError, scope: Object.fromEntries(Object.entries(todo).map(([eng,ws]) => [eng,ws.length])) };
+if (collectionError || incomplete) process.exitCode = 1;
 
 all.updated = new Date().toISOString();
 pruneDays(all.days);
 writeJson(FILE, all);
-const top = (k, n) => Object.values(day).filter((r) => typeof r[k] === 'number' && r[k] <= n).length;
-const bad = (k) => Object.values(day).filter((r) => r[k] === 'blocked' || r[k] === 'error' || r[k] === undefined).length;
-console.log(`排名：${words.length} 个词；百度前 10 的 ${top('baidu', 10)} 个、前 50 的 ${top('baidu', 50)} 个（没查到 ${bad('baidu')}）；必应前 10 的 ${top('bing', 10)} 个、前 50 的 ${top('bing', 50)} 个（没查到 ${bad('bing')}）`);
+const stats = rankSummary(all, TODAY);
+console.log(`排名：本轮范围${words.length}个词；今日百度有效样本${stats.checked.baidu}、必应${stats.checked.bing}；百度前10/前50：${stats.top10.baidu ?? '未核验'}/${stats.top50.baidu ?? '未核验'}；必应：${stats.top10.bing ?? '未核验'}/${stats.top50.bing ?? '未核验'}。未查或查询深度不足不算零。`);

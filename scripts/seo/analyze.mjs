@@ -6,6 +6,7 @@
 //   排名变化：和上一次相比进出前 10、变化 3 位以上
 //   来源失效：文章参考来源打不开
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
+import { rankChanged } from './rank-summary.mjs';
 import { join } from 'node:path';
 import { readJson, writeJson, TODAY, YESTERDAY, daysAgo, DATA, loadKeywords, sitemapUrls } from './lib.mjs';
 
@@ -51,7 +52,8 @@ for (const q of bing.latest?.queries ?? []) {
   if (q.impressions >= 5 && q.clicks === 0) addOpp(q.word, { source: 'Bing', impressions: q.impressions, clicks: 0, rank: q.rank });
 }
 const rankDays = Object.keys(rank.days).sort();
-const todayRank = rank.days[rankDays.at(-1)] ?? {};
+const todayRank = rank.days[TODAY] ?? {};
+if (!rank.days[TODAY]) findings.notes.push(`今日排名未取得；最近数据${rankDays.at(-1) ?? '无'}，不作为今日机会或变化`);
 for (const [word, r] of Object.entries(todayRank)) {
   for (const eng of ['baidu', 'bing']) if (typeof r[eng] === 'number' && r[eng] > 10 && r[eng] <= 30) addOpp(word, { source: eng === 'baidu' ? '百度排名' : '必应排名', rank: r[eng] });
 }
@@ -103,12 +105,10 @@ const haveCrawl = last7.some((d) => crawl.days[d]);
 if (haveCrawl) findings.crawl.notCrawled = important.filter((u) => !crawled7.has(u));
 
 // ── 排名变化 ──
-const prevDay = rankDays.filter((d) => d < rankDays.at(-1)).at(-1);
+const prevDay = rankDays.filter((d) => d < TODAY).at(-1);
 if (prevDay) for (const [word, r] of Object.entries(todayRank)) for (const eng of ['baidu', 'bing']) {
   const a = rank.days[prevDay][word]?.[eng], b = r[eng];
-  const num = (v) => (typeof v === 'number' ? v : typeof v === 'string' && v.startsWith('>') ? 99 : null);
-  if (num(a) == null || num(b) == null) continue;
-  if ((num(a) > 10) !== (num(b) > 10) || Math.abs(num(a) - num(b)) >= 3) findings.rankChanges.push({ word, engine: eng === 'baidu' ? '百度' : '必应', from: a, to: b });
+  if (rankChanged(a,b)) findings.rankChanges.push({ word, engine: eng === 'baidu' ? '百度' : '必应', from: a, to: b });
 }
 
 // ── 页面状态表：每页「推过没、最近被百度抓是哪天、有没有展现」，分清「提交了」和「收录了」──
