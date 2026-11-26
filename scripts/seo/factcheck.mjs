@@ -2,7 +2,7 @@ import {articleScope, SCOPE_VERSION} from './scope.mjs';
 import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import { runAI } from './ai.mjs';
-// 发布前事实核查：另起一个只读的 Claude（claude -p），对照文章自己列的官方来源逐条核对。
+// 发布前事实核查：另起一个只读的 Codex CLI（codex exec -s read-only），对照文章自己列的官方来源逐条核对。
 // 文章无人审核直接上线，这是最后一道关；输出解析不了一律当不通过（fail closed）。
 // 用法：node scripts/seo/factcheck.mjs <id>      打印结果 JSON
 //       import { factCheck } from './factcheck.mjs'

@@ -125,16 +125,35 @@ if (autoDaily?.date === ymd) {
   if ((f.opportunities ?? []).some((o) => o.action === '待写')) humanTasks.push({ title: `日报里有 ${f.opportunities.filter((o) => o.action === '待写').length} 个「待写」机会词，挑一个进选题地图` });
 }
 
-// ── 待办：写进 launchpad，同一天同一条不重复 ──
+// ── 待办：写进 launchpad，未完成日常项按归一化 key 原地更新，避免跨日重复堆积 ──
+const dailyTodoKey = (title = '') => {
+  if (/^\d+ 页流量比上周少 30% 以上/.test(title)) return 'daily:decline';
+  if (/^\d+ 篇文章的分发稿还没发完/.test(title)) return 'daily:distribute-pending';
+  if (/^审核 \d+ 篇自动写的草稿/.test(title)) return 'daily:review-drafts';
+  if (/^日报里有 \d+ 个「待写」机会词/.test(title)) return 'daily:opportunities';
+  if (/^\d+ 条建议新增选题/.test(title)) return 'daily:proposals';
+  if (/^\d+ 条参考来源打不开/.test(title)) return 'daily:dead-sources';
+  return 'daily:' + title;
+};
 let todos = existsSync(TODOS) ? JSON.parse(readFileSync(TODOS, 'utf8')) : [];
 if (!noTodo && existsSync(TODOS)) {
-  let added = 0;
+  let changed = 0;
   for (const t of humanTasks) {
+    const key = dailyTodoKey(t.title);
+    const existing = todos.find((x) => !x.done && x.project === PROJECT && /^SEO 日常/.test(x.detail ?? '') && dailyTodoKey(x.title) === key);
+    if (existing) {
+      const nextDetail = `SEO 日常 · ${ymd}`;
+      if (existing.title !== t.title || existing.detail !== nextDetail || existing.created !== ymd || (existing.link ?? '') !== (t.link ?? '')) {
+        Object.assign(existing, { title: t.title, detail: nextDetail, link: t.link ?? '', created: ymd });
+        changed++;
+      }
+      continue;
+    }
     if (todos.some((x) => x.project === PROJECT && x.title === t.title && x.created === ymd)) continue;
-    todos.push({ id: `t${Date.now()}${added}`, title: t.title, project: PROJECT, detail: `SEO 日常 · ${ymd}`, link: t.link ?? '', done: false, created: ymd });
-    added++;
+    todos.push({ id: `t${Date.now()}${changed}`, title: t.title, project: PROJECT, detail: `SEO 日常 · ${ymd}`, link: t.link ?? '', done: false, created: ymd });
+    changed++;
   }
-  if (added) writeFileSync(TODOS, JSON.stringify(todos, null, 2) + '\n');
+  if (changed) writeFileSync(TODOS, JSON.stringify(todos, null, 2) + '\n');
 }
 const mine = todos.filter((x) => x.project === PROJECT);
 const oneTime = mine.filter((x) => !/^SEO 日常/.test(x.detail ?? ''));

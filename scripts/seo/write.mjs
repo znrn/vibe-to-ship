@@ -1,6 +1,6 @@
 import {scopeErrors, articleScope} from './scope.mjs';
 import { runAI } from './ai.mjs';
-// 写稿：用本机 Claude Code 无头模式（claude -p）按 plan/WRITING.md 给队列里的节点写草稿（draft: true），
+// 写稿：用本机 Codex CLI（codex exec）按 plan/WRITING.md 给队列里的节点写草稿（draft: true），
 // 然后过检查：frontmatter 能解析、撞词检查（check-keywords）、AI 味词、来源链接存活、构建通过。
 // 用法：node scripts/seo/write.mjs            写队列里所有 picked / rewrite 的
 //       node scripts/seo/write.mjs <id>       只写这个
@@ -44,6 +44,7 @@ ${nodeYaml}
 
 ## 硬性要求
 - frontmatter 必须有：title、description、intent、keyword、covers、stage、kind: question、platforms、topics、date: ${TODAY}、reviewed: ${TODAY}、answer、steps（带 who）、sources、faq、draft: true、sample: false。字段含义照样板文章。
+- SERP 展示建议：title 尽量控制在 38 字以内（核心词前置、不堆砌），description 控制在 70–115 字且为完整句子（以句号/问号/叹号结尾），避免搜索结果截断并提升点击率。
 - intent / keyword / stage / platforms 照节点写，不要改；covers 可以在节点基础上增删。
 - 事实核对：每个数字、规则、费用、时限都先用 WebSearch 找官方页面（平台官方文档、帮助中心、政府网站），再用 WebFetch 打开核对原文。sources 只列你实际打开过的官方页面，title 写「平台：页面名」。核对不到的不写，不编。
 - 这篇写完会自动检查后**直接上线，没人审核**。冬瓜的做法（怎么交给 AI、提示词怎么写）拿不准的地方，按写作标准里的通用做法写（新建项目 → 说想法 → 交给 Claude / Codex 处理）；还拿不准就不写这一段。不要留「待冬瓜确认」标记（这条优先于下面写作标准里的说法）。

@@ -6,13 +6,25 @@ import { readJson, writeJson, pruneDays, TODAY, DATA, loadKeywords, argValue, eg
 import { rankSummary } from './rank-summary.mjs';
 
 const FILE = `${DATA}/rank.json`;
-const limit = Number(argValue('limit') ?? 60);
+const limit = Number(argValue('limit') ?? 30);
 const only = argValue('only');
-const words = (await loadKeywords()).slice(0, limit);
 const all = readJson(FILE, { days: {} });
+const done = (v) => typeof v === 'number' || (typeof v === 'string' && v.startsWith('>'));
+const datesDesc = Object.keys(all.days).filter((d) => d !== TODAY).sort().reverse();
+const lastChecked = (word) => {
+  for (const d of datesDesc) {
+    const r = all.days[d]?.[word];
+    if (r && done(r.baidu) && done(r.bing)) return d;
+  }
+  return '';
+};
+const words = (await loadKeywords())
+  .map((w, idx) => ({ w, idx, last: lastChecked(w.word) }))
+  .sort((a, b) => a.last.localeCompare(b.last) || a.idx - b.idx)
+  .slice(0, limit)
+  .map((x) => x.w);
 const day = (all.days[TODAY] ??= {});
 for (const w of words) day[w.word] ??= { page: w.page, level: w.level };
-const done = (v) => typeof v === 'number' || (typeof v === 'string' && v.startsWith('>'));
 const posOf = (urls) => { const i = urls.findIndex((u) => /eryx\.cn/.test(u)); return i < 0 ? null : i + 1; };
 
 const todo = {

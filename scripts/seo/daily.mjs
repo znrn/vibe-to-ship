@@ -26,10 +26,10 @@ const skip = new Set((argValue('skip') ?? '').split(',').filter(Boolean));
 if (hasFlag('--quick')) { skip.add('rank'); skip.add('geo'); }
 const t0 = Date.now();
 const steps = [];
-const rec = (label, ok, seconds, summary, skipped = false) => { steps.push({ label, ok, seconds, summary, skipped }); writeJson(`${DATA}/last-run.json`, { date: TODAY, started: new Date(t0).toISOString(), steps }); };
+const rec = (label, ok, seconds, summary, skipped = false, soft = false) => { steps.push({ label, ok, seconds, summary, skipped, ...(soft ? { soft: true } : {}) }); writeJson(`${DATA}/last-run.json`, { date: TODAY, started: new Date(t0).toISOString(), steps }); };
 
-function run(key, label, file, timeoutSec) {
-  if (skip.has(key)) { console.log(`\n== ${label}：跳过`); rec(label, true, 0, '跳过', true); return; }
+function run(key, label, file, timeoutSec, { soft = false } = {}) {
+  if (skip.has(key)) { console.log(`\n== ${label}：跳过`); rec(label, true, 0, '跳过', true, soft); return; }
   console.log(`\n== ${label}`);
   const s = Date.now();
   const [script, ...args] = file.split(' ');
@@ -39,7 +39,7 @@ function run(key, label, file, timeoutSec) {
   const seconds = Math.round((Date.now() - s) / 1000);
   const ok = r.status === 0 && !r.error;
   const summary = r.error ? (r.error.code === 'ETIMEDOUT' ? `超时（${timeoutSec}s）` : r.error.message) : out.split('\n').filter(Boolean).pop()?.slice(0, 160) ?? '';
-  rec(label, ok, seconds, summary);
+  rec(label, ok, seconds, summary, false, soft);
 }
 
 // 候选导入失败时阻止本轮写稿，并由原有运行记录/包装任务报警。
@@ -62,7 +62,7 @@ run('bing', 'Bing', 'collect-bing.mjs', 120);
 run('console', '百度站长', 'collect-baidu-console.mjs', 150);
 run('sources', '来源检查', 'collect-sources.mjs', 300);
 run('geo', 'GEO 探测', 'collect-geo.mjs', 900);
-run('rank', '排名', 'collect-rank.mjs', 1500);
+run('rank', '排名', 'collect-rank.mjs', 1500, { soft: true });
 run('live', '线上巡检', 'collect-live.mjs', 300);
 run('analyze', '分析', 'analyze.mjs', 60);
 
@@ -116,7 +116,8 @@ run('report', '日报', 'report.mjs', 60);
 console.log('\n== 工作台（seo-today）');
 const r = spawnSync('node', ['scripts/seo-today.mjs'], { stdio: 'inherit', timeout: 600000 });
 rec('工作台', r.status === 0, 0, r.status === 0 ? '完成' : '失败');
-console.log(`\n全部完成，用时 ${Math.round((Date.now() - t0) / 60000)} 分钟。失败的步骤：${steps.filter((s) => !s.ok).map((s) => s.label).join('、') || '无'}`);
+const failedSteps = steps.filter((s) => !s.ok && !s.soft);
+const softFails = steps.filter((s) => !s.ok && s.soft);
+console.log(`\n全部完成，用时 ${Math.round((Date.now() - t0) / 60000)} 分钟。失败的步骤：${failedSteps.map((s) => s.label).join('、') || '无'}${softFails.length ? '；非阻塞警告：' + softFails.map((s) => s.label).join('、') : ''}`);
 
-const failedSteps=steps.filter(s=>!s.ok);
-if(failedSteps.length){notify('冬瓜站 SEO 失败',failedSteps.map(s=>s.label).join('、'));process.exitCode=1;}
+if (failedSteps.length) { notify('冬瓜站 SEO 失败', failedSteps.map((s) => s.label).join('、')); process.exitCode = 1; }
