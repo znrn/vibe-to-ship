@@ -1,6 +1,6 @@
 ---
 title: 网站502怎么解决：让 AI 查清程序、Nginx 和源站，再恢复访问
-description: 网站上线后出现 502 Bad Gateway，先保存报错网址、时间和最近改动，再让 Claude / Codex 检查程序是否运行、Nginx 转发是否正确；用了 CDN 的，还要核对源站和回源配置。按证据修复后，亲自验证原报错页面和核心功能。
+description: "网站上线后出现 502 Bad Gateway，先保存报错网址、时间和最近改动，再让 Claude / Codex 检查程序是否运行、Nginx 转发是否正确；用了 CDN 的，还要核对源站和回源配置。"
 intent: 网站上线后打开显示 502 Bad Gateway，想知道是什么意思、自己怎么排查恢复
 keyword: 网站502怎么解决
 covers:
